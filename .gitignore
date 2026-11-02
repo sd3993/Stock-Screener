@@ -1,0 +1,14 @@
+# Commit only the process: CLAUDE.md, process/, tools/ and this file.
+
+# Run outputs and research data
+runs/
+data/
+acknowledgements.md
+
+# Retired files (the user may move this folder out)
+archive/
+
+# Local settings and Python caches
+.claude/settings.local.json
+__pycache__/
+*.pyc
