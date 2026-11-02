@@ -47,7 +47,15 @@ def f_date(x):
 
 def f_url(x):
     links = x.get('links') or {}
-    return x.get('url') or x.get('attachment_url') or x.get('pdf_url') or links.get('pdf_url') or x.get('source_url')
+    return (x.get('url') or x.get('document_url') or x.get('attachment_url') or x.get('pdf_url') or links.get('pdf_url')
+            or x.get('source_url'))
+
+def ar_quarter(doc, d):
+    """Annual reports carry period "FY2026" and a placeholder date (2026-01-01): file them under FY26Q4."""
+    m = re.search(r'(?:FY|Year |Report )(\d{4})', f"{doc.get('period') or ''} {doc.get('title') or ''}")
+    if m:
+        return f'FY{int(m.group(1)) % 100:02d}Q4'
+    return fy_quarter(dt.date(d.year - 1 if d.month < 4 else d.year, 3, 31))
 
 def load_index(sym):
     p = os.path.join(FILINGS_DIR, sym, 'index.json')
@@ -93,7 +101,7 @@ def get_parsed_doc(sym, idx, doc, with_pdf=False):
     if not d or not links.get('markdown_url'):
         return 0
     typ = doc.get('doc_type', 'doc')
-    q = fy_quarter(dt.date(d.year - 1 if d.month < 4 else d.year, 3, 31)) if typ == 'annual_report' else reported_quarter(d)
+    q = ar_quarter(doc, d) if typ == 'annual_report' else reported_quarter(d)
     n = 0
     stem = f"{typ}_{d.isoformat()}_{doc.get('doc_id')}"
     n += bool(get(sym, idx, links['markdown_url'], q, stem + '.md', typ, doc.get('period'), d, 'tapetide', doc.get('doc_id')))

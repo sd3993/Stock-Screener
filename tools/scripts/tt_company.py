@@ -23,18 +23,24 @@ try:
     fl = tt.fetch(sym, 'filings', f'/v1/stocks/{p}/filings', {'from': since3, 'limit': 200}, all_pages=True, refresh=True)
     filings = tt_docs.items(fl)
     newer = force or not last or any(str(tt_docs.f_date(x) or '') >= last for x in filings)
-    age = None if newer else 9999
-    tt.fetch(sym, 'financials', f'/v1/stocks/{p}/financials', {'periods': 40}, max_age_days=age, refresh=newer)
-    tt.fetch(sym, 'shareholding', f'/v1/stocks/{p}/shareholding', refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'pledge', f'/v1/stocks/{p}/promoter-pledge', {'limit': 100, 'order': 'desc'}, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'pledge_events', f'/v1/stocks/{p}/promoter-pledge/events', {'from': since3, 'limit': 200}, all_pages=True, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'insider', f'/v1/stocks/{p}/insider-trades', {'from': since3, 'limit': 200}, all_pages=True, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'sast', f'/v1/stocks/{p}/sast-disclosures', {'from': since3, 'limit': 200}, all_pages=True, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'deals', f'/v1/stocks/{p}/bulk-block-deals', {'from': since3, 'limit': 200}, all_pages=True, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'credit_ratings', f'/v1/stocks/{p}/credit-ratings', {'limit': 200}, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'corporate_actions', f'/v1/stocks/{p}/corporate-actions', {'limit': 200, 'order': 'desc'}, refresh=newer, max_age_days=age)
-    tt.fetch(sym, 'profile', f'/v1/stocks/{p}', {'include': 'peers'}, refresh=newer, max_age_days=age)
-    docs = tt.fetch(sym, 'documents', f'/v1/stocks/{p}/documents', {'limit': 50}, refresh=newer, max_age_days=age)
+    newest = max((str(tt_docs.f_date(x)) for x in filings if tt_docs.f_date(x)), default='')
+
+    def get(name, route, params=None, **kw):
+        # refetch only when the cache predates the newest filing (a cache from the same day or later is current)
+        env = tt.cached(api_path(sym, name))
+        stale = force or env is None or env['fetched_at'][:10] < newest
+        return tt.fetch(sym, name, route, params, refresh=stale, **kw)
+    get('financials', f'/v1/stocks/{p}/financials', {'periods': 40})
+    get('shareholding', f'/v1/stocks/{p}/shareholding')
+    get('pledge', f'/v1/stocks/{p}/promoter-pledge', {'limit': 100, 'order': 'desc'})
+    get('pledge_events', f'/v1/stocks/{p}/promoter-pledge/events', {'from': since3, 'limit': 200}, all_pages=True)
+    get('insider', f'/v1/stocks/{p}/insider-trades', {'from': since3, 'limit': 200}, all_pages=True)
+    get('sast', f'/v1/stocks/{p}/sast-disclosures', {'from': since3, 'limit': 200}, all_pages=True)
+    get('deals', f'/v1/stocks/{p}/bulk-block-deals', {'from': since3, 'limit': 200}, all_pages=True)
+    get('credit_ratings', f'/v1/stocks/{p}/credit-ratings', {'limit': 200})
+    get('corporate_actions', f'/v1/stocks/{p}/corporate-actions', {'limit': 200, 'order': 'desc'})
+    get('profile', f'/v1/stocks/{p}', {'include': 'peers'})
+    docs = get('documents', f'/v1/stocks/{p}/documents', {'limit': 50})
 except tt.QuotaExceeded as e:
     sys.exit(f'QUOTA EXCEEDED while fetching {sym}: nothing downloaded; re-run after the reset. {e}')
 
@@ -42,7 +48,7 @@ idx = tt_docs.load_index(sym)
 n = 0
 D = tt_docs.items(docs)
 for typ, keep, pdf in (('concall', 6, False), ('presentation', 4, False), ('annual_report', 3, True), ('drhp', 1, True), ('rhp', 1, True)):
-    for d in [d for d in D if d.get('doc_type') == typ][:keep]:
+    for d in [d for d in D if d.get('doc_type') == typ and (d.get('links') or {}).get('markdown_url')][:keep]:
         n += tt_docs.get_parsed_doc(sym, idx, d, with_pdf=pdf)
 # filings: results (last 8), governance and business events (3 years), as PDFs with text
 res, gov = [], []
