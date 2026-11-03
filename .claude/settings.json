@@ -5,15 +5,6 @@
   "permissions": {
     "allow": [
       "Workflow",
-      "mcp__screener__get_financials",
-      "mcp__screener__get_quarterly_results",
-      "mcp__screener__get_document_list",
-      "mcp__screener__get_company_announcements",
-      "mcp__screener__get_insider_trading",
-      "mcp__screener__get_shareholding_pattern",
-      "mcp__screener__get_company_overview",
-      "mcp__screener__screen_stocks",
-      "mcp__screener__search_company",
       "PowerShell(python tools/scripts/*)",
       "PowerShell(python -I tools/scripts/*)",
       "PowerShell(curl.exe -s -m 60 -o *)"
