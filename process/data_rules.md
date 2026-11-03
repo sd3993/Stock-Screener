@@ -33,7 +33,7 @@ How to reach each source (routes, scripts, quirks) is in `tools/tools.md`. This 
   - a SAST per-person annexure;
   - a figure that needs the exchange's XBRL.
 
-  Say what was missing and why in the company's `index.json` (`missing` and `fetched_direct`) and in `process/fetch_learnings.md`. NSE first for a company listed there, since its feeds and archives work from scripts. BSE (browser pane) for BSE-only companies, or when NSE lacks the document or it's unreadable there. Record which exchange each file came from.
+  Say what was missing and why in the company's `index.json` (`missing` and `fetched_direct`) and in `process/fetch_learnings.md`. NSE first for a company listed there, since its feeds and archives work from scripts. BSE (browser pane; `bse_fetch.py`, `tools/tools.md`) for BSE-only companies, or when NSE lacks the document or it's unreadable there. Record which exchange each file came from.
 - **Which document:** take every document from the exchange filing, not the company website or a third party. Use those only when the exchange has no copy (or the filing itself links to it), say so, and note it in unknowns. screener's transcript list sometimes points to the company website: look for the exchange copy first. Rank by assurance:
   - audited annual figures;
   - limited-reviewed quarterly/half-year figures;

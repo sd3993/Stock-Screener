@@ -12,7 +12,7 @@ How to reach each source, and what has already been found about each, so no sess
 | Announcements with PDF links, 3 years; insider trades | NSE feeds | `scr_company.py` → `scr/announcements`, `insider` |
 | Annual reports (back to about 2013), transcripts, credit-rating letters, peers, about text | screener page | `scr_company.py` → `scr/documents`, `credit_ratings`, `peers`, `overview` |
 | The documents themselves (results, ARs, transcripts, governance) | exchange PDFs | `scr_docs.py`; text via `pdf_text.py` |
-| BSE-only companies, documents NSE lacks | BSE | browser pane only (below) |
+| BSE-only companies, documents NSE lacks | BSE | `bse_fetch.py` + `bse_fetch.js` in the browser pane (below) |
 | Long price, P/E, EPS, market cap history (about 2005 onward, incl. merged/delisted) | screener public chart API | `mb_history.py` |
 | Stored price for the sheet (P8) | screener page | `scr_company.py --only overview` |
 | Tapetide | not needed by any phase | reference only (below) |
@@ -26,7 +26,9 @@ How to reach each source, and what has already been found about each, so no sess
   - The MCP's per-company tools cut to 8 quarters and 50 announcements; the public page and NSE feeds don't.
   - Company pages are public; only screens need login.
 - **screener has no pledge history** (only the current pledge, as a sentence in its cons, when significant). Pledge history is read from NSE's filed SHP XBRLs.
-- **BSE's API is bot-protected:** scripts and curl get 403, and working around that isn't allowed. BSE is browser-pane only. NSE goes first for NSE-listed companies.
+- **BSE's API is bot-protected:** scripts and curl get 403, and working around it (browser headers, cookies or fingerprints faked) isn't allowed. BSE's API is browser-pane only; its PDFs download with plain curl. NSE goes first for NSE-listed companies.
+- **Browser pane can't reach local addresses:** a page's request to 127.0.0.1 gets `ERR_BLOCKED_BY_CLIENT`, and bseindia.com's CSP blocks `eval`, so a snippet can't be loaded from a local server. Data leaves the pane only through a tool result: a result over MAX_MCP_OUTPUT_TOKENS is saved to a tool-results file and shown as a short notice (pad small results so they're saved too).
+- **BSE announcements API** (`AnnSubCategoryGetData`) sends 50 rows a page and no page count: page until a page adds no new `NEWSID`.
 - **NSE:**
   - Feeds work from scripts through the screener-mcp library's session.
   - XBRL files need that session; plain curl gets nothing.
@@ -47,6 +49,7 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
 - **Tapetide:** `tt.py` (REST client: `usage`, `get <route> k=v [--save PATH] [--all-pages]`, `calls [days]`; caching and call log for every other script), `tt_docs.py` (shared: filings/documents lists, downloads, `index.json`).
 - **Task 2 (`studies/multibaggers/`):** `mb_history.py SYM… | --csv FILE` (long price, P/E, EPS, market-cap-to-sales and sales history from screener's public chart API, back to about 2005; run through uvx like `scr_company.py`), `mb_outcomes.py` (price and market-cap multiples per window from those histories → `studies/multibaggers/outcomes.csv`).
 - **Phases:** `build_universe.py` (P2 → `universe.csv`), `triage.py` (P3 → `triage.csv`, `gate_batches.json`), `gate_merge.py` (P4R → `gate/decisions.csv`), `facts_check.py SYM` (P6: `facts.json` vs the cached screener and Tapetide figures), `check_pending.py` (after P8: `PENDING: n`).
+- **BSE:** `bse_fetch.py job|save` with `bse_fetch.js` (pledge, shareholding, results, corporate actions and announcements for companies NSE doesn't cover, through the browser pane; steps in the script's header).
 - **Documents:** `pdf_text.py <pdf> 1 9999 <out.txt>` (PDF → text with page markers). BSE/NSE fallback only: `bse_pdf.py`, `save_b64_pdf.py`, `save_js_file.py`, `save_last_js.py`.
 
 ## screener.in MCP (main source; `mcp__screener__*`)
@@ -101,7 +104,7 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
 
 ## BSE/NSE directly (for what the scripts above don't cover; `process/data_rules.md`)
 - **BSE PDFs:** `www.bseindia.com/xml-data/corpfiling/AttachHis/<id>.pdf` (same-day filings often under `AttachLive`) with `curl.exe` and its default identity; `AnnPdfOpen.aspx?Pname=<id>.pdf` is the same file. `bse_pdf.py SYM "regex" files...` downloads and extracts. Some transcript links return an HTML page from both paths: use the NSE copy. Large companies sometimes file only a cover letter linking to a website transcript: read the linked file and say so.
-- **BSE APIs** (bot-protected: scripts and curl get 403, and working around that isn't allowed, so there's no BSE fetch script): in the browser pane, open a tab on www.bseindia.com and call api.bseindia.com from it with fetch() (CORS allowed): `Integratedfinancedata/w?scripcode=` (iXBRL filings since the Mar-2025 quarter), `ConsolidatePledge/w`, `TabResults_SHP/w`, `ListofScripData/w`, announcements `AnnSubCategoryGetData/w?pageno=&strCat=-1&strPrevDate=YYYYMMDD&strScrip=<code>&strSearch=P&strToDate=&strType=C&subcategory=-1` (12-month window).
+- **BSE APIs** (bot-protected, so scripts can't call them): `bse_fetch.py` and `bse_fetch.js` cover the usual items for a batch of about 20 companies, saved to `data/companies/<SYM>/bse/`. For anything else, call api.bseindia.com with fetch() from a www.bseindia.com tab (CORS allowed): `Integratedfinancedata/w?scripcode=` (iXBRL filings since the Mar-2025 quarter), `ConsolidatePledge/w`, `TabResults_SHP/w` (last 3 quarters), `shpSecSummery_New/w?qtrid=<n>.00&scripcode=` (one quarter's pattern; Sep 2026 = 131), `CorporateAction/w`, `ListofScripData/w` (all scrips: `SCRIP_CD`, `scrip_id` = NSE-style symbol), announcements `AnnSubCategoryGetData/w?pageno=&strCat=-1&strPrevDate=YYYYMMDD&strScrip=<code>&strSearch=P&strToDate=&strType=C&subcategory=-1` (12-month window).
 - **NSE PDFs:** curl to nsearchives.nseindia.com hangs; the same paths download from `https://archives.nseindia.com/corporate/...` (`curl.exe -s -m 60 -o <file> <url>`). Fallback: fetch as base64 inside an nsearchives tab and decode with `save_b64_pdf.py`.
 - **NSE APIs** (scripts reach them through the screener-mcp library's NSE session, as `scr_company.py` does; otherwise from a www.nseindia.com tab): `/api/integrated-filing-results` (also `index=sme`), `/api/corporate-share-holdings-master`, `/api/corporates-pit?index=equities|sme&symbol=&from_date=&to_date=` (insider trades, pledges), `/api/corporate-announcements?index=equities&symbol=&from_date=&to_date=`. `corporate-announcements` silently drops rows over wide windows: query one month at a time.
 - **Promoter sales:** when the insider (PIT) feed and the SAST Reg 29(2) disclosure disagree on size, read the Reg 29(2) per-person annexure first (it covers everyone acting in concert). Settle promoter-group membership from Reg 31(4) declarations and the shareholding pattern's promoter list. A fall in promoter share count with unchanged total shares means a sale, transfer out or reclassification.

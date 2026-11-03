@@ -9,7 +9,7 @@ This file holds the user's standing instructions in their latest version. Update
 ## Layout
 - `process/`: `README.md` (the map), one file per phase (`p1_holdings.md` … `p9_allocation.md`) and per recheck (`p4r_…`, `p5r_…`, `p7r_…`, `p9r_…`), `recheck.md` (what all rechecks share), `investing_rules.md` (only copy), `data_rules.md`, `fetch_learnings.md`, `screens.json`.
 - `tools/`: `tools.md` (how to reach each source; scripts; the sheet's layout), `scripts/`.
-- `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/` and Tapetide answers in `api/`, and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide Tapetide answers. `data/calls.csv`: the Tapetide call log.
+- `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/`, BSE answers in `bse/` and Tapetide answers in `api/`, and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide Tapetide answers. `data/calls.csv`: the Tapetide call log.
 - `runs/<FYyyQn>/`: one folder per quarter (`progress.md`, `status.csv`, phase outputs). `runs/verdict_history.csv` is shared across quarters.
 - `studies/<name>/`: one-off studies that refine the rules (e.g. `multibaggers/`: task 2, plan in `plan.md`).
 - `archive/`: older retired material from before 3 Nov 2026 (git-ignored); never depend on it. Newly retired files are deleted instead (see "Git").
