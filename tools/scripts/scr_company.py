@@ -4,7 +4,10 @@ import asyncio, datetime as dt, json, os, re, sys
 # MCP tools' 8-quarter cut) and NSE's feeds: announcements, insider trades, promoter pledge (latest), SAST Reg 29 disclosures,
 # corporate actions and the shareholding-pattern list (about 26 quarters), plus promoter holding and pledge per quarter read
 # from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed):
-#   uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py SYM [--days 1100] [--only quarterly,shareholding]
+#   uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py SYM [SYM ...] [--syms-file list.txt] [--days 1100]
+#       [--only quarterly,shareholding] [--skip-saved]
+# Several companies in one run save the start-up time; --skip-saved skips a company whose --only items are all saved already
+# (item names that match a file: overview, documents, peers, shareholding, quarterly, insider, announcements, credit_ratings).
 # Writes {fetched_at (IST), via: "screener-public", tool, args, warnings, data} per item, the same envelope as scr_save.py.
 os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')  # fewer 429 cooldowns at the same throughput (tools/tools.md)
 from screener_mcp.core.company_page import fetch_company_page
@@ -17,11 +20,16 @@ from screener_mcp.core.nse_client import get_nse_client
 from bs4 import BeautifulSoup
 
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
-sym = sys.argv[1]
-days = int(sys.argv[sys.argv.index('--days') + 1]) if '--days' in sys.argv else 1100
-only = set(sys.argv[sys.argv.index('--only') + 1].split(',')) if '--only' in sys.argv else None
-out_dir = os.path.join('data', 'companies', sym, 'scr')
-os.makedirs(out_dir, exist_ok=True)
+a = sys.argv[1:]
+opt = lambda k: a[a.index(k) + 1] if k in a else None
+days = int(opt('--days') or 1100)
+only = set(opt('--only').split(',')) if opt('--only') else None
+skip_saved = '--skip-saved' in a
+vals = {a.index(k) + 1 for k in ('--days', '--only', '--syms-file') if k in a}
+syms = [x for i, x in enumerate(a) if not x.startswith('--') and i not in vals]
+if opt('--syms-file'):
+    syms += [l.strip() for l in open(opt('--syms-file'), encoding='utf-8') if l.strip()]
+sym = out_dir = None
 
 def save(name, tool, args, data, warnings=None):
     env = {'fetched_at': dt.datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S'), 'via': 'screener-public', 'tool': tool,
@@ -32,6 +40,7 @@ def result(r):
     return r.data, list(r.warnings or []) + ([r.reason] if getattr(r, 'reason', None) else [])
 
 async def main():
+    os.makedirs(out_dir, exist_ok=True)
     done, failed = [], []
 
     async def item(name, fn):
@@ -151,8 +160,22 @@ async def main():
                      ('documents', documents), ('announcements', announcements), ('insider', insider),
                      ('credit_ratings', credit_ratings), ('nse', nse_items)):
         await item(name, fn)
-    print(f'{sym}: saved {", ".join(done) or "nothing"} in {out_dir}' + (f'; FAILED: {"; ".join(failed)}' if failed else ''))
-    if failed:
+    print(f'{sym}: saved {", ".join(done) or "nothing"} in {out_dir}' + (f'; FAILED: {"; ".join(failed)}' if failed else ''), flush=True)
+    return not failed
+
+async def run_all():
+    global sym, out_dir
+    ok = True
+    for sym in syms:
+        out_dir = os.path.join('data', 'companies', sym, 'scr')
+        if skip_saved and only and all(os.path.exists(os.path.join(out_dir, n + '.json')) for n in only):
+            continue
+        try:
+            ok = await main() and ok
+        except Exception as e:  # one company's failure doesn't stop the batch
+            print(f'{sym}: FAILED: {type(e).__name__}: {e}'[:300], flush=True)
+            ok = False
+    if not ok:
         sys.exit(2)
 
-asyncio.run(main())
+asyncio.run(run_all())
