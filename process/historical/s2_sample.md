@@ -1,4 +1,4 @@
-# S2: sample (script, then an Opus medium review)
+# S2: sample (script; business types by Opus medium helpers)
 
 From `outcomes.csv` (S1), pick about 400 companies, each with its reason, into `runs/historical/<date>/sample.csv` (sym, group, horizon, window start, start market cap, sector, reason, matched_to).
 
@@ -21,4 +21,4 @@ The selection itself is `tools/scripts/mb_sample.py` (see Script).
 
 **Script:** `python -I tools/scripts/mb_sample.py [--seed 1]` writes `sample_candidates.csv` (winners, fallen winners, ~5 control candidates per winner, each with its reason), seeded so the picks are reproducible, and prints counts per group, horizon, period and size band. Once types are tagged, each winner's control is the nearest candidate of the same business type.
 
-**Review (helper, Opus medium):** reads `sample.csv` and the counts and checks: groups and periods balanced; controls genuinely comparable at the start (not already obviously different); no data artefacts posing as winners (price series breaks, splits or bonuses not adjusted, near-zero starting market caps, shell companies). It returns the rows to drop or replace with reasons; the orchestrator applies them and records the final counts in `status.md`.
+**Checks (script, no helper):** `mb_sample.py` merges the batch files, picks each winner's control (nearest candidate of the same type), counts the peers flags, and checks: groups, periods and size bands balanced; no data artefacts posing as winners (a price jump with no matching market-cap change, i.e. an unadjusted split or bonus; a start market cap near the ₹50 cr floor with thin trading; a series break); controls within the matching limits. Shell companies or ones with no real operations are flagged by the tagging helpers, who read the about text anyway. The orchestrator drops or replaces flagged rows, re-runs the checks and records the final counts in `status.md`.

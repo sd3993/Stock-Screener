@@ -21,19 +21,19 @@ The study looks for patterns that recur and can be seen at the time, not stories
 | # | Step | Who | Model / effort | File | Output (`runs/historical/<date>/`) | Done when |
 |---|---|---|---|---|---|---|
 | S1 | Universe, history and outcomes | scripts (+ MCP screens) | orchestrator | `s1_universe.md` | `universe.csv`, `outcomes.csv` | every universe company has a history or a recorded failure; outcomes written |
-| S2 | Sample: winners, controls, fallen winners; business types | script, helpers (types in batches, then review) | Opus medium | `s2_sample.md` | `sample.csv`, `business_types.csv` | ~400 companies, each with its reason and business type; review done |
+| S2 | Sample: winners, controls, fallen winners; business types | script (selection, controls, checks), helpers (types in batches) | Opus medium | `s2_sample.md` | `sample.csv`, `business_types.csv` | ~400 companies, each with its reason and business type; checks pass |
 | S3 | Statements for the sample | script | none | `s3_statements.md` | `data/companies/<SYM>/scr/` | every sample company fetched or its failure recorded |
 | S4 | Pattern back-test | script, then orchestrator | Opus medium | `s4_backtest.md` | `features.csv`, `backtest.md` | every hypothesis scored in-sample, out-of-sample and on the whole market |
 | S5 | Stage studies, one company at a time | helper each, + one recheck | Opus high (recheck Opus medium) | `s5_stages.md` | `stages/<SYM>.md` | ~30 winners and ~10 fallen winners studied and rechecked |
 | S6 | Expert evidence | helper | Opus medium | `s6_experts.md` | `experts.md` | findings and hypotheses written, tagged with sources |
-| S7 | Proposals, then rechecks 1 and 2 | orchestrator, helper each | Opus high (rechecks Opus medium) | `s7_proposals.md` | `proposals.md` | both rechecks agree; sent to the user |
+| S7 | Proposals, figure check, reasoning recheck | orchestrator, script, helper | Opus high (recheck Opus medium) | `s7_proposals.md` | `proposals.md` | both rechecks agree; sent to the user |
 
 ## Order of work
 1. S6 can run any time (it needs no data). S1 next; its history fetch runs for hours in the background, watched by a half-hourly watchdog (`CLAUDE.md`, "Watchdog").
 2. S2 → S3 → S4. S4's hypothesis list comes from `experts.md` (S6) plus the current rules.
 3. S5, one helper at a time, each followed by its recheck; learnings from one study go into the next helper's brief. S5 picks come from S4's results (winners that the rules missed and that they caught, and fallen winners).
 4. S7 after S4 and S5. The proposals go to the user; approved general-rule changes and the orchestrator's sector-note changes are made in `process/investing_rules.md`.
-5. Update `status.md` at every step boundary, and commit and push at each completed step (`CLAUDE.md`, "Git").
+5. Update `status.md` at every step boundary (it stays out of git with the rest of the run; `CLAUDE.md`, "Git"). Commit and push process or script changes made along the way.
 
 ## Resuming
 Read `status.md`. Scripts skip finished work (saved histories, saved statements), so re-run the step's command. A stage study with a written `stages/<SYM>.md` but no recheck goes straight to its recheck.

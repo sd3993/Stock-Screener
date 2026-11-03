@@ -1,5 +1,6 @@
-# Commit the process, its tools and every run (runs/). Fetched company data stays out: it is large (GBs of
-# exchange PDFs and cached answers), would double the project's OneDrive storage inside .git, and can be re-fetched.
+# Only the workflow is committed: CLAUDE.md, process/ and tools/. Everything a run produces stays out (it lives on
+# OneDrive): run folders, fetched company data (GBs, would double the OneDrive storage inside .git, can be re-fetched).
+runs/
 data/
 acknowledgements.md
 

@@ -1,4 +1,4 @@
-# S7: proposals (orchestrator at Opus high), then rechecks 1 and 2 (Opus medium helpers)
+# S7: proposals (orchestrator at Opus high), then a figure check (script) and a reasoning recheck (Opus medium helper)
 
 Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`.
 
@@ -10,6 +10,6 @@ Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`
 - **Citation corrections** from `experts.md`.
 - **Not adopted:** patterns that looked good but failed a test, and why (so a re-run doesn't chase them again).
 
-**Rechecks** (`process/future/recheck.md`): recheck 1 checks every figure against `backtest.md` and the files behind it, and that each proposal passed every test; recheck 2 checks the reasoning: mechanisms, hindsight, over-fitting, and whether the wording would let a future analyst apply it at the time. Disagreements are settled per `recheck.md`.
+**Checks:** recheck 1 is a script: every figure in `proposals.md` cites its pattern id, and the script compares it with the S4 output files and confirms the pattern passed every test there. Recheck 2 is a helper (`process/future/recheck.md`) and checks only the reasoning: mechanisms, hindsight, over-fitting, and whether the wording would let a future analyst apply it at the time. Disagreements are settled per `recheck.md`.
 
 **Then:** send the user the proposals (general-rule changes need their approval; `CLAUDE.md`, "Rules file"). The orchestrator makes approved general-rule changes and its own sector-note changes in `process/investing_rules.md`, and records the study run in `status.md`.
