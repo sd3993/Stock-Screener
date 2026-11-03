@@ -19,7 +19,9 @@ studies/*/stages/*.json
 archive/
 
 # Local settings, caches and scratch
+# .claude/settings.json (project config) is committed; personal overrides and runtime locks are not
 .claude/settings.local.json
+.claude/*.lock
 __pycache__/
 *.pyc
 *.log
