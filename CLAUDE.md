@@ -2,16 +2,15 @@
 
 **Goal:** screen the user's Zerodha Kite portfolio and the whole Indian market against `process/investing_rules.md`, verify every figure, and record the outcomes (bucket rankings, allocation, holdings actions) in the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`).
 
-**Start here:** `process/README.md` is the map of the whole process: the phases in order, who runs each (model and effort), inputs, outputs, when a phase is done, and how to resume. Before starting or resuming a run, read it, then the run's `progress.md` and `status.csv` (`runs/<FYyyQn>/`, the newest quarter folder).
+**Start here:** `process/future/README.md` is the map of the research process (quarterly runs): the phases in order, who runs each (model and effort), inputs, outputs, when a phase is done, and how to resume. Before starting or resuming a run, read it, then the run's `progress.md` and `status.csv` (`runs/future/<FYyyQn>/`, the newest quarter folder). The multibagger study that refines the rules has its own map, `process/historical/README.md`, and its runs in `runs/historical/<date>/` (`status.md`).
 
-This file holds the user's standing instructions in their latest version. Update it whenever the user gives a new or changed instruction, replacing the old wording. Each instruction lives in exactly one place: the process and orchestration in `process/README.md`, step work in the phase files (`process/p*.md`), investing rules in `process/investing_rules.md`, data rules in `process/data_rules.md`, tool how-to and the sheet's layout in `tools/tools.md`. Don't copy text between them; point to it.
+This file holds the user's standing instructions in their latest version. Update it whenever the user gives a new or changed instruction, replacing the old wording. Each instruction lives in exactly one place: the process and orchestration in `process/future/README.md`, the study in `process/historical/README.md`, step work in the phase and step files (`process/future/p*.md`, `process/historical/s*.md`), investing rules in `process/investing_rules.md`, data rules in `process/data_rules.md`, tool how-to and the sheet's layout in `tools/tools.md`. Don't copy text between them; point to it.
 
 ## Layout
-- `process/`: `README.md` (the map), `study_multibaggers/` (the repeatable multibagger study: its own map and step files), one file per phase (`p1_holdings.md` … `p9_allocation.md`) and per recheck (`p4r_…`, `p5r_…`, `p7r_…`, `p9r_…`), `recheck.md` (what all rechecks share), `investing_rules.md` (only copy), `data_rules.md`, `fetch_learnings.md`, `screens.json`.
+- `process/`: `investing_rules.md` (only copy), `data_rules.md` and `fetch_learnings.md`, shared by both parts; `future/`: the quarterly research process (`README.md`, the map; one file per phase `p1_holdings.md` … `p9_allocation.md` and per recheck `p4r_…`, `p5r_…`, `p7r_…`, `p9r_…`; `recheck.md`, what all rechecks share; `screens.json`); `historical/`: the repeatable multibagger study (`README.md`, the map; steps `s1_…` … `s7_…`).
 - `tools/`: `tools.md` (how to reach each source; scripts; the sheet's layout), `scripts/`.
 - `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/`, BSE answers in `bse/` (and old Tapetide answers in `api/`), and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide Tapetide answers. `data/calls.csv`: the Tapetide call log.
-- `runs/<FYyyQn>/`: one folder per quarter (`progress.md`, `status.csv`, phase outputs). `runs/verdict_history.csv` is shared across quarters.
-- `studies/<name>/`: outputs of studies that refine the rules, with the current run's `status.md` (e.g. `multibaggers/`, method in `process/study_multibaggers/`).
+- `runs/` (committed): `future/<FYyyQn>/`, one folder per quarterly research run (`progress.md`, `status.csv`, phase outputs), and `future/verdict_history.csv`, shared across quarters; `historical/<YYYY-MM-DD>/`, one folder per multibagger-study run, by its start date (`status.md`, universe, outcomes, sample, findings, proposals).
 - `archive/`: run data set aside rather than deleted (git-ignored, so git can't bring it back): an abandoned or superseded run's folder, or company data replaced by a fresh fetch, moved to `archive/<what>_<date>/`. Never depend on it.
 
 ## How to work
@@ -32,8 +31,8 @@ This file holds the user's standing instructions in their latest version. Update
 - **Git (this project; overrides the user-level rule on commits):** commit and push to `origin` (https://github.com/sd3993/Stock-Screener) at milestones (a process or tool change complete and checked, a phase or study step done), with a message saying what changed. Retired committed files (process, tools) are deleted, not archived: git history keeps them. Run data isn't in git, so it goes to `archive/` instead (see "Layout").
 
 ## Helpers
-- **The orchestrator dispatches; helpers never start other helpers.** One orchestrator per run, one helper at a time across all threads (they share the user's usage, quota and scratchpad, and each helper's learnings must reach the next); time is not a concern. Models and efforts per phase: `process/README.md`.
-- Judgement work is rechecked (`process/recheck.md`) rather than redone in independent runs. Helpers write bulky data to files and return short summaries. Use Agent-tool helpers, not workflows, unless the user asks.
+- **The orchestrator dispatches; helpers never start other helpers.** One orchestrator per run, one helper at a time across all threads (they share the user's usage, quota and scratchpad, and each helper's learnings must reach the next); time is not a concern. Models and efforts per phase: `process/future/README.md`.
+- Judgement work is rechecked (`process/future/recheck.md`) rather than redone in independent runs. Helpers write bulky data to files and return short summaries. Use Agent-tool helpers, not workflows, unless the user asks.
 - Lower a phase's model (also as you learn during runs) only when the lower model can handle it and the higher one had no strong reason, never just to save usage. When strongly confident, make the change and list it for acknowledgement; when not sure, ask the user first.
 
 ## Files and scripts

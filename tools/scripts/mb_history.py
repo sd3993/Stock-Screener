@@ -1,9 +1,9 @@
 import asyncio, csv, datetime as dt, json, os, sys
-# Multibagger study, step 1 (process/study_multibaggers/s1_universe.md): long price and valuation history per company from screener.in's public chart API
+# Multibagger study, step 1 (process/historical/s1_universe.md): long price and valuation history per company from screener.in's public chart API
 # (no login, no model tokens), back to about 2005: price and volume, P/E with the TTM EPS behind it, and market cap to
 # sales with TTM sales (market cap = the ratio x sales). Saved as data/companies/<SYM>/scr/history.json; a company already
 # saved is skipped unless --refresh. Input: symbols, or a CSV with columns sym and (optionally) screener_id.
-#   uvx --from screener-mcp==0.5.0 python tools/scripts/mb_history.py SYM ... | --csv studies/multibaggers/universe.csv [--refresh]
+#   uvx --from screener-mcp==0.5.0 python tools/scripts/mb_history.py SYM ... | --csv runs/historical/<date>/universe.csv [--refresh]
 from screener_mcp.client import get_client
 from screener_mcp.core.company_page import fetch_company_page
 

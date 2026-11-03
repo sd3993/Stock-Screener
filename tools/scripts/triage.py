@@ -2,7 +2,7 @@ import csv, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
 # P3: scores every company in <run>/universe.csv (and every holding) and writes <run>/triage.csv and
-# <run>/gate_batches.json. See process/p3_triage.md for what it decides.
+# <run>/gate_batches.json. See process/future/p3_triage.md for what it decides.
 #  (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per bucket (short 2y, medium 5y, long 7y) at
 #      exit P/E = min(own 5y median P/E, 30), with dividends, vs growth VISIBLE in trailing data (conservative, optimistic);
 #  (b) earnings evidence (rule 6): E1 acceleration, E2 stalwart rebound, E3 sustained growth, E4 turnaround;

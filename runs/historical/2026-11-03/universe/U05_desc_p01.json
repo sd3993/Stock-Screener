@@ -1,0 +1,3234 @@
+{
+ "fetched_at": "2026-11-03 06:21:59",
+ "via": "screener",
+ "tool": "screen_stocks",
+ "args": {
+  "query": "Market Capitalization > 500 AND Market Capitalization <= 1500",
+  "limit": 200,
+  "page": 1,
+  "order": "desc"
+ },
+ "warnings": [],
+ "partial": false,
+ "data": {
+  "query": "Market Capitalization > 500 AND Market Capitalization <= 1500",
+  "screener_query": "Market Capitalization > 500 AND Market Capitalization <= 1500",
+  "total_matches": 645,
+  "page": 1,
+  "showing": 200,
+  "results": [
+   {
+    "symbol": "INFOBEAN",
+    "name": "InfoBeans Tech.",
+    "company_id": "1272917",
+    "fundamentals": {
+     "Current Price": 154.58,
+     "Price to Earning": 16.92,
+     "Market Capitalization": 1499.04,
+     "Dividend yield": 0.32,
+     "Net Profit latest quarter": 26.26,
+     "YOY Quarterly profit growth": 16.14,
+     "Sales latest quarter": 163.24,
+     "YOY Quarterly sales growth": 30.13,
+     "Return on capital employed": 29.18
+    }
+   },
+   {
+    "symbol": "PAUSHAKLTD",
+    "name": "Paushak",
+    "company_id": "1272429",
+    "fundamentals": {
+     "Current Price": 606.25,
+     "Price to Earning": 31.61,
+     "Market Capitalization": 1494.83,
+     "Dividend yield": 0.41,
+     "Net Profit latest quarter": 13.51,
+     "YOY Quarterly profit growth": 56.91,
+     "Sales latest quarter": 89.32,
+     "YOY Quarterly sales growth": 51.96,
+     "Return on capital employed": 8.3
+    }
+   },
+   {
+    "symbol": "ACCENTMIC",
+    "name": "Accent Microcell",
+    "company_id": "1284581",
+    "fundamentals": {
+     "Current Price": 619.7,
+     "Price to Earning": 26.12,
+     "Market Capitalization": 1486.6,
+     "Dividend yield": 0.16,
+     "Net Profit latest quarter": 31.12,
+     "YOY Quarterly profit growth": 72.22,
+     "Sales latest quarter": 174.83,
+     "YOY Quarterly sales growth": 25.44,
+     "Return on capital employed": 24.88
+    }
+   },
+   {
+    "symbol": "AURUM",
+    "name": "Aurum Proptech",
+    "company_id": "1272987",
+    "fundamentals": {
+     "Current Price": 206.11,
+     "Price to Earning": 127.15,
+     "Market Capitalization": 1486.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 4.29,
+     "YOY Quarterly profit growth": 156.45,
+     "Sales latest quarter": 130.19,
+     "YOY Quarterly sales growth": 63.88,
+     "Return on capital employed": 1.33
+    }
+   },
+   {
+    "symbol": "SUMMITSEC",
+    "name": "Summit Securitie",
+    "company_id": "3241",
+    "fundamentals": {
+     "Current Price": 1362.0,
+     "Price to Earning": 12.4,
+     "Market Capitalization": 1484.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 35.29,
+     "YOY Quarterly profit growth": 74.79,
+     "Sales latest quarter": 40.89,
+     "YOY Quarterly sales growth": 48.47,
+     "Return on capital employed": 1.52
+    }
+   },
+   {
+    "symbol": "TEXINFRA",
+    "name": "Texmaco Infrast.",
+    "company_id": "3401",
+    "fundamentals": {
+     "Current Price": 116.49,
+     "Price to Earning": 163.66,
+     "Market Capitalization": 1484.39,
+     "Dividend yield": 0.13,
+     "Net Profit latest quarter": 1.62,
+     "YOY Quarterly profit growth": -55.49,
+     "Sales latest quarter": 3.61,
+     "YOY Quarterly sales growth": -10.86,
+     "Return on capital employed": 1.35
+    }
+   },
+   {
+    "symbol": "PANORAMA",
+    "name": "Panorama Studios",
+    "company_id": "1273128",
+    "fundamentals": {
+     "Current Price": 56.95,
+     "Price to Earning": 61.46,
+     "Market Capitalization": 1483.75,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 12.71,
+     "YOY Quarterly profit growth": 165.95,
+     "Sales latest quarter": 183.07,
+     "YOY Quarterly sales growth": 34.26,
+     "Return on capital employed": 8.7
+    }
+   },
+   {
+    "symbol": "JINDRILL",
+    "name": "Jindal Drilling",
+    "company_id": "1620",
+    "fundamentals": {
+     "Current Price": 511.35,
+     "Price to Earning": 7.61,
+     "Market Capitalization": 1481.89,
+     "Dividend yield": 0.2,
+     "Net Profit latest quarter": 47.14,
+     "YOY Quarterly profit growth": -28.69,
+     "Sales latest quarter": 275.39,
+     "YOY Quarterly sales growth": 8.38,
+     "Return on capital employed": 13.67
+    }
+   },
+   {
+    "symbol": "HITECH",
+    "name": "Hi-Tech Pipes",
+    "company_id": "1273262",
+    "fundamentals": {
+     "Current Price": 72.64,
+     "Price to Earning": 19.6,
+     "Market Capitalization": 1475.37,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 20.04,
+     "YOY Quarterly profit growth": -4.21,
+     "Sales latest quarter": 1412.8,
+     "YOY Quarterly sales growth": 78.53,
+     "Return on capital employed": 9.77
+    }
+   },
+   {
+    "symbol": "SURYODAY",
+    "name": "Suryoday Small",
+    "company_id": "1274851",
+    "fundamentals": {
+     "Current Price": 138.75,
+     "Price to Earning": 6.2,
+     "Market Capitalization": 1474.87,
+     "Dividend yield": 1.08,
+     "Net Profit latest quarter": 76.55,
+     "YOY Quarterly profit growth": 151.73,
+     "Sales latest quarter": 702.86,
+     "YOY Quarterly sales growth": 35.25,
+     "Return on capital employed": 7.33
+    }
+   },
+   {
+    "symbol": "KAPSTON",
+    "name": "Kapston Services",
+    "company_id": "1274320",
+    "fundamentals": {
+     "Current Price": 483.25,
+     "Price to Earning": 45.49,
+     "Market Capitalization": 1470.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 8.94,
+     "YOY Quarterly profit growth": 27.35,
+     "Sales latest quarter": 223.17,
+     "YOY Quarterly sales growth": 6.33,
+     "Return on capital employed": 15.18
+    }
+   },
+   {
+    "symbol": "RSL",
+    "name": "Rajputana Stain.",
+    "company_id": "1285918",
+    "fundamentals": {
+     "Current Price": 175.39,
+     "Price to Earning": 21.15,
+     "Market Capitalization": 1465.69,
+     "Dividend yield": 0.29,
+     "Net Profit latest quarter": 23.7,
+     "YOY Quarterly profit growth": 79.27,
+     "Sales latest quarter": 359.81,
+     "YOY Quarterly sales growth": 33.26,
+     "Return on capital employed": 25.33
+    }
+   },
+   {
+    "symbol": "EPACK",
+    "name": "Epack Durable",
+    "company_id": "1284639",
+    "fundamentals": {
+     "Current Price": 152.1,
+     "Price to Earning": null,
+     "Market Capitalization": 1464.37,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -25.07,
+     "YOY Quarterly profit growth": -12.67,
+     "Sales latest quarter": 439.33,
+     "YOY Quarterly sales growth": 106.01,
+     "Return on capital employed": 4.54
+    }
+   },
+   {
+    "symbol": "ALLCARGO",
+    "name": "Allcargo Logist.",
+    "company_id": "134",
+    "fundamentals": {
+     "Current Price": 9.72,
+     "Price to Earning": 31.65,
+     "Market Capitalization": 1455.84,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 14.0,
+     "YOY Quarterly profit growth": 227.27,
+     "Sales latest quarter": 546.0,
+     "YOY Quarterly sales growth": 11.2,
+     "Return on capital employed": 4.83
+    }
+   },
+   {
+    "symbol": "MCLOUD",
+    "name": "Magellanic Cloud",
+    "company_id": "1236192",
+    "fundamentals": {
+     "Current Price": 24.66,
+     "Price to Earning": 13.02,
+     "Market Capitalization": 1452.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 23.7,
+     "YOY Quarterly profit growth": -14.56,
+     "Sales latest quarter": 180.28,
+     "YOY Quarterly sales growth": 9.95,
+     "Return on capital employed": 19.69
+    }
+   },
+   {
+    "symbol": "RAJESHEXPO",
+    "name": "Rajesh Exports",
+    "company_id": "2640",
+    "fundamentals": {
+     "Current Price": 49.12,
+     "Price to Earning": 8.57,
+     "Market Capitalization": 1450.32,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 47.19,
+     "YOY Quarterly profit growth": 595.17,
+     "Sales latest quarter": 240335.72,
+     "YOY Quarterly sales growth": 82.71,
+     "Return on capital employed": 1.86
+    }
+   },
+   {
+    "symbol": "TINNARUBR",
+    "name": "Tinna Rubber",
+    "company_id": "3427",
+    "fundamentals": {
+     "Current Price": 804.5,
+     "Price to Earning": 21.65,
+     "Market Capitalization": 1449.37,
+     "Dividend yield": 0.4,
+     "Net Profit latest quarter": 17.04,
+     "YOY Quarterly profit growth": 44.77,
+     "Sales latest quarter": 156.59,
+     "YOY Quarterly sales growth": 31.02,
+     "Return on capital employed": 22.46
+    }
+   },
+   {
+    "symbol": "544291",
+    "name": "Rajesh Power",
+    "company_id": "1285169",
+    "fundamentals": {
+     "Current Price": 804.7,
+     "Price to Earning": 9.15,
+     "Market Capitalization": 1449.05,
+     "Dividend yield": 0.12,
+     "Net Profit latest quarter": 78.5,
+     "YOY Quarterly profit growth": 35.2,
+     "Sales latest quarter": 929.26,
+     "YOY Quarterly sales growth": 45.69,
+     "Return on capital employed": 47.33
+    }
+   },
+   {
+    "symbol": "BFINVEST",
+    "name": "BF Investment",
+    "company_id": "438",
+    "fundamentals": {
+     "Current Price": 383.95,
+     "Price to Earning": 3.71,
+     "Market Capitalization": 1445.96,
+     "Dividend yield": 2.6,
+     "Net Profit latest quarter": 145.99,
+     "YOY Quarterly profit growth": 279.79,
+     "Sales latest quarter": 11.28,
+     "YOY Quarterly sales growth": 19.62,
+     "Return on capital employed": 4.86
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item"
+    ]
+   },
+   {
+    "symbol": "MIIL",
+    "name": "Meghna Infracon",
+    "company_id": "1070548",
+    "fundamentals": {
+     "Current Price": 665.5,
+     "Price to Earning": 318.44,
+     "Market Capitalization": 1445.72,
+     "Dividend yield": 0.04,
+     "Net Profit latest quarter": 0.57,
+     "YOY Quarterly profit growth": -61.15,
+     "Sales latest quarter": 8.43,
+     "YOY Quarterly sales growth": -19.48,
+     "Return on capital employed": 31.33
+    }
+   },
+   {
+    "symbol": "ARDEE",
+    "name": "Ardee Industries",
+    "company_id": "1286077",
+    "fundamentals": {
+     "Current Price": 45.85,
+     "Price to Earning": 16.79,
+     "Market Capitalization": 1445.2,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 19.9,
+     "YOY Quarterly profit growth": 5.96,
+     "Sales latest quarter": 338.81,
+     "YOY Quarterly sales growth": 35.19,
+     "Return on capital employed": 49.08
+    }
+   },
+   {
+    "symbol": "SERVOTECH",
+    "name": "Servotech Renew",
+    "company_id": "1274127",
+    "fundamentals": {
+     "Current Price": 63.73,
+     "Price to Earning": 38.42,
+     "Market Capitalization": 1439.31,
+     "Dividend yield": 0.03,
+     "Net Profit latest quarter": 8.06,
+     "YOY Quarterly profit growth": 74.62,
+     "Sales latest quarter": 215.79,
+     "YOY Quarterly sales growth": 57.81,
+     "Return on capital employed": 12.79
+    }
+   },
+   {
+    "symbol": "533315",
+    "name": "Innovassynth Technologies",
+    "company_id": "1497",
+    "fundamentals": {
+     "Current Price": 154.9,
+     "Price to Earning": null,
+     "Market Capitalization": 1438.41,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 6.74,
+     "YOY Quarterly profit growth": 136.1,
+     "Sales latest quarter": 55.99,
+     "YOY Quarterly sales growth": 356.32,
+     "Return on capital employed": -16.38
+    }
+   },
+   {
+    "symbol": "AVTNPL",
+    "name": "AVT Natural Prod",
+    "company_id": "346",
+    "fundamentals": {
+     "Current Price": 94.41,
+     "Price to Earning": 17.16,
+     "Market Capitalization": 1437.86,
+     "Dividend yield": 0.85,
+     "Net Profit latest quarter": 31.1,
+     "YOY Quarterly profit growth": 156.6,
+     "Sales latest quarter": 241.21,
+     "YOY Quarterly sales growth": 82.16,
+     "Return on capital employed": 14.22
+    }
+   },
+   {
+    "symbol": "AMRUTANJAN",
+    "name": "Amrutanjan Healt",
+    "company_id": "177",
+    "fundamentals": {
+     "Current Price": 496.4,
+     "Price to Earning": 23.07,
+     "Market Capitalization": 1435.12,
+     "Dividend yield": 0.99,
+     "Net Profit latest quarter": 4.37,
+     "YOY Quarterly profit growth": -29.84,
+     "Sales latest quarter": 102.97,
+     "YOY Quarterly sales growth": 9.48,
+     "Return on capital employed": 24.84
+    }
+   },
+   {
+    "symbol": "BLIL",
+    "name": "Balmer Law. Inv.",
+    "company_id": "386",
+    "fundamentals": {
+     "Current Price": 64.51,
+     "Price to Earning": 7.99,
+     "Market Capitalization": 1431.95,
+     "Dividend yield": 6.67,
+     "Net Profit latest quarter": 72.59,
+     "YOY Quarterly profit growth": 1.86,
+     "Sales latest quarter": 751.14,
+     "YOY Quarterly sales growth": 9.9,
+     "Return on capital employed": 16.91
+    }
+   },
+   {
+    "symbol": "GPTINFRA",
+    "name": "GPT Infraproject",
+    "company_id": "1194",
+    "fundamentals": {
+     "Current Price": 113.14,
+     "Price to Earning": 14.52,
+     "Market Capitalization": 1429.69,
+     "Dividend yield": 2.43,
+     "Net Profit latest quarter": 24.34,
+     "YOY Quarterly profit growth": 4.9,
+     "Sales latest quarter": 302.07,
+     "YOY Quarterly sales growth": -3.38,
+     "Return on capital employed": 21.4
+    }
+   },
+   {
+    "symbol": "JAGSNPHARM",
+    "name": "Jagsonpal Pharma",
+    "company_id": "1569",
+    "fundamentals": {
+     "Current Price": 216.33,
+     "Price to Earning": 30.27,
+     "Market Capitalization": 1429.06,
+     "Dividend yield": 1.85,
+     "Net Profit latest quarter": 12.59,
+     "YOY Quarterly profit growth": 1.59,
+     "Sales latest quarter": 81.38,
+     "YOY Quarterly sales growth": 9.28,
+     "Return on capital employed": 22.73
+    }
+   },
+   {
+    "symbol": "TIRUMALCHM",
+    "name": "Thirumalai Chem.",
+    "company_id": "3415",
+    "fundamentals": {
+     "Current Price": 118.31,
+     "Price to Earning": null,
+     "Market Capitalization": 1426.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -43.67,
+     "YOY Quarterly profit growth": 27.17,
+     "Sales latest quarter": 546.67,
+     "YOY Quarterly sales growth": 21.47,
+     "Return on capital employed": -3.15
+    }
+   },
+   {
+    "symbol": "MTNL",
+    "name": "M T N L",
+    "company_id": "1963",
+    "fundamentals": {
+     "Current Price": 22.6,
+     "Price to Earning": null,
+     "Market Capitalization": 1423.8,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -842.36,
+     "YOY Quarterly profit growth": 10.69,
+     "Sales latest quarter": 216.89,
+     "YOY Quarterly sales growth": 25.94,
+     "Return on capital employed": -9.32
+    }
+   },
+   {
+    "symbol": "DLINKINDIA",
+    "name": "D-Link India",
+    "company_id": "756",
+    "fundamentals": {
+     "Current Price": 399.45,
+     "Price to Earning": 12.87,
+     "Market Capitalization": 1418.24,
+     "Dividend yield": 6.51,
+     "Net Profit latest quarter": 28.25,
+     "YOY Quarterly profit growth": 11.31,
+     "Sales latest quarter": 452.39,
+     "YOY Quarterly sales growth": 20.12,
+     "Return on capital employed": 25.89
+    }
+   },
+   {
+    "symbol": "RICOAUTO",
+    "name": "Rico Auto Inds",
+    "company_id": "2754",
+    "fundamentals": {
+     "Current Price": 104.52,
+     "Price to Earning": 39.49,
+     "Market Capitalization": 1414.16,
+     "Dividend yield": 0.53,
+     "Net Profit latest quarter": -3.38,
+     "YOY Quarterly profit growth": -121.0,
+     "Sales latest quarter": 755.08,
+     "YOY Quarterly sales growth": 38.94,
+     "Return on capital employed": 9.15
+    }
+   },
+   {
+    "symbol": "DPEL",
+    "name": "Divine Power",
+    "company_id": "1284824",
+    "fundamentals": {
+     "Current Price": 564.25,
+     "Price to Earning": 52.74,
+     "Market Capitalization": 1408.65,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 18.88,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 346.47,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "BIL",
+    "name": "Bhartiya Intl.",
+    "company_id": "468",
+    "fundamentals": {
+     "Current Price": 1049.6,
+     "Price to Earning": 54.96,
+     "Market Capitalization": 1407.56,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 17.76,
+     "YOY Quarterly profit growth": 218.28,
+     "Sales latest quarter": 372.8,
+     "YOY Quarterly sales growth": 33.16,
+     "Return on capital employed": 9.53
+    }
+   },
+   {
+    "symbol": "JAYBARMARU",
+    "name": "Jay Bharat Maru.",
+    "company_id": "1589",
+    "fundamentals": {
+     "Current Price": 130.01,
+     "Price to Earning": 9.44,
+     "Market Capitalization": 1407.36,
+     "Dividend yield": 0.54,
+     "Net Profit latest quarter": 31.12,
+     "YOY Quarterly profit growth": 72.6,
+     "Sales latest quarter": 823.42,
+     "YOY Quarterly sales growth": 41.32,
+     "Return on capital employed": 16.44
+    }
+   },
+   {
+    "symbol": "ALICON",
+    "name": "Alicon Cast.",
+    "company_id": "127",
+    "fundamentals": {
+     "Current Price": 855.2,
+     "Price to Earning": 37.79,
+     "Market Capitalization": 1403.54,
+     "Dividend yield": 0.58,
+     "Net Profit latest quarter": 11.45,
+     "YOY Quarterly profit growth": 4.76,
+     "Sales latest quarter": 578.01,
+     "YOY Quarterly sales growth": 38.3,
+     "Return on capital employed": 10.65
+    }
+   },
+   {
+    "symbol": "WENDT",
+    "name": "Wendt India",
+    "company_id": "3745",
+    "fundamentals": {
+     "Current Price": 7010.5,
+     "Price to Earning": 71.03,
+     "Market Capitalization": 1402.1,
+     "Dividend yield": 0.43,
+     "Net Profit latest quarter": 5.49,
+     "YOY Quarterly profit growth": 103.33,
+     "Sales latest quarter": 72.51,
+     "YOY Quarterly sales growth": 28.15,
+     "Return on capital employed": 7.82
+    }
+   },
+   {
+    "symbol": "JAGRAN",
+    "name": "Jagran Prakashan",
+    "company_id": "1567",
+    "fundamentals": {
+     "Current Price": 64.34,
+     "Price to Earning": 7.43,
+     "Market Capitalization": 1400.39,
+     "Dividend yield": 10.88,
+     "Net Profit latest quarter": 61.23,
+     "YOY Quarterly profit growth": -12.49,
+     "Sales latest quarter": 499.35,
+     "YOY Quarterly sales growth": 8.54,
+     "Return on capital employed": 12.15
+    }
+   },
+   {
+    "symbol": "ACCELYA",
+    "name": "Accelya Solution",
+    "company_id": "1688",
+    "fundamentals": {
+     "Current Price": 937.7,
+     "Price to Earning": 13.97,
+     "Market Capitalization": 1399.64,
+     "Dividend yield": 8.53,
+     "Net Profit latest quarter": 28.85,
+     "YOY Quarterly profit growth": -2.57,
+     "Sales latest quarter": 137.65,
+     "YOY Quarterly sales growth": 1.06,
+     "Return on capital employed": 48.99
+    }
+   },
+   {
+    "symbol": "SKYWAYS",
+    "name": "Skyways Air Ser.",
+    "company_id": "1285924",
+    "fundamentals": {
+     "Current Price": 96.15,
+     "Price to Earning": 26.17,
+     "Market Capitalization": 1397.48,
+     "Dividend yield": 0.68,
+     "Net Profit latest quarter": 26.79,
+     "YOY Quarterly profit growth": 190.12,
+     "Sales latest quarter": 1216.53,
+     "YOY Quarterly sales growth": 90.38,
+     "Return on capital employed": 13.22
+    }
+   },
+   {
+    "symbol": "539724",
+    "name": "Hypersoft Tech.",
+    "company_id": "1273275",
+    "fundamentals": {
+     "Current Price": 165.4,
+     "Price to Earning": 73.4,
+     "Market Capitalization": 1396.83,
+     "Dividend yield": 0.15,
+     "Net Profit latest quarter": 8.01,
+     "YOY Quarterly profit growth": 232.37,
+     "Sales latest quarter": 82.29,
+     "YOY Quarterly sales growth": 395.42,
+     "Return on capital employed": 4.83
+    }
+   },
+   {
+    "symbol": "MOL",
+    "name": "Meghmani Organi.",
+    "company_id": "1274917",
+    "fundamentals": {
+     "Current Price": 54.68,
+     "Price to Earning": 21.65,
+     "Market Capitalization": 1390.59,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 48.19,
+     "YOY Quarterly profit growth": 280.05,
+     "Sales latest quarter": 542.83,
+     "YOY Quarterly sales growth": -11.54,
+     "Return on capital employed": 6.71
+    }
+   },
+   {
+    "symbol": "PNBGILTS",
+    "name": "PNB Gilts",
+    "company_id": "2497",
+    "fundamentals": {
+     "Current Price": 77.17,
+     "Price to Earning": 7.25,
+     "Market Capitalization": 1389.14,
+     "Dividend yield": 2.59,
+     "Net Profit latest quarter": 44.84,
+     "YOY Quarterly profit growth": 197.88,
+     "Sales latest quarter": 436.32,
+     "YOY Quarterly sales growth": -1.6,
+     "Return on capital employed": 6.15
+    }
+   },
+   {
+    "symbol": "DOLLAR",
+    "name": "Dollar Industrie",
+    "company_id": "1274061",
+    "fundamentals": {
+     "Current Price": 244.52,
+     "Price to Earning": 12.54,
+     "Market Capitalization": 1386.82,
+     "Dividend yield": 1.23,
+     "Net Profit latest quarter": 24.46,
+     "YOY Quarterly profit growth": 24.67,
+     "Sales latest quarter": 389.07,
+     "YOY Quarterly sales growth": 1.36,
+     "Return on capital employed": 13.64
+    }
+   },
+   {
+    "symbol": "VIKRAN",
+    "name": "Vikran Engg.",
+    "company_id": "1285612",
+    "fundamentals": {
+     "Current Price": 53.7,
+     "Price to Earning": 15.24,
+     "Market Capitalization": 1384.98,
+     "Dividend yield": 0.34,
+     "Net Profit latest quarter": 3.99,
+     "YOY Quarterly profit growth": -29.38,
+     "Sales latest quarter": 141.59,
+     "YOY Quarterly sales growth": -11.04,
+     "Return on capital employed": 16.85
+    }
+   },
+   {
+    "symbol": "HINDWAREAP",
+    "name": "Hindware Home In",
+    "company_id": "1274717",
+    "fundamentals": {
+     "Current Price": 165.19,
+     "Price to Earning": null,
+     "Market Capitalization": 1381.75,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 4.37,
+     "YOY Quarterly profit growth": -78.72,
+     "Sales latest quarter": 625.25,
+     "YOY Quarterly sales growth": 17.71,
+     "Return on capital employed": 7.07
+    }
+   },
+   {
+    "symbol": "ASIANTILES",
+    "name": "Asian Granito",
+    "company_id": "290",
+    "fundamentals": {
+     "Current Price": 46.5,
+     "Price to Earning": 105.88,
+     "Market Capitalization": 1378.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 8.07,
+     "YOY Quarterly profit growth": 8.84,
+     "Sales latest quarter": 530.95,
+     "YOY Quarterly sales growth": 36.76,
+     "Return on capital employed": 2.85
+    }
+   },
+   {
+    "symbol": "GALAPREC",
+    "name": "Gala Precis. Eng",
+    "company_id": "1284954",
+    "fundamentals": {
+     "Current Price": 1072.5,
+     "Price to Earning": 36.12,
+     "Market Capitalization": 1374.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 8.19,
+     "YOY Quarterly profit growth": 26.4,
+     "Sales latest quarter": 75.38,
+     "YOY Quarterly sales growth": 19.5,
+     "Return on capital employed": 15.6
+    }
+   },
+   {
+    "symbol": "AEROENTER",
+    "name": "Aeroflex Enter.",
+    "company_id": "2906",
+    "fundamentals": {
+     "Current Price": 121.09,
+     "Price to Earning": 9.02,
+     "Market Capitalization": 1370.31,
+     "Dividend yield": 0.33,
+     "Net Profit latest quarter": 103.22,
+     "YOY Quarterly profit growth": 854.16,
+     "Sales latest quarter": 189.0,
+     "YOY Quarterly sales growth": 40.54,
+     "Return on capital employed": 12.63
+    }
+   },
+   {
+    "symbol": "INVPRECQ",
+    "name": "Inv.& Prec.Cast.",
+    "company_id": "1533",
+    "fundamentals": {
+     "Current Price": 1365.5,
+     "Price to Earning": 91.46,
+     "Market Capitalization": 1365.5,
+     "Dividend yield": 0.07,
+     "Net Profit latest quarter": 4.99,
+     "YOY Quarterly profit growth": 129.95,
+     "Sales latest quarter": 53.38,
+     "YOY Quarterly sales growth": 21.07,
+     "Return on capital employed": 14.39
+    }
+   },
+   {
+    "symbol": "UDS",
+    "name": "Updater Services",
+    "company_id": "1284513",
+    "fundamentals": {
+     "Current Price": 203.68,
+     "Price to Earning": 13.16,
+     "Market Capitalization": 1363.7,
+     "Dividend yield": 0.49,
+     "Net Profit latest quarter": 32.13,
+     "YOY Quarterly profit growth": 62.24,
+     "Sales latest quarter": 812.24,
+     "YOY Quarterly sales growth": 11.37,
+     "Return on capital employed": 9.92
+    }
+   },
+   {
+    "symbol": "512014",
+    "name": "Sobhagya Mercant",
+    "company_id": "1268240",
+    "fundamentals": {
+     "Current Price": 1307.1,
+     "Price to Earning": 66.3,
+     "Market Capitalization": 1359.25,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 4.08,
+     "YOY Quarterly profit growth": -27.4,
+     "Sales latest quarter": 41.37,
+     "YOY Quarterly sales growth": -20.93,
+     "Return on capital employed": 23.44
+    }
+   },
+   {
+    "symbol": "506373",
+    "name": "Citurgia Biochem",
+    "company_id": "666",
+    "fundamentals": {
+     "Current Price": 102.45,
+     "Price to Earning": null,
+     "Market Capitalization": 1353.32,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.08,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "IPL",
+    "name": "India Pesticides",
+    "company_id": "1274881",
+    "fundamentals": {
+     "Current Price": 117.13,
+     "Price to Earning": 12.53,
+     "Market Capitalization": 1348.91,
+     "Dividend yield": 0.64,
+     "Net Profit latest quarter": 22.77,
+     "YOY Quarterly profit growth": -34.82,
+     "Sales latest quarter": 251.76,
+     "YOY Quarterly sales growth": -8.51,
+     "Return on capital employed": 16.63
+    }
+   },
+   {
+    "symbol": "TAALTECH",
+    "name": "TAAL Tech",
+    "company_id": "1273408",
+    "fundamentals": {
+     "Current Price": 864.0,
+     "Price to Earning": 21.65,
+     "Market Capitalization": 1346.26,
+     "Dividend yield": 1.5,
+     "Net Profit latest quarter": 19.43,
+     "YOY Quarterly profit growth": 41.72,
+     "Sales latest quarter": 64.81,
+     "YOY Quarterly sales growth": 41.6,
+     "Return on capital employed": 27.48
+    }
+   },
+   {
+    "symbol": "GTLINFRA",
+    "name": "GTL Infra.",
+    "company_id": "1219",
+    "fundamentals": {
+     "Current Price": 1.05,
+     "Price to Earning": null,
+     "Market Capitalization": 1344.99,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 69.39,
+     "YOY Quarterly profit growth": 129.86,
+     "Sales latest quarter": 327.31,
+     "YOY Quarterly sales growth": -2.16,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "544150",
+    "name": "KP Green Engg.",
+    "company_id": "1284721",
+    "fundamentals": {
+     "Current Price": 268.25,
+     "Price to Earning": 10.0,
+     "Market Capitalization": 1341.25,
+     "Dividend yield": 0.21,
+     "Net Profit latest quarter": 77.44,
+     "YOY Quarterly profit growth": 66.47,
+     "Sales latest quarter": 713.5,
+     "YOY Quarterly sales growth": 65.06,
+     "Return on capital employed": 36.43
+    }
+   },
+   {
+    "symbol": "CLSEL",
+    "name": "Chamanlal Setia",
+    "company_id": "619",
+    "fundamentals": {
+     "Current Price": 267.9,
+     "Price to Earning": 10.65,
+     "Market Capitalization": 1332.15,
+     "Dividend yield": 1.12,
+     "Net Profit latest quarter": 31.99,
+     "YOY Quarterly profit growth": 47.83,
+     "Sales latest quarter": 345.92,
+     "YOY Quarterly sales growth": 12.58,
+     "Return on capital employed": 18.18
+    }
+   },
+   {
+    "symbol": "GARUDA",
+    "name": "Garuda Cons",
+    "company_id": "1285112",
+    "fundamentals": {
+     "Current Price": 143.03,
+     "Price to Earning": 9.78,
+     "Market Capitalization": 1330.78,
+     "Dividend yield": 0.02,
+     "Net Profit latest quarter": 41.56,
+     "YOY Quarterly profit growth": 48.38,
+     "Sales latest quarter": 175.38,
+     "YOY Quarterly sales growth": 40.12,
+     "Return on capital employed": 42.4
+    }
+   },
+   {
+    "symbol": "BENARAS",
+    "name": "Benares Hotels",
+    "company_id": "424",
+    "fundamentals": {
+     "Current Price": 10212.0,
+     "Price to Earning": 29.84,
+     "Market Capitalization": 1327.56,
+     "Dividend yield": 0.24,
+     "Net Profit latest quarter": 6.56,
+     "YOY Quarterly profit growth": 7.89,
+     "Sales latest quarter": 31.52,
+     "YOY Quarterly sales growth": 31.88,
+     "Return on capital employed": 29.83
+    }
+   },
+   {
+    "symbol": "BPLPHARMA",
+    "name": "Bharat Parenter.",
+    "company_id": "1268337",
+    "fundamentals": {
+     "Current Price": 1924.0,
+     "Price to Earning": 1069.36,
+     "Market Capitalization": 1326.01,
+     "Dividend yield": 0.05,
+     "Net Profit latest quarter": 11.82,
+     "YOY Quarterly profit growth": 230.11,
+     "Sales latest quarter": 136.28,
+     "YOY Quarterly sales growth": 110.89,
+     "Return on capital employed": -1.87
+    }
+   },
+   {
+    "symbol": "UTTAMSUGAR",
+    "name": "Uttam Sug.Mills",
+    "company_id": "3579",
+    "fundamentals": {
+     "Current Price": 347.15,
+     "Price to Earning": 15.16,
+     "Market Capitalization": 1323.96,
+     "Dividend yield": 0.72,
+     "Net Profit latest quarter": 4.21,
+     "YOY Quarterly profit growth": 184.46,
+     "Sales latest quarter": 453.49,
+     "YOY Quarterly sales growth": -18.99,
+     "Return on capital employed": 11.63
+    }
+   },
+   {
+    "symbol": "PRIZOR",
+    "name": "Prizor Viztech",
+    "company_id": "1284848",
+    "fundamentals": {
+     "Current Price": 1216.2,
+     "Price to Earning": 43.51,
+     "Market Capitalization": 1313.03,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 15.34,
+     "YOY Quarterly profit growth": 159.56,
+     "Sales latest quarter": 106.5,
+     "YOY Quarterly sales growth": 153.51,
+     "Return on capital employed": 38.25
+    }
+   },
+   {
+    "symbol": "AHCL",
+    "name": "Anlon Healthcare",
+    "company_id": "1285622",
+    "fundamentals": {
+     "Current Price": 24.69,
+     "Price to Earning": 36.78,
+     "Market Capitalization": 1312.31,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 17.18,
+     "YOY Quarterly profit growth": 43.45,
+     "Sales latest quarter": 105.61,
+     "YOY Quarterly sales growth": 102.32,
+     "Return on capital employed": 20.77
+    }
+   },
+   {
+    "symbol": "SHANKESH",
+    "name": "Shankesh Jewellers",
+    "company_id": "1286108",
+    "fundamentals": {
+     "Current Price": 89.25,
+     "Price to Earning": 12.3,
+     "Market Capitalization": 1312.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": null,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": null,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 50.26
+    }
+   },
+   {
+    "symbol": "INDOBORAX",
+    "name": "Indo Borax & Ch.",
+    "company_id": "1458",
+    "fundamentals": {
+     "Current Price": 405.5,
+     "Price to Earning": 26.58,
+     "Market Capitalization": 1301.25,
+     "Dividend yield": 2.47,
+     "Net Profit latest quarter": 16.25,
+     "YOY Quarterly profit growth": 59.31,
+     "Sales latest quarter": 70.36,
+     "YOY Quarterly sales growth": 31.34,
+     "Return on capital employed": 15.37
+    }
+   },
+   {
+    "symbol": "SHALBY",
+    "name": "Shalby",
+    "company_id": "1274219",
+    "fundamentals": {
+     "Current Price": 120.41,
+     "Price to Earning": 33.07,
+     "Market Capitalization": 1300.55,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 10.5,
+     "YOY Quarterly profit growth": 21.64,
+     "Sales latest quarter": 331.22,
+     "YOY Quarterly sales growth": 11.74,
+     "Return on capital employed": 6.12
+    }
+   },
+   {
+    "symbol": "IKIO",
+    "name": "IKIO Tech",
+    "company_id": "1284374",
+    "fundamentals": {
+     "Current Price": 168.0,
+     "Price to Earning": 27.92,
+     "Market Capitalization": 1298.32,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.05,
+     "YOY Quarterly profit growth": 408.96,
+     "Sales latest quarter": 169.29,
+     "YOY Quarterly sales growth": 40.91,
+     "Return on capital employed": 9.49
+    }
+   },
+   {
+    "symbol": "LGHL",
+    "name": "Laxmi Goldorna",
+    "company_id": "1274746",
+    "fundamentals": {
+     "Current Price": 258.97,
+     "Price to Earning": 800.77,
+     "Market Capitalization": 1297.25,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.17,
+     "YOY Quarterly profit growth": -41.44,
+     "Sales latest quarter": 37.44,
+     "YOY Quarterly sales growth": 30.73,
+     "Return on capital employed": 10.08
+    }
+   },
+   {
+    "symbol": "ASIANHOTNR",
+    "name": "Asian Hotels (N)",
+    "company_id": "292",
+    "fundamentals": {
+     "Current Price": 303.45,
+     "Price to Earning": 96.33,
+     "Market Capitalization": 1293.71,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -3.54,
+     "YOY Quarterly profit growth": 73.87,
+     "Sales latest quarter": 77.63,
+     "YOY Quarterly sales growth": 10.44,
+     "Return on capital employed": 3.4
+    }
+   },
+   {
+    "symbol": "TTKHLTCARE",
+    "name": "TTK Healthcare",
+    "company_id": "3487",
+    "fundamentals": {
+     "Current Price": 914.25,
+     "Price to Earning": 17.79,
+     "Market Capitalization": 1291.87,
+     "Dividend yield": 1.09,
+     "Net Profit latest quarter": 222.97,
+     "YOY Quarterly profit growth": -19.47,
+     "Sales latest quarter": 233.38,
+     "YOY Quarterly sales growth": 14.64,
+     "Return on capital employed": 8.04
+    }
+   },
+   {
+    "symbol": "GKSL",
+    "name": "Gujarat Kidney",
+    "company_id": "1285833",
+    "fundamentals": {
+     "Current Price": 163.59,
+     "Price to Earning": 81.48,
+     "Market Capitalization": 1289.8,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.32,
+     "YOY Quarterly profit growth": 7.02,
+     "Sales latest quarter": 34.29,
+     "YOY Quarterly sales growth": 124.71,
+     "Return on capital employed": 14.48
+    }
+   },
+   {
+    "symbol": "CAPACITE",
+    "name": "Capacit'e Infra.",
+    "company_id": "1274144",
+    "fundamentals": {
+     "Current Price": 152.18,
+     "Price to Earning": 6.95,
+     "Market Capitalization": 1287.5,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 39.84,
+     "YOY Quarterly profit growth": -13.68,
+     "Sales latest quarter": 628.93,
+     "YOY Quarterly sales growth": 6.71,
+     "Return on capital employed": 15.48
+    }
+   },
+   {
+    "symbol": "SESHAPAPER",
+    "name": "Seshasayee Paper",
+    "company_id": "2945",
+    "fundamentals": {
+     "Current Price": 203.63,
+     "Price to Earning": 10.8,
+     "Market Capitalization": 1284.26,
+     "Dividend yield": 0.98,
+     "Net Profit latest quarter": 42.31,
+     "YOY Quarterly profit growth": 88.8,
+     "Sales latest quarter": 503.06,
+     "YOY Quarterly sales growth": 45.26,
+     "Return on capital employed": 5.6
+    }
+   },
+   {
+    "symbol": "ANDHRAPAP",
+    "name": "Andhra Paper",
+    "company_id": "187",
+    "fundamentals": {
+     "Current Price": 64.58,
+     "Price to Earning": 24.62,
+     "Market Capitalization": 1284.17,
+     "Dividend yield": 0.77,
+     "Net Profit latest quarter": 4.27,
+     "YOY Quarterly profit growth": 121.08,
+     "Sales latest quarter": 426.07,
+     "YOY Quarterly sales growth": 17.67,
+     "Return on capital employed": 0.04
+    }
+   },
+   {
+    "symbol": "IMPAL",
+    "name": "India Motor Part",
+    "company_id": "1427",
+    "fundamentals": {
+     "Current Price": 1025.6,
+     "Price to Earning": 12.8,
+     "Market Capitalization": 1279.95,
+     "Dividend yield": 3.22,
+     "Net Profit latest quarter": 27.67,
+     "YOY Quarterly profit growth": 8.51,
+     "Sales latest quarter": 221.7,
+     "YOY Quarterly sales growth": 11.57,
+     "Return on capital employed": 4.53
+    }
+   },
+   {
+    "symbol": "ALLTIME",
+    "name": "All Time Plastic",
+    "company_id": "1285591",
+    "fundamentals": {
+     "Current Price": 195.31,
+     "Price to Earning": 33.59,
+     "Market Capitalization": 1279.43,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 12.1,
+     "YOY Quarterly profit growth": -5.62,
+     "Sales latest quarter": 161.06,
+     "YOY Quarterly sales growth": 1.95,
+     "Return on capital employed": 11.57
+    }
+   },
+   {
+    "symbol": "GYFTR",
+    "name": "GYFTR",
+    "company_id": "1899",
+    "fundamentals": {
+     "Current Price": 166.51,
+     "Price to Earning": 62.91,
+     "Market Capitalization": 1278.93,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.28,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 158.19,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 6.08
+    }
+   },
+   {
+    "symbol": "GOCOLORS",
+    "name": "Go Fashion (I)",
+    "company_id": "1275106",
+    "fundamentals": {
+     "Current Price": 243.02,
+     "Price to Earning": 31.5,
+     "Market Capitalization": 1278.19,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 8.97,
+     "YOY Quarterly profit growth": -58.85,
+     "Sales latest quarter": 217.59,
+     "YOY Quarterly sales growth": -2.94,
+     "Return on capital employed": 10.76
+    }
+   },
+   {
+    "symbol": "DCW",
+    "name": "DCW",
+    "company_id": "775",
+    "fundamentals": {
+     "Current Price": 43.29,
+     "Price to Earning": 18.82,
+     "Market Capitalization": 1277.73,
+     "Dividend yield": 0.69,
+     "Net Profit latest quarter": 10.36,
+     "YOY Quarterly profit growth": -24.98,
+     "Sales latest quarter": 662.86,
+     "YOY Quarterly sales growth": 22.93,
+     "Return on capital employed": 9.89
+    }
+   },
+   {
+    "symbol": "CEINSYS",
+    "name": "Ceinsys Tech",
+    "company_id": "1085308",
+    "fundamentals": {
+     "Current Price": 607.2,
+     "Price to Earning": 9.5,
+     "Market Capitalization": 1271.33,
+     "Dividend yield": 0.58,
+     "Net Profit latest quarter": 30.95,
+     "YOY Quarterly profit growth": -2.18,
+     "Sales latest quarter": 157.79,
+     "YOY Quarterly sales growth": 0.76,
+     "Return on capital employed": 27.69
+    }
+   },
+   {
+    "symbol": "WALCHANNAG",
+    "name": "Walchan. Inds.",
+    "company_id": "3723",
+    "fundamentals": {
+     "Current Price": 186.78,
+     "Price to Earning": null,
+     "Market Capitalization": 1270.23,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.18,
+     "YOY Quarterly profit growth": 111.36,
+     "Sales latest quarter": 90.83,
+     "YOY Quarterly sales growth": 83.75,
+     "Return on capital employed": 4.17
+    }
+   },
+   {
+    "symbol": "EXPLEOSOL",
+    "name": "Expleo Solutions",
+    "company_id": "3413",
+    "fundamentals": {
+     "Current Price": 816.05,
+     "Price to Earning": 8.63,
+     "Market Capitalization": 1266.49,
+     "Dividend yield": 13.48,
+     "Net Profit latest quarter": 34.18,
+     "YOY Quarterly profit growth": 67.3,
+     "Sales latest quarter": 291.55,
+     "YOY Quarterly sales growth": 12.29,
+     "Return on capital employed": 24.25
+    }
+   },
+   {
+    "symbol": "STEELXIND",
+    "name": "Steel Exchange",
+    "company_id": "3194",
+    "fundamentals": {
+     "Current Price": 9.9,
+     "Price to Earning": 39.72,
+     "Market Capitalization": 1262.76,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 15.03,
+     "YOY Quarterly profit growth": 46.92,
+     "Sales latest quarter": 269.71,
+     "YOY Quarterly sales growth": -10.1,
+     "Return on capital employed": 9.34
+    }
+   },
+   {
+    "symbol": "HMAAGRO",
+    "name": "HMA Agro Inds.",
+    "company_id": "1284380",
+    "fundamentals": {
+     "Current Price": 25.16,
+     "Price to Earning": 5.87,
+     "Market Capitalization": 1259.94,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 50.51,
+     "YOY Quarterly profit growth": 6158.02,
+     "Sales latest quarter": 2110.32,
+     "YOY Quarterly sales growth": 87.98,
+     "Return on capital employed": 16.19
+    }
+   },
+   {
+    "symbol": "ALLDIGI",
+    "name": "Alldigi Tech",
+    "company_id": "138",
+    "fundamentals": {
+     "Current Price": 825.6,
+     "Price to Earning": 12.44,
+     "Market Capitalization": 1258.08,
+     "Dividend yield": 7.27,
+     "Net Profit latest quarter": 26.58,
+     "YOY Quarterly profit growth": 50.85,
+     "Sales latest quarter": 153.31,
+     "YOY Quarterly sales growth": 4.0,
+     "Return on capital employed": 27.89
+    }
+   },
+   {
+    "symbol": "516038",
+    "name": "KS Smart Technlogies",
+    "company_id": "214589",
+    "fundamentals": {
+     "Current Price": 76.47,
+     "Price to Earning": 16.89,
+     "Market Capitalization": 1254.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 3.8,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 233.43,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 36.75
+    }
+   },
+   {
+    "symbol": "BHARATSE",
+    "name": "Bharat Seats",
+    "company_id": "464",
+    "fundamentals": {
+     "Current Price": 199.04,
+     "Price to Earning": 23.78,
+     "Market Capitalization": 1249.97,
+     "Dividend yield": 0.75,
+     "Net Profit latest quarter": 15.2,
+     "YOY Quarterly profit growth": 53.54,
+     "Sales latest quarter": 709.22,
+     "YOY Quarterly sales growth": 54.65,
+     "Return on capital employed": 20.19
+    }
+   },
+   {
+    "symbol": "NELCAST",
+    "name": "Nelcast",
+    "company_id": "2230",
+    "fundamentals": {
+     "Current Price": 143.65,
+     "Price to Earning": 23.8,
+     "Market Capitalization": 1249.77,
+     "Dividend yield": 0.49,
+     "Net Profit latest quarter": 16.2,
+     "YOY Quarterly profit growth": 240.34,
+     "Sales latest quarter": 405.95,
+     "YOY Quarterly sales growth": 35.89,
+     "Return on capital employed": 11.43
+    }
+   },
+   {
+    "symbol": "CAPITALSFB",
+    "name": "Capital Small",
+    "company_id": "1284667",
+    "fundamentals": {
+     "Current Price": 272.35,
+     "Price to Earning": 7.68,
+     "Market Capitalization": 1238.95,
+     "Dividend yield": 1.84,
+     "Net Profit latest quarter": 45.61,
+     "YOY Quarterly profit growth": 30.73,
+     "Sales latest quarter": 300.82,
+     "YOY Quarterly sales growth": 17.3,
+     "Return on capital employed": 7.07
+    }
+   },
+   {
+    "symbol": "DSSL",
+    "name": "Dynacons Sys.",
+    "company_id": "864",
+    "fundamentals": {
+     "Current Price": 972.45,
+     "Price to Earning": 14.62,
+     "Market Capitalization": 1238.62,
+     "Dividend yield": 0.05,
+     "Net Profit latest quarter": 19.56,
+     "YOY Quarterly profit growth": -0.25,
+     "Sales latest quarter": 311.19,
+     "YOY Quarterly sales growth": -5.32,
+     "Return on capital employed": 29.73
+    }
+   },
+   {
+    "symbol": "MANALIPETC",
+    "name": "Manali Petrochem",
+    "company_id": "1988",
+    "fundamentals": {
+     "Current Price": 71.99,
+     "Price to Earning": 10.42,
+     "Market Capitalization": 1238.22,
+     "Dividend yield": 0.69,
+     "Net Profit latest quarter": 64.36,
+     "YOY Quarterly profit growth": 348.81,
+     "Sales latest quarter": 274.72,
+     "YOY Quarterly sales growth": 17.07,
+     "Return on capital employed": 7.25
+    }
+   },
+   {
+    "symbol": "EIMCOELECO",
+    "name": "Eimco Elecon(I)",
+    "company_id": "892",
+    "fundamentals": {
+     "Current Price": 2145.2,
+     "Price to Earning": 29.41,
+     "Market Capitalization": 1237.78,
+     "Dividend yield": 0.19,
+     "Net Profit latest quarter": 7.83,
+     "YOY Quarterly profit growth": 46.36,
+     "Sales latest quarter": 56.8,
+     "YOY Quarterly sales growth": 70.88,
+     "Return on capital employed": 10.29
+    }
+   },
+   {
+    "symbol": "FERMENTA",
+    "name": "Fermenta Biotec.",
+    "company_id": "831",
+    "fundamentals": {
+     "Current Price": 420.45,
+     "Price to Earning": 22.61,
+     "Market Capitalization": 1237.43,
+     "Dividend yield": 0.89,
+     "Net Profit latest quarter": 9.53,
+     "YOY Quarterly profit growth": -55.38,
+     "Sales latest quarter": 121.82,
+     "YOY Quarterly sales growth": -10.6,
+     "Return on capital employed": 20.57
+    }
+   },
+   {
+    "symbol": "DHANBANK",
+    "name": "Dhanlaxmi Bank",
+    "company_id": "806",
+    "fundamentals": {
+     "Current Price": 31.24,
+     "Price to Earning": 8.76,
+     "Market Capitalization": 1233.04,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 48.55,
+     "YOY Quarterly profit growth": 109.27,
+     "Sales latest quarter": 471.15,
+     "YOY Quarterly sales growth": 22.82,
+     "Return on capital employed": 5.81
+    }
+   },
+   {
+    "symbol": "SUNSHINE",
+    "name": "Sunshine Picture",
+    "company_id": "1286106",
+    "fundamentals": {
+     "Current Price": 395.45,
+     "Price to Earning": 30.11,
+     "Market Capitalization": 1231.78,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.25,
+     "YOY Quarterly profit growth": 123.15,
+     "Sales latest quarter": 6.48,
+     "YOY Quarterly sales growth": 16100.0,
+     "Return on capital employed": 40.96
+    }
+   },
+   {
+    "symbol": "UNITEDPOLY",
+    "name": "United Polyfab",
+    "company_id": "1273372",
+    "fundamentals": {
+     "Current Price": 53.27,
+     "Price to Earning": 39.55,
+     "Market Capitalization": 1222.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.15,
+     "YOY Quarterly profit growth": 46.71,
+     "Sales latest quarter": 182.8,
+     "YOY Quarterly sales growth": -1.31,
+     "Return on capital employed": 17.75
+    }
+   },
+   {
+    "symbol": "ASTEC",
+    "name": "Astec Lifescienc",
+    "company_id": "306",
+    "fundamentals": {
+     "Current Price": 548.55,
+     "Price to Earning": null,
+     "Market Capitalization": 1222.32,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -37.4,
+     "YOY Quarterly profit growth": -53.13,
+     "Sales latest quarter": 72.02,
+     "YOY Quarterly sales growth": -2.31,
+     "Return on capital employed": -5.44
+    }
+   },
+   {
+    "symbol": "537392",
+    "name": "Keto Motors",
+    "company_id": "260",
+    "fundamentals": {
+     "Current Price": 173.5,
+     "Price to Earning": 4700.15,
+     "Market Capitalization": 1222.04,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.44,
+     "YOY Quarterly profit growth": 4500.0,
+     "Sales latest quarter": 6.34,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -0.3
+    }
+   },
+   {
+    "symbol": "ETL",
+    "name": "Emkay Tools",
+    "company_id": "1285539",
+    "fundamentals": {
+     "Current Price": 1140.0,
+     "Price to Earning": 21.08,
+     "Market Capitalization": 1216.53,
+     "Dividend yield": 0.26,
+     "Net Profit latest quarter": 34.36,
+     "YOY Quarterly profit growth": 39.96,
+     "Sales latest quarter": 82.48,
+     "YOY Quarterly sales growth": 31.74,
+     "Return on capital employed": 69.8
+    }
+   },
+   {
+    "symbol": "530477",
+    "name": "Vikram Thermo",
+    "company_id": "3659",
+    "fundamentals": {
+     "Current Price": 387.35,
+     "Price to Earning": 27.71,
+     "Market Capitalization": 1214.65,
+     "Dividend yield": 0.32,
+     "Net Profit latest quarter": 13.28,
+     "YOY Quarterly profit growth": 67.25,
+     "Sales latest quarter": 37.87,
+     "YOY Quarterly sales growth": 32.41,
+     "Return on capital employed": 36.19
+    }
+   },
+   {
+    "symbol": "SIGNPOST",
+    "name": "Signpost India",
+    "company_id": "1284684",
+    "fundamentals": {
+     "Current Price": 226.53,
+     "Price to Earning": 16.49,
+     "Market Capitalization": 1210.8,
+     "Dividend yield": 0.22,
+     "Net Profit latest quarter": 18.69,
+     "YOY Quarterly profit growth": 22.32,
+     "Sales latest quarter": 152.26,
+     "YOY Quarterly sales growth": 10.61,
+     "Return on capital employed": 25.13
+    }
+   },
+   {
+    "symbol": "VALIANTORG",
+    "name": "Valiant Organics",
+    "company_id": "1273533",
+    "fundamentals": {
+     "Current Price": 430.85,
+     "Price to Earning": 23.9,
+     "Market Capitalization": 1207.87,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 29.26,
+     "YOY Quarterly profit growth": 254.27,
+     "Sales latest quarter": 231.54,
+     "YOY Quarterly sales growth": 13.27,
+     "Return on capital employed": 5.47
+    }
+   },
+   {
+    "symbol": "PLATIND",
+    "name": "Platinum Industr",
+    "company_id": "1284697",
+    "fundamentals": {
+     "Current Price": 219.84,
+     "Price to Earning": 23.79,
+     "Market Capitalization": 1207.47,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.13,
+     "YOY Quarterly profit growth": -12.42,
+     "Sales latest quarter": 108.94,
+     "YOY Quarterly sales growth": -5.58,
+     "Return on capital employed": 15.79
+    }
+   },
+   {
+    "symbol": "NRAIL",
+    "name": "N R Agarwal Inds",
+    "company_id": "2179",
+    "fundamentals": {
+     "Current Price": 708.2,
+     "Price to Earning": 18.26,
+     "Market Capitalization": 1205.29,
+     "Dividend yield": 0.28,
+     "Net Profit latest quarter": 34.98,
+     "YOY Quarterly profit growth": 111.36,
+     "Sales latest quarter": 646.96,
+     "YOY Quarterly sales growth": 43.09,
+     "Return on capital employed": 8.49
+    }
+   },
+   {
+    "symbol": "543787",
+    "name": "Macfos",
+    "company_id": "1284303",
+    "fundamentals": {
+     "Current Price": 1159.65,
+     "Price to Earning": 41.74,
+     "Market Capitalization": 1201.22,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 7.36,
+     "YOY Quarterly profit growth": 44.88,
+     "Sales latest quarter": 98.73,
+     "YOY Quarterly sales growth": 44.17,
+     "Return on capital employed": 33.76
+    }
+   },
+   {
+    "symbol": "IFGLEXPOR",
+    "name": "IFGL Refractori.",
+    "company_id": "1274196",
+    "fundamentals": {
+     "Current Price": 166.01,
+     "Price to Earning": 27.93,
+     "Market Capitalization": 1196.58,
+     "Dividend yield": 1.3,
+     "Net Profit latest quarter": 17.06,
+     "YOY Quarterly profit growth": 57.82,
+     "Sales latest quarter": 512.37,
+     "YOY Quarterly sales growth": 12.85,
+     "Return on capital employed": 4.92
+    }
+   },
+   {
+    "symbol": "ONIXSOLAR",
+    "name": "Onix Solar",
+    "company_id": "30",
+    "fundamentals": {
+     "Current Price": 323.6,
+     "Price to Earning": 35.39,
+     "Market Capitalization": 1193.05,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.49,
+     "YOY Quarterly profit growth": 301.35,
+     "Sales latest quarter": 32.42,
+     "YOY Quarterly sales growth": -25.25,
+     "Return on capital employed": 11.34
+    }
+   },
+   {
+    "symbol": "530927",
+    "name": "Haryana Fin. Co.",
+    "company_id": "1282",
+    "fundamentals": {
+     "Current Price": 57.25,
+     "Price to Earning": 156.22,
+     "Market Capitalization": 1188.84,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.4,
+     "YOY Quarterly profit growth": -42.86,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 3.74
+    }
+   },
+   {
+    "symbol": "TGVSL",
+    "name": "TGV Sraac",
+    "company_id": "3159",
+    "fundamentals": {
+     "Current Price": 110.54,
+     "Price to Earning": 8.53,
+     "Market Capitalization": 1183.77,
+     "Dividend yield": 0.9,
+     "Net Profit latest quarter": 45.42,
+     "YOY Quarterly profit growth": 17.2,
+     "Sales latest quarter": 543.08,
+     "YOY Quarterly sales growth": 10.62,
+     "Return on capital employed": 12.96
+    }
+   },
+   {
+    "symbol": "DEN",
+    "name": "Den Networks",
+    "company_id": "792",
+    "fundamentals": {
+     "Current Price": 24.77,
+     "Price to Earning": 7.9,
+     "Market Capitalization": 1182.08,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 36.77,
+     "YOY Quarterly profit growth": 3.67,
+     "Sales latest quarter": 232.56,
+     "YOY Quarterly sales growth": -3.67,
+     "Return on capital employed": 3.23
+    }
+   },
+   {
+    "symbol": "JYOTISTRUC",
+    "name": "Jyoti Structures",
+    "company_id": "1671",
+    "fundamentals": {
+     "Current Price": 9.88,
+     "Price to Earning": 18.33,
+     "Market Capitalization": 1179.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 19.46,
+     "YOY Quarterly profit growth": 74.37,
+     "Sales latest quarter": 251.46,
+     "YOY Quarterly sales growth": 61.0,
+     "Return on capital employed": 2.25
+    }
+   },
+   {
+    "symbol": "FEDDERSHOL",
+    "name": "Fedders Holding",
+    "company_id": "547",
+    "fundamentals": {
+     "Current Price": 58.51,
+     "Price to Earning": 15.44,
+     "Market Capitalization": 1178.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 10.82,
+     "YOY Quarterly profit growth": -22.2,
+     "Sales latest quarter": 68.88,
+     "YOY Quarterly sales growth": -11.01,
+     "Return on capital employed": 11.19
+    }
+   },
+   {
+    "symbol": "PVP",
+    "name": "PVP Ventures",
+    "company_id": "2603",
+    "fundamentals": {
+     "Current Price": 45.19,
+     "Price to Earning": 77.1,
+     "Market Capitalization": 1176.76,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.06,
+     "YOY Quarterly profit growth": 7513.79,
+     "Sales latest quarter": 45.64,
+     "YOY Quarterly sales growth": 165.19,
+     "Return on capital employed": 6.37
+    }
+   },
+   {
+    "symbol": "BLKASHYAP",
+    "name": "B.L.Kashyap",
+    "company_id": "354",
+    "fundamentals": {
+     "Current Price": 52.13,
+     "Price to Earning": 31.93,
+     "Market Capitalization": 1175.22,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 10.0,
+     "YOY Quarterly profit growth": -7.83,
+     "Sales latest quarter": 345.12,
+     "YOY Quarterly sales growth": 2.59,
+     "Return on capital employed": 12.64
+    }
+   },
+   {
+    "symbol": "QLINE",
+    "name": "Q-Line Biotech",
+    "company_id": "1285984",
+    "fundamentals": {
+     "Current Price": 503.0,
+     "Price to Earning": 20.72,
+     "Market Capitalization": 1173.41,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 34.41,
+     "YOY Quarterly profit growth": 147.29,
+     "Sales latest quarter": 197.94,
+     "YOY Quarterly sales growth": -8.59,
+     "Return on capital employed": 22.45
+    }
+   },
+   {
+    "symbol": "SPIC",
+    "name": "S P I C",
+    "company_id": "3136",
+    "fundamentals": {
+     "Current Price": 57.5,
+     "Price to Earning": 5.71,
+     "Market Capitalization": 1170.93,
+     "Dividend yield": 3.48,
+     "Net Profit latest quarter": 60.18,
+     "YOY Quarterly profit growth": -9.79,
+     "Sales latest quarter": 848.81,
+     "YOY Quarterly sales growth": 8.73,
+     "Return on capital employed": 16.77
+    }
+   },
+   {
+    "symbol": "KOPRAN",
+    "name": "Kopran",
+    "company_id": "1816",
+    "fundamentals": {
+     "Current Price": 242.21,
+     "Price to Earning": 46.84,
+     "Market Capitalization": 1170.51,
+     "Dividend yield": 1.24,
+     "Net Profit latest quarter": 6.7,
+     "YOY Quarterly profit growth": -10.07,
+     "Sales latest quarter": 153.99,
+     "YOY Quarterly sales growth": 13.88,
+     "Return on capital employed": 6.65
+    }
+   },
+   {
+    "symbol": "JINDALPHOT",
+    "name": "Jindal Photo",
+    "company_id": "1622",
+    "fundamentals": {
+     "Current Price": 1141.0,
+     "Price to Earning": null,
+     "Market Capitalization": 1170.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 13.08,
+     "YOY Quarterly profit growth": -75.03,
+     "Sales latest quarter": 7.97,
+     "YOY Quarterly sales growth": 1375.93,
+     "Return on capital employed": -1.38
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item"
+    ]
+   },
+   {
+    "symbol": "MWL",
+    "name": "Mangalam World.",
+    "company_id": "1275243",
+    "fundamentals": {
+     "Current Price": 39.33,
+     "Price to Earning": 21.18,
+     "Market Capitalization": 1168.13,
+     "Dividend yield": 0.08,
+     "Net Profit latest quarter": 13.81,
+     "YOY Quarterly profit growth": 31.02,
+     "Sales latest quarter": 360.4,
+     "YOY Quarterly sales growth": 13.65,
+     "Return on capital employed": 17.7
+    }
+   },
+   {
+    "symbol": "ICEMAKE",
+    "name": "ICE Make Refrig.",
+    "company_id": "1274213",
+    "fundamentals": {
+     "Current Price": 643.2,
+     "Price to Earning": 107.38,
+     "Market Capitalization": 1167.23,
+     "Dividend yield": 0.35,
+     "Net Profit latest quarter": -1.41,
+     "YOY Quarterly profit growth": -1.44,
+     "Sales latest quarter": 176.08,
+     "YOY Quarterly sales growth": 57.41,
+     "Return on capital employed": 10.77
+    }
+   },
+   {
+    "symbol": "SKMEGGPROD",
+    "name": "SKM Egg Prod.",
+    "company_id": "3097",
+    "fundamentals": {
+     "Current Price": 221.02,
+     "Price to Earning": 11.16,
+     "Market Capitalization": 1163.89,
+     "Dividend yield": 0.57,
+     "Net Profit latest quarter": 17.78,
+     "YOY Quarterly profit growth": -28.28,
+     "Sales latest quarter": 189.84,
+     "YOY Quarterly sales growth": -5.99,
+     "Return on capital employed": 30.7
+    }
+   },
+   {
+    "symbol": "AKCAPIT",
+    "name": "A.K.Capital Serv",
+    "company_id": "110",
+    "fundamentals": {
+     "Current Price": 1761.8,
+     "Price to Earning": 10.16,
+     "Market Capitalization": 1162.79,
+     "Dividend yield": 3.41,
+     "Net Profit latest quarter": 28.26,
+     "YOY Quarterly profit growth": 17.71,
+     "Sales latest quarter": 139.72,
+     "YOY Quarterly sales growth": 3.92,
+     "Return on capital employed": 9.33
+    }
+   },
+   {
+    "symbol": "SPICEJET",
+    "name": "SpiceJet",
+    "company_id": "3151",
+    "fundamentals": {
+     "Current Price": 7.61,
+     "Price to Earning": null,
+     "Market Capitalization": 1161.36,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -269.27,
+     "YOY Quarterly profit growth": -1104.04,
+     "Sales latest quarter": 1384.31,
+     "YOY Quarterly sales growth": 12.45,
+     "Return on capital employed": 9.1
+    }
+   },
+   {
+    "symbol": "NRL",
+    "name": "Nupur Recyclers",
+    "company_id": "1275125",
+    "fundamentals": {
+     "Current Price": 168.0,
+     "Price to Earning": 67.62,
+     "Market Capitalization": 1160.36,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 7.39,
+     "YOY Quarterly profit growth": 83.05,
+     "Sales latest quarter": 79.34,
+     "YOY Quarterly sales growth": 55.6,
+     "Return on capital employed": 15.12
+    }
+   },
+   {
+    "symbol": "IGARASHI",
+    "name": "Igarashi Motors",
+    "company_id": "1397",
+    "fundamentals": {
+     "Current Price": 368.4,
+     "Price to Earning": 70.7,
+     "Market Capitalization": 1159.54,
+     "Dividend yield": 0.35,
+     "Net Profit latest quarter": 6.77,
+     "YOY Quarterly profit growth": 169.72,
+     "Sales latest quarter": 250.87,
+     "YOY Quarterly sales growth": 22.55,
+     "Return on capital employed": 4.58
+    }
+   },
+   {
+    "symbol": "SPMLINFRA",
+    "name": "SPML Infra",
+    "company_id": "3154",
+    "fundamentals": {
+     "Current Price": 136.31,
+     "Price to Earning": 13.57,
+     "Market Capitalization": 1156.51,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 22.68,
+     "YOY Quarterly profit growth": 87.13,
+     "Sales latest quarter": 284.28,
+     "YOY Quarterly sales growth": 82.34,
+     "Return on capital employed": 6.47
+    }
+   },
+   {
+    "symbol": "539895",
+    "name": "Spice LoungeFood",
+    "company_id": "1273366",
+    "fundamentals": {
+     "Current Price": 16.53,
+     "Price to Earning": 73.49,
+     "Market Capitalization": 1152.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 4.81,
+     "YOY Quarterly profit growth": 507.63,
+     "Sales latest quarter": 40.14,
+     "YOY Quarterly sales growth": 24.31,
+     "Return on capital employed": 6.42
+    }
+   },
+   {
+    "symbol": "GENESYS",
+    "name": "Genesys Intl.",
+    "company_id": "1119",
+    "fundamentals": {
+     "Current Price": 172.33,
+     "Price to Earning": 33.11,
+     "Market Capitalization": 1152.28,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.28,
+     "YOY Quarterly profit growth": -25.14,
+     "Sales latest quarter": 81.36,
+     "YOY Quarterly sales growth": 14.8,
+     "Return on capital employed": 8.32
+    }
+   },
+   {
+    "symbol": "NAVKARCORP",
+    "name": "Navkar Corporat.",
+    "company_id": "1273002",
+    "fundamentals": {
+     "Current Price": 76.33,
+     "Price to Earning": 24.24,
+     "Market Capitalization": 1148.91,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.77,
+     "YOY Quarterly profit growth": 170.57,
+     "Sales latest quarter": 223.2,
+     "YOY Quarterly sales growth": 37.45,
+     "Return on capital employed": 3.06
+    }
+   },
+   {
+    "symbol": "ARIS",
+    "name": "Arisinfra Solu.",
+    "company_id": "1285242",
+    "fundamentals": {
+     "Current Price": 140.35,
+     "Price to Earning": 17.38,
+     "Market Capitalization": 1147.98,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 20.04,
+     "YOY Quarterly profit growth": 306.31,
+     "Sales latest quarter": 290.81,
+     "YOY Quarterly sales growth": 37.12,
+     "Return on capital employed": 15.57
+    }
+   },
+   {
+    "symbol": "MATRIMONY",
+    "name": "Matrimony.com",
+    "company_id": "1274140",
+    "fundamentals": {
+     "Current Price": 554.0,
+     "Price to Earning": 25.54,
+     "Market Capitalization": 1145.31,
+     "Dividend yield": 0.9,
+     "Net Profit latest quarter": 19.08,
+     "YOY Quarterly profit growth": 127.14,
+     "Sales latest quarter": 130.51,
+     "YOY Quarterly sales growth": 13.16,
+     "Return on capital employed": 17.41
+    }
+   },
+   {
+    "symbol": "MBECL",
+    "name": "McNally Bharat",
+    "company_id": "2045",
+    "fundamentals": {
+     "Current Price": 343.55,
+     "Price to Earning": null,
+     "Market Capitalization": 1145.17,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -25.27,
+     "YOY Quarterly profit growth": 95.62,
+     "Sales latest quarter": 15.05,
+     "YOY Quarterly sales growth": 0.87,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "BELDING",
+    "name": "Belding India",
+    "company_id": "3332",
+    "fundamentals": {
+     "Current Price": 789.15,
+     "Price to Earning": null,
+     "Market Capitalization": 1142.6,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -4.13,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.22,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.53
+    }
+   },
+   {
+    "symbol": "PUNJABCHEM",
+    "name": "Punjab Chemicals",
+    "company_id": "2598",
+    "fundamentals": {
+     "Current Price": 928.35,
+     "Price to Earning": 17.0,
+     "Market Capitalization": 1138.16,
+     "Dividend yield": 0.32,
+     "Net Profit latest quarter": 22.07,
+     "YOY Quarterly profit growth": 6.98,
+     "Sales latest quarter": 347.24,
+     "YOY Quarterly sales growth": 8.68,
+     "Return on capital employed": 18.55
+    }
+   },
+   {
+    "symbol": "BHARATWIRE",
+    "name": "Bharat Wire",
+    "company_id": "1273307",
+    "fundamentals": {
+     "Current Price": 165.24,
+     "Price to Earning": 16.45,
+     "Market Capitalization": 1136.57,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 12.23,
+     "YOY Quarterly profit growth": -21.65,
+     "Sales latest quarter": 130.39,
+     "YOY Quarterly sales growth": -7.95,
+     "Return on capital employed": 12.31
+    }
+   },
+   {
+    "symbol": "GHCLTEXTIL",
+    "name": "GHCL Textiles",
+    "company_id": "1284390",
+    "fundamentals": {
+     "Current Price": 118.89,
+     "Price to Earning": 11.81,
+     "Market Capitalization": 1136.42,
+     "Dividend yield": 0.5,
+     "Net Profit latest quarter": 39.35,
+     "YOY Quarterly profit growth": 191.05,
+     "Sales latest quarter": 408.94,
+     "YOY Quarterly sales growth": 52.73,
+     "Return on capital employed": 5.75
+    }
+   },
+   {
+    "symbol": "YATRA",
+    "name": "Yatra Online",
+    "company_id": "1284491",
+    "fundamentals": {
+     "Current Price": 72.24,
+     "Price to Earning": 32.93,
+     "Market Capitalization": 1133.56,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.34,
+     "YOY Quarterly profit growth": -97.88,
+     "Sales latest quarter": 187.9,
+     "YOY Quarterly sales growth": -10.44,
+     "Return on capital employed": 7.23
+    }
+   },
+   {
+    "symbol": "ANDREWYU",
+    "name": "Andrew Yule & Co",
+    "company_id": "189",
+    "fundamentals": {
+     "Current Price": 23.01,
+     "Price to Earning": null,
+     "Market Capitalization": 1125.08,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -2.34,
+     "YOY Quarterly profit growth": -111.62,
+     "Sales latest quarter": 58.3,
+     "YOY Quarterly sales growth": 3.85,
+     "Return on capital employed": -16.17
+    }
+   },
+   {
+    "symbol": "3BBLACKBIO",
+    "name": "3B Blackbio",
+    "company_id": "1778",
+    "fundamentals": {
+     "Current Price": 1310.1,
+     "Price to Earning": 20.25,
+     "Market Capitalization": 1124.42,
+     "Dividend yield": 0.38,
+     "Net Profit latest quarter": 8.98,
+     "YOY Quarterly profit growth": -24.31,
+     "Sales latest quarter": 33.49,
+     "YOY Quarterly sales growth": 50.65,
+     "Return on capital employed": 25.48
+    }
+   },
+   {
+    "symbol": "MVKAGRO",
+    "name": "M.V.K. Agro",
+    "company_id": "1284699",
+    "fundamentals": {
+     "Current Price": 222.1,
+     "Price to Earning": 22.63,
+     "Market Capitalization": 1121.69,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 6.38,
+     "YOY Quarterly profit growth": 84.93,
+     "Sales latest quarter": 65.55,
+     "YOY Quarterly sales growth": 105.94,
+     "Return on capital employed": 14.37
+    }
+   },
+   {
+    "symbol": "EKC",
+    "name": "Everest Kanto",
+    "company_id": "973",
+    "fundamentals": {
+     "Current Price": 99.66,
+     "Price to Earning": 8.41,
+     "Market Capitalization": 1118.26,
+     "Dividend yield": 0.7,
+     "Net Profit latest quarter": 30.16,
+     "YOY Quarterly profit growth": -27.86,
+     "Sales latest quarter": 346.31,
+     "YOY Quarterly sales growth": -10.49,
+     "Return on capital employed": 12.01
+    }
+   },
+   {
+    "symbol": "ASALCBR",
+    "name": "Assoc.Alcohols",
+    "company_id": "303",
+    "fundamentals": {
+     "Current Price": 556.75,
+     "Price to Earning": 13.51,
+     "Market Capitalization": 1117.91,
+     "Dividend yield": 0.36,
+     "Net Profit latest quarter": 17.92,
+     "YOY Quarterly profit growth": -24.26,
+     "Sales latest quarter": 280.86,
+     "YOY Quarterly sales growth": 5.31,
+     "Return on capital employed": 17.99
+    }
+   },
+   {
+    "symbol": "544516",
+    "name": "Airfloa Rail",
+    "company_id": "1285643",
+    "fundamentals": {
+     "Current Price": 465.45,
+     "Price to Earning": 28.5,
+     "Market Capitalization": 1115.68,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 27.07,
+     "YOY Quarterly profit growth": 68.77,
+     "Sales latest quarter": 229.06,
+     "YOY Quarterly sales growth": 113.54,
+     "Return on capital employed": 25.87
+    }
+   },
+   {
+    "symbol": "ROTO",
+    "name": "Roto Pumps",
+    "company_id": "2785",
+    "fundamentals": {
+     "Current Price": 59.16,
+     "Price to Earning": 40.22,
+     "Market Capitalization": 1114.84,
+     "Dividend yield": 0.32,
+     "Net Profit latest quarter": 9.25,
+     "YOY Quarterly profit growth": 46.83,
+     "Sales latest quarter": 75.6,
+     "YOY Quarterly sales growth": 14.75,
+     "Return on capital employed": 15.16
+    }
+   },
+   {
+    "symbol": "VHLTD",
+    "name": "Viceroy Hotels",
+    "company_id": "3644",
+    "fundamentals": {
+     "Current Price": 145.02,
+     "Price to Earning": 48.86,
+     "Market Capitalization": 1113.49,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.45,
+     "YOY Quarterly profit growth": 148.01,
+     "Sales latest quarter": 44.9,
+     "YOY Quarterly sales growth": 76.98,
+     "Return on capital employed": 7.12
+    }
+   },
+   {
+    "symbol": "517172",
+    "name": "Pervasive Comm.",
+    "company_id": "941014",
+    "fundamentals": {
+     "Current Price": 12.35,
+     "Price to Earning": null,
+     "Market Capitalization": 1112.68,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": -90.0,
+     "Sales latest quarter": 0.49,
+     "YOY Quarterly sales growth": -86.58,
+     "Return on capital employed": 22.11
+    }
+   },
+   {
+    "symbol": "SALSTEEL",
+    "name": "S.A.L Steel",
+    "company_id": "2849",
+    "fundamentals": {
+     "Current Price": 76.66,
+     "Price to Earning": null,
+     "Market Capitalization": 1109.78,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 3.09,
+     "YOY Quarterly profit growth": 131.95,
+     "Sales latest quarter": 87.37,
+     "YOY Quarterly sales growth": -31.57,
+     "Return on capital employed": 1.08
+    }
+   },
+   {
+    "symbol": "AGL",
+    "name": "Allcargo Global",
+    "company_id": "1285954",
+    "fundamentals": {
+     "Current Price": 11.29,
+     "Price to Earning": null,
+     "Market Capitalization": 1109.56,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -28.0,
+     "YOY Quarterly profit growth": 67.82,
+     "Sales latest quarter": 3522.0,
+     "YOY Quarterly sales growth": 5.77,
+     "Return on capital employed": -6.09
+    }
+   },
+   {
+    "symbol": "SUNRAKSHAK",
+    "name": "Sunrakshakk Inds",
+    "company_id": "1272996",
+    "fundamentals": {
+     "Current Price": 357.5,
+     "Price to Earning": 25.48,
+     "Market Capitalization": 1108.49,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 15.04,
+     "YOY Quarterly profit growth": 130.67,
+     "Sales latest quarter": 276.33,
+     "YOY Quarterly sales growth": 120.64,
+     "Return on capital employed": 29.25
+    }
+   },
+   {
+    "symbol": "SHRIRAMPPS",
+    "name": "Shriram Properti",
+    "company_id": "1275120",
+    "fundamentals": {
+     "Current Price": 64.82,
+     "Price to Earning": 12.12,
+     "Market Capitalization": 1106.18,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.04,
+     "YOY Quarterly profit growth": -46.38,
+     "Sales latest quarter": 224.28,
+     "YOY Quarterly sales growth": -7.44,
+     "Return on capital employed": 7.79
+    }
+   },
+   {
+    "symbol": "GPTHEALTH",
+    "name": "GPT Healthcare",
+    "company_id": "1284689",
+    "fundamentals": {
+     "Current Price": 134.8,
+     "Price to Earning": 23.4,
+     "Market Capitalization": 1106.1,
+     "Dividend yield": 1.85,
+     "Net Profit latest quarter": 12.73,
+     "YOY Quarterly profit growth": 65.76,
+     "Sales latest quarter": 126.2,
+     "YOY Quarterly sales growth": 17.82,
+     "Return on capital employed": 19.94
+    }
+   },
+   {
+    "symbol": "GODAVARIB",
+    "name": "Godavari Bioref.",
+    "company_id": "1285137",
+    "fundamentals": {
+     "Current Price": 215.5,
+     "Price to Earning": 38.02,
+     "Market Capitalization": 1102.84,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -19.32,
+     "YOY Quarterly profit growth": -20.6,
+     "Sales latest quarter": 557.88,
+     "YOY Quarterly sales growth": 4.62,
+     "Return on capital employed": 6.43
+    }
+   },
+   {
+    "symbol": "ANDHRSUGAR",
+    "name": "Andhra Sugars",
+    "company_id": "188",
+    "fundamentals": {
+     "Current Price": 81.23,
+     "Price to Earning": 9.36,
+     "Market Capitalization": 1100.95,
+     "Dividend yield": 1.23,
+     "Net Profit latest quarter": 46.63,
+     "YOY Quarterly profit growth": 74.28,
+     "Sales latest quarter": 627.11,
+     "YOY Quarterly sales growth": 4.55,
+     "Return on capital employed": 8.44
+    }
+   },
+   {
+    "symbol": "VHL",
+    "name": "Vardhman Hold.",
+    "company_id": "3609",
+    "fundamentals": {
+     "Current Price": 3450.9,
+     "Price to Earning": 4.38,
+     "Market Capitalization": 1100.84,
+     "Dividend yield": 0.14,
+     "Net Profit latest quarter": 98.08,
+     "YOY Quarterly profit growth": 56.73,
+     "Sales latest quarter": 10.83,
+     "YOY Quarterly sales growth": 217.6,
+     "Return on capital employed": 6.28
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item"
+    ]
+   },
+   {
+    "symbol": "MMP",
+    "name": "MMP Industries",
+    "company_id": "1274325",
+    "fundamentals": {
+     "Current Price": 432.45,
+     "Price to Earning": 22.11,
+     "Market Capitalization": 1098.54,
+     "Dividend yield": 0.46,
+     "Net Profit latest quarter": 12.11,
+     "YOY Quarterly profit growth": 72.75,
+     "Sales latest quarter": 252.68,
+     "YOY Quarterly sales growth": 34.63,
+     "Return on capital employed": 12.56
+    }
+   },
+   {
+    "symbol": "ARROWGREEN",
+    "name": "Arrow Greentech",
+    "company_id": "250",
+    "fundamentals": {
+     "Current Price": 726.15,
+     "Price to Earning": 17.16,
+     "Market Capitalization": 1095.61,
+     "Dividend yield": 0.69,
+     "Net Profit latest quarter": 27.43,
+     "YOY Quarterly profit growth": 151.19,
+     "Sales latest quarter": 87.84,
+     "YOY Quarterly sales growth": 111.15,
+     "Return on capital employed": 29.62
+    }
+   },
+   {
+    "symbol": "BNAGROCHEM",
+    "name": "BN Agrochem",
+    "company_id": "241",
+    "fundamentals": {
+     "Current Price": 111.98,
+     "Price to Earning": 64.14,
+     "Market Capitalization": 1094.86,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 2.98,
+     "YOY Quarterly profit growth": -85.16,
+     "Sales latest quarter": 257.51,
+     "YOY Quarterly sales growth": 26.66,
+     "Return on capital employed": 4.44
+    }
+   },
+   {
+    "symbol": "IVALUE",
+    "name": "Ivalue Infosolut",
+    "company_id": "1285661",
+    "fundamentals": {
+     "Current Price": 199.64,
+     "Price to Earning": 10.19,
+     "Market Capitalization": 1093.1,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 15.72,
+     "YOY Quarterly profit growth": 52.26,
+     "Sales latest quarter": 179.73,
+     "YOY Quarterly sales growth": -21.14,
+     "Return on capital employed": 25.37
+    }
+   },
+   {
+    "symbol": "KPEL",
+    "name": "K.P. Energy",
+    "company_id": "1273264",
+    "fundamentals": {
+     "Current Price": 160.84,
+     "Price to Earning": 5.99,
+     "Market Capitalization": 1090.46,
+     "Dividend yield": 0.56,
+     "Net Profit latest quarter": 26.08,
+     "YOY Quarterly profit growth": 2.6,
+     "Sales latest quarter": 519.46,
+     "YOY Quarterly sales growth": 136.61,
+     "Return on capital employed": 39.0
+    }
+   },
+   {
+    "symbol": "TNPETRO",
+    "name": "T N Petro Prod.",
+    "company_id": "3352",
+    "fundamentals": {
+     "Current Price": 120.8,
+     "Price to Earning": 7.97,
+     "Market Capitalization": 1086.84,
+     "Dividend yield": 1.24,
+     "Net Profit latest quarter": 80.11,
+     "YOY Quarterly profit growth": 125.98,
+     "Sales latest quarter": 780.15,
+     "YOY Quarterly sales growth": 68.5,
+     "Return on capital employed": 10.91
+    }
+   },
+   {
+    "symbol": "MICEL",
+    "name": "MIC Electronics",
+    "company_id": "2073",
+    "fundamentals": {
+     "Current Price": 36.46,
+     "Price to Earning": null,
+     "Market Capitalization": 1086.09,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 2.13,
+     "YOY Quarterly profit growth": 27.54,
+     "Sales latest quarter": 43.72,
+     "YOY Quarterly sales growth": 276.57,
+     "Return on capital employed": 8.67
+    }
+   },
+   {
+    "symbol": "542669",
+    "name": "BMW Industries",
+    "company_id": "1274663",
+    "fundamentals": {
+     "Current Price": 48.23,
+     "Price to Earning": 12.77,
+     "Market Capitalization": 1085.59,
+     "Dividend yield": 0.89,
+     "Net Profit latest quarter": 19.04,
+     "YOY Quarterly profit growth": 25.79,
+     "Sales latest quarter": 166.0,
+     "YOY Quarterly sales growth": 11.64,
+     "Return on capital employed": 11.94
+    }
+   },
+   {
+    "symbol": "PRADPME",
+    "name": "Pradeep Metals",
+    "company_id": "2526",
+    "fundamentals": {
+     "Current Price": 628.3,
+     "Price to Earning": 32.76,
+     "Market Capitalization": 1085.07,
+     "Dividend yield": 0.4,
+     "Net Profit latest quarter": 8.35,
+     "YOY Quarterly profit growth": 49.91,
+     "Sales latest quarter": 93.71,
+     "YOY Quarterly sales growth": 20.87,
+     "Return on capital employed": 21.18
+    }
+   },
+   {
+    "symbol": "RAJRILTD",
+    "name": "Raj Rayon Inds.",
+    "company_id": "2632",
+    "fundamentals": {
+     "Current Price": 19.5,
+     "Price to Earning": 31.18,
+     "Market Capitalization": 1084.36,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 6.86,
+     "YOY Quarterly profit growth": 13.01,
+     "Sales latest quarter": 204.46,
+     "YOY Quarterly sales growth": -21.42,
+     "Return on capital employed": 13.57
+    }
+   },
+   {
+    "symbol": "SULA",
+    "name": "Sula Vineyards",
+    "company_id": "1275376",
+    "fundamentals": {
+     "Current Price": 128.05,
+     "Price to Earning": 41.72,
+     "Market Capitalization": 1081.35,
+     "Dividend yield": 1.56,
+     "Net Profit latest quarter": 1.06,
+     "YOY Quarterly profit growth": -45.36,
+     "Sales latest quarter": 112.87,
+     "YOY Quarterly sales growth": 2.95,
+     "Return on capital employed": 7.55
+    }
+   },
+   {
+    "symbol": "KOTIC",
+    "name": "Kothari Indl",
+    "company_id": "1268109",
+    "fundamentals": {
+     "Current Price": 100.03,
+     "Price to Earning": null,
+     "Market Capitalization": 1080.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -28.9,
+     "YOY Quarterly profit growth": -1405.21,
+     "Sales latest quarter": 52.44,
+     "YOY Quarterly sales growth": 33.78,
+     "Return on capital employed": -11.43
+    }
+   },
+   {
+    "symbol": "UGROCAP",
+    "name": "Ugro Capital",
+    "company_id": "645",
+    "fundamentals": {
+     "Current Price": 69.43,
+     "Price to Earning": 7.7,
+     "Market Capitalization": 1078.17,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 60.71,
+     "YOY Quarterly profit growth": 77.88,
+     "Sales latest quarter": 417.41,
+     "YOY Quarterly sales growth": 0.82,
+     "Return on capital employed": 10.12
+    }
+   },
+   {
+    "symbol": "FAZE3Q",
+    "name": "Faze Three",
+    "company_id": "998",
+    "fundamentals": {
+     "Current Price": 437.95,
+     "Price to Earning": 35.39,
+     "Market Capitalization": 1077.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 9.64,
+     "YOY Quarterly profit growth": -24.51,
+     "Sales latest quarter": 229.39,
+     "YOY Quarterly sales growth": 8.22,
+     "Return on capital employed": 10.12
+    }
+   },
+   {
+    "symbol": "MODISONLTD",
+    "name": "Modison",
+    "company_id": "2109",
+    "fundamentals": {
+     "Current Price": 331.75,
+     "Price to Earning": 9.2,
+     "Market Capitalization": 1076.53,
+     "Dividend yield": 1.66,
+     "Net Profit latest quarter": 23.29,
+     "YOY Quarterly profit growth": 89.44,
+     "Sales latest quarter": 279.03,
+     "YOY Quarterly sales growth": 92.22,
+     "Return on capital employed": 30.98
+    }
+   },
+   {
+    "symbol": "EXCELINDUS",
+    "name": "Excel Industries",
+    "company_id": "979",
+    "fundamentals": {
+     "Current Price": 855.65,
+     "Price to Earning": 15.07,
+     "Market Capitalization": 1075.61,
+     "Dividend yield": 1.61,
+     "Net Profit latest quarter": 29.47,
+     "YOY Quarterly profit growth": -12.71,
+     "Sales latest quarter": 293.83,
+     "YOY Quarterly sales growth": -5.07,
+     "Return on capital employed": 6.17
+    }
+   },
+   {
+    "symbol": "ACGL",
+    "name": "Auto.Corp.of Goa",
+    "company_id": "333",
+    "fundamentals": {
+     "Current Price": 1763.7,
+     "Price to Earning": 18.19,
+     "Market Capitalization": 1073.85,
+     "Dividend yield": 1.56,
+     "Net Profit latest quarter": 13.2,
+     "YOY Quarterly profit growth": -9.84,
+     "Sales latest quarter": 265.6,
+     "YOY Quarterly sales growth": 28.69,
+     "Return on capital employed": 29.61
+    }
+   },
+   {
+    "symbol": "RIR",
+    "name": "RIR Power Electr",
+    "company_id": "2812",
+    "fundamentals": {
+     "Current Price": 134.83,
+     "Price to Earning": 113.89,
+     "Market Capitalization": 1072.87,
+     "Dividend yield": 0.07,
+     "Net Profit latest quarter": 4.45,
+     "YOY Quarterly profit growth": 41.27,
+     "Sales latest quarter": 33.98,
+     "YOY Quarterly sales growth": 32.53,
+     "Return on capital employed": 7.96
+    }
+   },
+   {
+    "symbol": "ASTAR",
+    "name": "Asian Star Co.",
+    "company_id": "296",
+    "fundamentals": {
+     "Current Price": 669.95,
+     "Price to Earning": 32.37,
+     "Market Capitalization": 1072.38,
+     "Dividend yield": 0.22,
+     "Net Profit latest quarter": 12.06,
+     "YOY Quarterly profit growth": -37.69,
+     "Sales latest quarter": 638.31,
+     "YOY Quarterly sales growth": -10.92,
+     "Return on capital employed": 3.6
+    }
+   },
+   {
+    "symbol": "ATULAUTO",
+    "name": "Atul Auto",
+    "company_id": "318",
+    "fundamentals": {
+     "Current Price": 386.15,
+     "Price to Earning": 23.41,
+     "Market Capitalization": 1071.62,
+     "Dividend yield": 0.78,
+     "Net Profit latest quarter": 6.84,
+     "YOY Quarterly profit growth": -27.04,
+     "Sales latest quarter": 268.31,
+     "YOY Quarterly sales growth": 34.04,
+     "Return on capital employed": 11.32
+    }
+   },
+   {
+    "symbol": "BALAJITELE",
+    "name": "Balaji Telefilms",
+    "company_id": "381",
+    "fundamentals": {
+     "Current Price": 87.78,
+     "Price to Earning": null,
+     "Market Capitalization": 1070.06,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 22.39,
+     "YOY Quarterly profit growth": 489.25,
+     "Sales latest quarter": 240.29,
+     "YOY Quarterly sales growth": 229.93,
+     "Return on capital employed": -10.07
+    }
+   },
+   {
+    "symbol": "RHETAN",
+    "name": "Rhetan TMT Ltd",
+    "company_id": "1275275",
+    "fundamentals": {
+     "Current Price": 13.41,
+     "Price to Earning": 84.14,
+     "Market Capitalization": 1068.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 3.16,
+     "YOY Quarterly profit growth": 315.79,
+     "Sales latest quarter": 4.06,
+     "YOY Quarterly sales growth": -19.44,
+     "Return on capital employed": 11.0
+    }
+   },
+   {
+    "symbol": "GRPLTD",
+    "name": "GRP",
+    "company_id": "1251",
+    "fundamentals": {
+     "Current Price": 1999.0,
+     "Price to Earning": 94.6,
+     "Market Capitalization": 1066.13,
+     "Dividend yield": 0.18,
+     "Net Profit latest quarter": 6.38,
+     "YOY Quarterly profit growth": 225.51,
+     "Sales latest quarter": 172.34,
+     "YOY Quarterly sales growth": 30.21,
+     "Return on capital employed": 6.94
+    }
+   },
+   {
+    "symbol": "ACEVECTOR",
+    "name": "AceVector",
+    "company_id": "1286205",
+    "fundamentals": {
+     "Current Price": 19.51,
+     "Price to Earning": null,
+     "Market Capitalization": 1061.71,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -17.6,
+     "YOY Quarterly profit growth": -52.59,
+     "Sales latest quarter": 151.2,
+     "YOY Quarterly sales growth": 16.97,
+     "Return on capital employed": -14.68
+    }
+   },
+   {
+    "symbol": "DOLATALGO",
+    "name": "Dolat Algotech",
+    "company_id": "843",
+    "fundamentals": {
+     "Current Price": 60.28,
+     "Price to Earning": 7.37,
+     "Market Capitalization": 1060.93,
+     "Dividend yield": 0.17,
+     "Net Profit latest quarter": 53.82,
+     "YOY Quarterly profit growth": 38.68,
+     "Sales latest quarter": 114.25,
+     "YOY Quarterly sales growth": 37.37,
+     "Return on capital employed": 16.32
+    }
+   },
+   {
+    "symbol": "SAFEENTP",
+    "name": "Safe Enterprises",
+    "company_id": "1285499",
+    "fundamentals": {
+     "Current Price": 227.05,
+     "Price to Earning": 16.45,
+     "Market Capitalization": 1058.15,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 30.61,
+     "YOY Quarterly profit growth": 40.94,
+     "Sales latest quarter": 106.04,
+     "YOY Quarterly sales growth": 31.64,
+     "Return on capital employed": 47.06
+    }
+   },
+   {
+    "symbol": "GREENPOWER",
+    "name": "Orient Green",
+    "company_id": "2354",
+    "fundamentals": {
+     "Current Price": 9.0,
+     "Price to Earning": 19.73,
+     "Market Capitalization": 1055.73,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 23.95,
+     "YOY Quarterly profit growth": -20.14,
+     "Sales latest quarter": 81.43,
+     "YOY Quarterly sales growth": -6.81,
+     "Return on capital employed": 7.19
+    }
+   },
+   {
+    "symbol": "KAMDHENU",
+    "name": "Kamdhenu",
+    "company_id": "1705",
+    "fundamentals": {
+     "Current Price": 37.42,
+     "Price to Earning": 11.63,
+     "Market Capitalization": 1054.81,
+     "Dividend yield": 1.07,
+     "Net Profit latest quarter": 23.8,
+     "YOY Quarterly profit growth": 27.27,
+     "Sales latest quarter": 214.97,
+     "YOY Quarterly sales growth": 12.47,
+     "Return on capital employed": 29.52
+    }
+   },
+   {
+    "symbol": "544369",
+    "name": "Beezaasan Exp.",
+    "company_id": "1285332",
+    "fundamentals": {
+     "Current Price": 695.0,
+     "Price to Earning": 79.47,
+     "Market Capitalization": 1053.05,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.03,
+     "YOY Quarterly profit growth": -0.2,
+     "Sales latest quarter": 111.12,
+     "YOY Quarterly sales growth": -2.15,
+     "Return on capital employed": 12.2
+    }
+   },
+   {
+    "symbol": "MONTECARLO",
+    "name": "Monte Carlo Fas.",
+    "company_id": "1176414",
+    "fundamentals": {
+     "Current Price": 507.85,
+     "Price to Earning": 10.07,
+     "Market Capitalization": 1052.88,
+     "Dividend yield": 3.94,
+     "Net Profit latest quarter": -23.48,
+     "YOY Quarterly profit growth": -43.87,
+     "Sales latest quarter": 149.04,
+     "YOY Quarterly sales growth": 7.59,
+     "Return on capital employed": 14.01
+    }
+   },
+   {
+    "symbol": "IRISDOREME",
+    "name": "Iris Clothings",
+    "company_id": "1274587",
+    "fundamentals": {
+     "Current Price": 55.31,
+     "Price to Earning": 56.81,
+     "Market Capitalization": 1052.72,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.08,
+     "YOY Quarterly profit growth": 23.3,
+     "Sales latest quarter": 62.16,
+     "YOY Quarterly sales growth": 40.25,
+     "Return on capital employed": 16.04
+    }
+   },
+   {
+    "symbol": "SYSTMTXC",
+    "name": "Systematix Corp.",
+    "company_id": "3334",
+    "fundamentals": {
+     "Current Price": 77.05,
+     "Price to Earning": null,
+     "Market Capitalization": 1052.03,
+     "Dividend yield": 0.13,
+     "Net Profit latest quarter": -4.89,
+     "YOY Quarterly profit growth": -146.75,
+     "Sales latest quarter": 56.26,
+     "YOY Quarterly sales growth": 43.63,
+     "Return on capital employed": 8.49
+    }
+   },
+   {
+    "symbol": "523160",
+    "name": "Foseco Crucible (India)",
+    "company_id": "2128",
+    "fundamentals": {
+     "Current Price": 1875.4,
+     "Price to Earning": 23.44,
+     "Market Capitalization": 1050.22,
+     "Dividend yield": 0.67,
+     "Net Profit latest quarter": 14.22,
+     "YOY Quarterly profit growth": 61.96,
+     "Sales latest quarter": 53.18,
+     "YOY Quarterly sales growth": 15.78,
+     "Return on capital employed": 33.24
+    }
+   },
+   {
+    "symbol": "DHAMPURSUG",
+    "name": "Dhampur Sugar",
+    "company_id": "802",
+    "fundamentals": {
+     "Current Price": 163.12,
+     "Price to Earning": 14.93,
+     "Market Capitalization": 1048.97,
+     "Dividend yield": 1.23,
+     "Net Profit latest quarter": 6.09,
+     "YOY Quarterly profit growth": 609.41,
+     "Sales latest quarter": 552.62,
+     "YOY Quarterly sales growth": 5.98,
+     "Return on capital employed": 6.43
+    }
+   },
+   {
+    "symbol": "ELITECON",
+    "name": "Elitecon Inter.",
+    "company_id": "1273187",
+    "fundamentals": {
+     "Current Price": 6.56,
+     "Price to Earning": 6.47,
+     "Market Capitalization": 1048.62,
+     "Dividend yield": 0.76,
+     "Net Profit latest quarter": -85.05,
+     "YOY Quarterly profit growth": -269.56,
+     "Sales latest quarter": 1880.69,
+     "YOY Quarterly sales growth": 500.55,
+     "Return on capital employed": 46.33
+    }
+   },
+   {
+    "symbol": "RIIL",
+    "name": "Rel. Indl. Infra",
+    "company_id": "2725",
+    "fundamentals": {
+     "Current Price": 690.2,
+     "Price to Earning": 87.8,
+     "Market Capitalization": 1042.2,
+     "Dividend yield": 0.51,
+     "Net Profit latest quarter": 2.8,
+     "YOY Quarterly profit growth": -8.5,
+     "Sales latest quarter": 8.35,
+     "YOY Quarterly sales growth": -31.39,
+     "Return on capital employed": 3.01
+    }
+   },
+   {
+    "symbol": "ULTRAMAR",
+    "name": "Ultramarine Pig.",
+    "company_id": "3524",
+    "fundamentals": {
+     "Current Price": 356.2,
+     "Price to Earning": 12.73,
+     "Market Capitalization": 1040.1,
+     "Dividend yield": 1.68,
+     "Net Profit latest quarter": 27.97,
+     "YOY Quarterly profit growth": 68.19,
+     "Sales latest quarter": 218.87,
+     "YOY Quarterly sales growth": 29.76,
+     "Return on capital employed": 10.09
+    }
+   },
+   {
+    "symbol": "BAFNAPH",
+    "name": "Bafna Pharma.",
+    "company_id": "363",
+    "fundamentals": {
+     "Current Price": 438.95,
+     "Price to Earning": 133.3,
+     "Market Capitalization": 1038.39,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.08,
+     "YOY Quarterly profit growth": -97.64,
+     "Sales latest quarter": 26.58,
+     "YOY Quarterly sales growth": -23.22,
+     "Return on capital employed": 11.87
+    }
+   },
+   {
+    "symbol": "INDPRUD",
+    "name": "Indl.& Prud.Inv.",
+    "company_id": "1481",
+    "fundamentals": {
+     "Current Price": 6189.5,
+     "Price to Earning": 17.03,
+     "Market Capitalization": 1037.26,
+     "Dividend yield": 1.94,
+     "Net Profit latest quarter": 10.92,
+     "YOY Quarterly profit growth": -20.64,
+     "Sales latest quarter": 2.74,
+     "YOY Quarterly sales growth": -6.8,
+     "Return on capital employed": 7.72
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item"
+    ]
+   },
+   {
+    "symbol": "513361",
+    "name": "India Homes",
+    "company_id": "1430",
+    "fundamentals": {
+     "Current Price": 26.05,
+     "Price to Earning": 61.29,
+     "Market Capitalization": 1037.0,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 3.44,
+     "YOY Quarterly profit growth": -116.89,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 17.52
+    }
+   },
+   {
+    "symbol": "BAJAJHCARE",
+    "name": "Bajaj Healthcare",
+    "company_id": "1273348",
+    "fundamentals": {
+     "Current Price": 306.8,
+     "Price to Earning": 17.75,
+     "Market Capitalization": 1032.77,
+     "Dividend yield": 0.49,
+     "Net Profit latest quarter": 14.09,
+     "YOY Quarterly profit growth": 15.5,
+     "Sales latest quarter": 175.9,
+     "YOY Quarterly sales growth": 18.92,
+     "Return on capital employed": 11.46
+    }
+   },
+   {
+    "symbol": "CREST",
+    "name": "Crest Ventures",
+    "company_id": "2966",
+    "fundamentals": {
+     "Current Price": 362.75,
+     "Price to Earning": 31.28,
+     "Market Capitalization": 1032.02,
+     "Dividend yield": 0.28,
+     "Net Profit latest quarter": 11.46,
+     "YOY Quarterly profit growth": -54.98,
+     "Sales latest quarter": 30.24,
+     "YOY Quarterly sales growth": -52.08,
+     "Return on capital employed": 5.67
+    }
+   },
+   {
+    "symbol": "IZMO",
+    "name": "IZMO",
+    "company_id": "1906",
+    "fundamentals": {
+     "Current Price": 688.3,
+     "Price to Earning": 19.18,
+     "Market Capitalization": 1031.1,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 12.2,
+     "YOY Quarterly profit growth": 103.33,
+     "Sales latest quarter": 65.38,
+     "YOY Quarterly sales growth": 15.7,
+     "Return on capital employed": 12.61
+    }
+   },
+   {
+    "symbol": "544458",
+    "name": "Shree Refrigerat",
+    "company_id": "1285566",
+    "fundamentals": {
+     "Current Price": 287.85,
+     "Price to Earning": 38.38,
+     "Market Capitalization": 1030.4,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 6.89,
+     "YOY Quarterly profit growth": 338.85,
+     "Sales latest quarter": 93.17,
+     "YOY Quarterly sales growth": 84.9,
+     "Return on capital employed": 13.84
+    }
+   },
+   {
+    "symbol": "AFSL",
+    "name": "Abans Financial",
+    "company_id": "1275375",
+    "fundamentals": {
+     "Current Price": 201.16,
+     "Price to Earning": 8.03,
+     "Market Capitalization": 1030.24,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 65.85,
+     "YOY Quarterly profit growth": 106.84,
+     "Sales latest quarter": 3712.76,
+     "YOY Quarterly sales growth": 96.05,
+     "Return on capital employed": 7.9
+    }
+   }
+  ]
+ }
+}

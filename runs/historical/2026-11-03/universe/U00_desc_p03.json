@@ -1,0 +1,3612 @@
+{
+ "fetched_at": "2026-11-03 06:17:21",
+ "via": "screener",
+ "tool": "screen_stocks",
+ "args": {
+  "query": "Market Capitalization > 0 AND Market Capitalization <= 20",
+  "limit": 200,
+  "page": 3,
+  "order": "desc"
+ },
+ "warnings": [],
+ "partial": false,
+ "data": {
+  "query": "Market Capitalization > 0 AND Market Capitalization <= 20",
+  "screener_query": "Market Capitalization > 0 AND Market Capitalization <= 20",
+  "total_matches": 858,
+  "page": 3,
+  "showing": 200,
+  "results": [
+   {
+    "symbol": "526504",
+    "name": "Dolphin Medical",
+    "company_id": "845",
+    "fundamentals": {
+     "Current Price": 7.11,
+     "Price to Earning": 179.0,
+     "Market Capitalization": 10.74,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.02,
+     "YOY Quarterly profit growth": -33.33,
+     "Sales latest quarter": 0.21,
+     "YOY Quarterly sales growth": 23.53,
+     "Return on capital employed": 0.64
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539224",
+    "name": "HCKK Ventures",
+    "company_id": "1270899",
+    "fundamentals": {
+     "Current Price": 28.91,
+     "Price to Earning": null,
+     "Market Capitalization": 10.73,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": -130.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -27.26
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531574",
+    "name": "Vas Infra.",
+    "company_id": "3616",
+    "fundamentals": {
+     "Current Price": 7.05,
+     "Price to Earning": 28.84,
+     "Market Capitalization": 10.67,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.13,
+     "YOY Quarterly profit growth": 27.78,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531091",
+    "name": "United Credit",
+    "company_id": "3549",
+    "fundamentals": {
+     "Current Price": 20.0,
+     "Price to Earning": 13.32,
+     "Market Capitalization": 10.66,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.19,
+     "YOY Quarterly profit growth": -24.0,
+     "Sales latest quarter": 0.78,
+     "YOY Quarterly sales growth": 5.41,
+     "Return on capital employed": 3.59
+    }
+   },
+   {
+    "symbol": "535279",
+    "name": "Bothra Metals",
+    "company_id": "350446",
+    "fundamentals": {
+     "Current Price": 5.75,
+     "Price to Earning": 39.44,
+     "Market Capitalization": 10.65,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.27,
+     "YOY Quarterly profit growth": 170.0,
+     "Sales latest quarter": 17.29,
+     "YOY Quarterly sales growth": -8.37,
+     "Return on capital employed": 3.11
+    }
+   },
+   {
+    "symbol": "542938",
+    "name": "Octavius Plant.",
+    "company_id": "1274740",
+    "fundamentals": {
+     "Current Price": 35.51,
+     "Price to Earning": 15.66,
+     "Market Capitalization": 10.65,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.13,
+     "YOY Quarterly profit growth": -53.57,
+     "Sales latest quarter": 12.9,
+     "YOY Quarterly sales growth": 132.01,
+     "Return on capital employed": 7.32
+    }
+   },
+   {
+    "symbol": "540134",
+    "name": "Ishaan Infrastru",
+    "company_id": "1273514",
+    "fundamentals": {
+     "Current Price": 16.43,
+     "Price to Earning": null,
+     "Market Capitalization": 10.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.05,
+     "YOY Quarterly profit growth": 16.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -3.66
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "EUROTEXIND",
+    "name": "Eurotex Industri",
+    "company_id": "970",
+    "fundamentals": {
+     "Current Price": 12.15,
+     "Price to Earning": null,
+     "Market Capitalization": 10.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.31,
+     "YOY Quarterly profit growth": -50.57,
+     "Sales latest quarter": 0.02,
+     "YOY Quarterly sales growth": -50.0,
+     "Return on capital employed": -39.76
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "DCMFINSERV",
+    "name": "DCM Financial",
+    "company_id": "771",
+    "fundamentals": {
+     "Current Price": 4.8,
+     "Price to Earning": null,
+     "Market Capitalization": 10.62,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.19,
+     "YOY Quarterly profit growth": 26.92,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -4.86
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531286",
+    "name": "Adhata Global",
+    "company_id": "1269753",
+    "fundamentals": {
+     "Current Price": 22.5,
+     "Price to Earning": null,
+     "Market Capitalization": 10.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.21,
+     "YOY Quarterly profit growth": -90.91,
+     "Sales latest quarter": 0.5,
+     "YOY Quarterly sales growth": -76.08,
+     "Return on capital employed": -29.8
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "PARAMPARA",
+    "name": "Parampara Dairy",
+    "company_id": "1274277",
+    "fundamentals": {
+     "Current Price": 10.1,
+     "Price to Earning": 6.55,
+     "Market Capitalization": 10.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.56,
+     "YOY Quarterly profit growth": 1100.0,
+     "Sales latest quarter": 24.49,
+     "YOY Quarterly sales growth": 63.48,
+     "Return on capital employed": 8.95
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off"
+    ]
+   },
+   {
+    "symbol": "503641",
+    "name": "Zodiac Vent.",
+    "company_id": "3807",
+    "fundamentals": {
+     "Current Price": 1.28,
+     "Price to Earning": 7.62,
+     "Market Capitalization": 10.59,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": -50.0,
+     "Sales latest quarter": 1.11,
+     "YOY Quarterly sales growth": 73.44,
+     "Return on capital employed": 7.1
+    }
+   },
+   {
+    "symbol": "544170",
+    "name": "Dolphin Kitchen Utensils",
+    "company_id": "1284765",
+    "fundamentals": {
+     "Current Price": 7.98,
+     "Price to Earning": 2.96,
+     "Market Capitalization": 10.58,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.03,
+     "YOY Quarterly profit growth": -98.52,
+     "Sales latest quarter": 8.37,
+     "YOY Quarterly sales growth": -80.23,
+     "Return on capital employed": 7.5
+    }
+   },
+   {
+    "symbol": "521062",
+    "name": "Perfect-Octave",
+    "company_id": "2454",
+    "fundamentals": {
+     "Current Price": 3.04,
+     "Price to Earning": null,
+     "Market Capitalization": 10.55,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.19,
+     "YOY Quarterly profit growth": -18.75,
+     "Sales latest quarter": 0.04,
+     "YOY Quarterly sales growth": -42.86,
+     "Return on capital employed": 8.1
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "522209",
+    "name": "Yogi Infra Proj.",
+    "company_id": "3785",
+    "fundamentals": {
+     "Current Price": 6.25,
+     "Price to Earning": null,
+     "Market Capitalization": 10.53,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -3.33,
+     "YOY Quarterly profit growth": -24.25,
+     "Sales latest quarter": 0.33,
+     "YOY Quarterly sales growth": -13.16,
+     "Return on capital employed": 3.64
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "512604",
+    "name": "Haria Exports",
+    "company_id": "1276",
+    "fundamentals": {
+     "Current Price": 9.06,
+     "Price to Earning": 261.5,
+     "Market Capitalization": 10.46,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": -120.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.7
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "542446",
+    "name": "Jonjua Overseas",
+    "company_id": "1274628",
+    "fundamentals": {
+     "Current Price": 2.97,
+     "Price to Earning": 1.3,
+     "Market Capitalization": 10.46,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.24,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 4.35,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 19.64
+    }
+   },
+   {
+    "symbol": "544178",
+    "name": "Piotex Indus.",
+    "company_id": "1284783",
+    "fundamentals": {
+     "Current Price": 20.5,
+     "Price to Earning": 15.85,
+     "Market Capitalization": 10.46,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.58,
+     "YOY Quarterly profit growth": -66.47,
+     "Sales latest quarter": 23.51,
+     "YOY Quarterly sales growth": -65.73,
+     "Return on capital employed": 4.23
+    }
+   },
+   {
+    "symbol": "521234",
+    "name": "Sri Nacha. Cott.",
+    "company_id": "3169",
+    "fundamentals": {
+     "Current Price": 24.3,
+     "Price to Earning": null,
+     "Market Capitalization": 10.45,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.15,
+     "YOY Quarterly profit growth": -25.0,
+     "Sales latest quarter": 12.91,
+     "YOY Quarterly sales growth": -7.19,
+     "Return on capital employed": -5.16
+    }
+   },
+   {
+    "symbol": "532092",
+    "name": "Epuja Spiritech",
+    "company_id": "2835",
+    "fundamentals": {
+     "Current Price": 0.92,
+     "Price to Earning": null,
+     "Market Capitalization": 10.4,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.22,
+     "YOY Quarterly profit growth": 135.48,
+     "Sales latest quarter": 7.55,
+     "YOY Quarterly sales growth": 5707.69,
+     "Return on capital employed": -55.53
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "544636",
+    "name": "Western Overseas",
+    "company_id": "1285804",
+    "fundamentals": {
+     "Current Price": 17.28,
+     "Price to Earning": 3.81,
+     "Market Capitalization": 10.39,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.54,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 4.94,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 26.7
+    }
+   },
+   {
+    "symbol": "531341",
+    "name": "Ashtasidhhi Ind",
+    "company_id": "1238",
+    "fundamentals": {
+     "Current Price": 13.8,
+     "Price to Earning": 69.07,
+     "Market Capitalization": 10.36,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.08,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 2.45,
+     "YOY Quarterly sales growth": 64.43,
+     "Return on capital employed": 1.65
+    }
+   },
+   {
+    "symbol": "531158",
+    "name": "Catvision Ltd",
+    "company_id": "591",
+    "fundamentals": {
+     "Current Price": 19.0,
+     "Price to Earning": 16.44,
+     "Market Capitalization": 10.36,
+     "Dividend yield": 10.53,
+     "Net Profit latest quarter": 0.51,
+     "YOY Quarterly profit growth": 1600.0,
+     "Sales latest quarter": 5.23,
+     "YOY Quarterly sales growth": -10.29,
+     "Return on capital employed": -0.57
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off"
+    ]
+   },
+   {
+    "symbol": "505797",
+    "name": "Mipco Seaml Ring",
+    "company_id": "2096",
+    "fundamentals": {
+     "Current Price": 28.88,
+     "Price to Earning": 41.4,
+     "Market Capitalization": 10.35,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.06,
+     "YOY Quarterly profit growth": 175.0,
+     "Sales latest quarter": 1.31,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 37.04
+    }
+   },
+   {
+    "symbol": "523722",
+    "name": "Svam Software",
+    "company_id": "3308",
+    "fundamentals": {
+     "Current Price": 6.11,
+     "Price to Earning": null,
+     "Market Capitalization": 10.32,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.19,
+     "YOY Quarterly profit growth": -2000.0,
+     "Sales latest quarter": 0.4,
+     "YOY Quarterly sales growth": 566.67,
+     "Return on capital employed": 2.55
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "508963",
+    "name": "Trustwave",
+    "company_id": "3203",
+    "fundamentals": {
+     "Current Price": 315.15,
+     "Price to Earning": null,
+     "Market Capitalization": 10.3,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.13,
+     "YOY Quarterly profit growth": -160.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 2.12
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509423",
+    "name": "Sanathnagar Ent.",
+    "company_id": "1268089",
+    "fundamentals": {
+     "Current Price": 32.66,
+     "Price to Earning": null,
+     "Market Capitalization": 10.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.08,
+     "YOY Quarterly profit growth": -900.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 6.33
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540174",
+    "name": "Southern Infocon",
+    "company_id": "1273564",
+    "fundamentals": {
+     "Current Price": 20.49,
+     "Price to Earning": null,
+     "Market Capitalization": 10.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.2,
+     "YOY Quarterly profit growth": 20.0,
+     "Sales latest quarter": 0.43,
+     "YOY Quarterly sales growth": -51.14,
+     "Return on capital employed": -2.2
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540259",
+    "name": "Shangar Decor",
+    "company_id": "1273623",
+    "fundamentals": {
+     "Current Price": 0.21,
+     "Price to Earning": 3.51,
+     "Market Capitalization": 10.28,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.05,
+     "YOY Quarterly profit growth": 556.25,
+     "Sales latest quarter": 10.84,
+     "YOY Quarterly sales growth": 301.48,
+     "Return on capital employed": 3.65
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "530735",
+    "name": "Super Bakers (I)",
+    "company_id": "3269",
+    "fundamentals": {
+     "Current Price": 34.01,
+     "Price to Earning": 21.4,
+     "Market Capitalization": 10.27,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.1,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 10.65
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "508961",
+    "name": "Shricon Indus.",
+    "company_id": "3041",
+    "fundamentals": {
+     "Current Price": 82.7,
+     "Price to Earning": 6.29,
+     "Market Capitalization": 10.25,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": -74.14,
+     "Sales latest quarter": 0.96,
+     "YOY Quarterly sales growth": 0.0,
+     "Return on capital employed": 45.89
+    }
+   },
+   {
+    "symbol": "511493",
+    "name": "Shrydus Indust.",
+    "company_id": "3623",
+    "fundamentals": {
+     "Current Price": 3.2,
+     "Price to Earning": null,
+     "Market Capitalization": 10.24,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -2.88,
+     "YOY Quarterly profit growth": -4014.29,
+     "Sales latest quarter": 0.8,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -0.12
+    }
+   },
+   {
+    "symbol": "522237",
+    "name": "Shivagrico Impl.",
+    "company_id": "2991",
+    "fundamentals": {
+     "Current Price": 20.39,
+     "Price to Earning": 22.71,
+     "Market Capitalization": 10.22,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.06,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 11.73,
+     "YOY Quarterly sales growth": -0.42,
+     "Return on capital employed": 6.9
+    }
+   },
+   {
+    "symbol": "544269",
+    "name": "Neopolitan Pizza",
+    "company_id": "1272909",
+    "fundamentals": {
+     "Current Price": 6.0,
+     "Price to Earning": 51.0,
+     "Market Capitalization": 10.2,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": 135.71,
+     "Sales latest quarter": 16.41,
+     "YOY Quarterly sales growth": -52.42,
+     "Return on capital employed": 1.21
+    }
+   },
+   {
+    "symbol": "543521",
+    "name": "Fone4 Communica.",
+    "company_id": "1275217",
+    "fundamentals": {
+     "Current Price": 4.09,
+     "Price to Earning": null,
+     "Market Capitalization": 10.2,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.98,
+     "YOY Quarterly profit growth": -11.86,
+     "Sales latest quarter": 36.08,
+     "YOY Quarterly sales growth": 49.83,
+     "Return on capital employed": -28.82
+    }
+   },
+   {
+    "symbol": "531029",
+    "name": "Bharat Textiles",
+    "company_id": "244383",
+    "fundamentals": {
+     "Current Price": 17.4,
+     "Price to Earning": 22.15,
+     "Market Capitalization": 10.19,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.04,
+     "YOY Quarterly profit growth": 144.44,
+     "Sales latest quarter": 2.11,
+     "YOY Quarterly sales growth": 14.05,
+     "Return on capital employed": 1.67
+    }
+   },
+   {
+    "symbol": "530445",
+    "name": "Sumeru Industrie",
+    "company_id": "3240",
+    "fundamentals": {
+     "Current Price": 1.41,
+     "Price to Earning": 126.88,
+     "Market Capitalization": 10.15,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": -50.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.48
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526959",
+    "name": "Woodsvilla",
+    "company_id": "3768",
+    "fundamentals": {
+     "Current Price": 16.87,
+     "Price to Earning": 126.88,
+     "Market Capitalization": 10.15,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.09,
+     "YOY Quarterly profit growth": 1000.0,
+     "Sales latest quarter": 0.4,
+     "YOY Quarterly sales growth": 73.91,
+     "Return on capital employed": 1.64
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "502281",
+    "name": "Triveni Glass",
+    "company_id": "3485",
+    "fundamentals": {
+     "Current Price": 8.01,
+     "Price to Earning": 6.02,
+     "Market Capitalization": 10.11,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.96,
+     "YOY Quarterly profit growth": 916.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -20.66
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "PLADAINFO",
+    "name": "Plada Infotech S",
+    "company_id": "1284525",
+    "fundamentals": {
+     "Current Price": 11.75,
+     "Price to Earning": 5.82,
+     "Market Capitalization": 10.07,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.79,
+     "YOY Quarterly profit growth": -22.22,
+     "Sales latest quarter": 37.93,
+     "YOY Quarterly sales growth": 9.85,
+     "Return on capital employed": 13.96
+    }
+   },
+   {
+    "symbol": "509563",
+    "name": "Garware Marine",
+    "company_id": "1101",
+    "fundamentals": {
+     "Current Price": 17.42,
+     "Price to Earning": 62.75,
+     "Market Capitalization": 10.04,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.07,
+     "YOY Quarterly profit growth": 16.67,
+     "Sales latest quarter": 0.31,
+     "YOY Quarterly sales growth": 19.23,
+     "Return on capital employed": 1.13
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "502893",
+    "name": "United Interacti",
+    "company_id": "3551",
+    "fundamentals": {
+     "Current Price": 54.86,
+     "Price to Earning": 21.36,
+     "Market Capitalization": 10.04,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.38,
+     "YOY Quarterly profit growth": 41.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 2.07
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530805",
+    "name": "Onesource Indus.",
+    "company_id": "1269620",
+    "fundamentals": {
+     "Current Price": 3.26,
+     "Price to Earning": 7.26,
+     "Market Capitalization": 10.02,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.29,
+     "YOY Quarterly profit growth": -129.59,
+     "Sales latest quarter": 0.52,
+     "YOY Quarterly sales growth": -97.42,
+     "Return on capital employed": 43.87
+    }
+   },
+   {
+    "symbol": "503624",
+    "name": "Svaraj Trading",
+    "company_id": "3309",
+    "fundamentals": {
+     "Current Price": 6.77,
+     "Price to Earning": null,
+     "Market Capitalization": 9.99,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.19,
+     "YOY Quarterly profit growth": -118.63,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 1.07
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "543594",
+    "name": "Dipna Pharmachem",
+    "company_id": "1275283",
+    "fundamentals": {
+     "Current Price": 3.8,
+     "Price to Earning": 3.8,
+     "Market Capitalization": 9.99,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.18,
+     "YOY Quarterly profit growth": -64.0,
+     "Sales latest quarter": 2.05,
+     "YOY Quarterly sales growth": -87.12,
+     "Return on capital employed": 7.64
+    }
+   },
+   {
+    "symbol": "531017",
+    "name": "Arihant's Secur.",
+    "company_id": "242",
+    "fundamentals": {
+     "Current Price": 19.96,
+     "Price to Earning": 45.36,
+     "Market Capitalization": 9.98,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.09,
+     "YOY Quarterly profit growth": -10.0,
+     "Sales latest quarter": 0.29,
+     "YOY Quarterly sales growth": -3.33,
+     "Return on capital employed": 0.83
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530177",
+    "name": "VK Global",
+    "company_id": "3155",
+    "fundamentals": {
+     "Current Price": 23.47,
+     "Price to Earning": 45.23,
+     "Market Capitalization": 9.95,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": 112.5,
+     "Sales latest quarter": 0.28,
+     "YOY Quarterly sales growth": 64.71,
+     "Return on capital employed": 2.14
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539526",
+    "name": "Suncare Traders",
+    "company_id": "1273179",
+    "fundamentals": {
+     "Current Price": 0.39,
+     "Price to Earning": null,
+     "Market Capitalization": 9.95,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.3,
+     "YOY Quarterly profit growth": -68.75,
+     "Sales latest quarter": 0.51,
+     "YOY Quarterly sales growth": -54.46,
+     "Return on capital employed": 0.69
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "542865",
+    "name": "Anuroop Packagin",
+    "company_id": "1274712",
+    "fundamentals": {
+     "Current Price": 9.0,
+     "Price to Earning": 3.71,
+     "Market Capitalization": 9.95,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.36,
+     "YOY Quarterly profit growth": -50.0,
+     "Sales latest quarter": 1.96,
+     "YOY Quarterly sales growth": -38.75,
+     "Return on capital employed": 11.14
+    }
+   },
+   {
+    "symbol": "531265",
+    "name": "Progrex Ventures",
+    "company_id": "969369",
+    "fundamentals": {
+     "Current Price": 27.58,
+     "Price to Earning": null,
+     "Market Capitalization": 9.94,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -1.91
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531262",
+    "name": "Equilateral Ent.",
+    "company_id": "3290",
+    "fundamentals": {
+     "Current Price": 8.03,
+     "Price to Earning": 76.15,
+     "Market Capitalization": 9.9,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.05,
+     "YOY Quarterly profit growth": -68.75,
+     "Sales latest quarter": 10.22,
+     "YOY Quarterly sales growth": -37.42,
+     "Return on capital employed": 2.06
+    }
+   },
+   {
+    "symbol": "530839",
+    "name": "CLIO Infotech",
+    "company_id": "675",
+    "fundamentals": {
+     "Current Price": 8.97,
+     "Price to Earning": 13.35,
+     "Market Capitalization": 9.88,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.08,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.23,
+     "YOY Quarterly sales growth": 228.57,
+     "Return on capital employed": 2.87
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "512618",
+    "name": "RLF",
+    "company_id": "2769",
+    "fundamentals": {
+     "Current Price": 9.0,
+     "Price to Earning": null,
+     "Market Capitalization": 9.85,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.03,
+     "YOY Quarterly profit growth": 400.0,
+     "Sales latest quarter": 0.03,
+     "YOY Quarterly sales growth": -75.0,
+     "Return on capital employed": 0.03
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530421",
+    "name": "Kuwer Industries",
+    "company_id": "40866",
+    "fundamentals": {
+     "Current Price": 10.83,
+     "Price to Earning": 2.78,
+     "Market Capitalization": 9.83,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": 109.32,
+     "Sales latest quarter": 19.55,
+     "YOY Quarterly sales growth": 38.95,
+     "Return on capital employed": -6.76
+    }
+   },
+   {
+    "symbol": "543651",
+    "name": "DAPS Advertising",
+    "company_id": "1275349",
+    "fundamentals": {
+     "Current Price": 19.0,
+     "Price to Earning": 7.28,
+     "Market Capitalization": 9.83,
+     "Dividend yield": 1.32,
+     "Net Profit latest quarter": 0.91,
+     "YOY Quarterly profit growth": 16.67,
+     "Sales latest quarter": 12.33,
+     "YOY Quarterly sales growth": 11.58,
+     "Return on capital employed": 10.35
+    }
+   },
+   {
+    "symbol": "531441",
+    "name": "Lyons Corporate",
+    "company_id": "1269819",
+    "fundamentals": {
+     "Current Price": 21.0,
+     "Price to Earning": 33.86,
+     "Market Capitalization": 9.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": -200.0,
+     "Sales latest quarter": 0.26,
+     "YOY Quarterly sales growth": -10.34,
+     "Return on capital employed": 5.85
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "511636",
+    "name": "DJS Stock",
+    "company_id": "840",
+    "fundamentals": {
+     "Current Price": 1.3,
+     "Price to Earning": null,
+     "Market Capitalization": 9.81,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.04,
+     "YOY Quarterly profit growth": -140.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 0.61
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "536672",
+    "name": "VCU Data Managem",
+    "company_id": "573159",
+    "fundamentals": {
+     "Current Price": 6.3,
+     "Price to Earning": 244.25,
+     "Market Capitalization": 9.77,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.27
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530571",
+    "name": "Explicit Finance",
+    "company_id": "983",
+    "fundamentals": {
+     "Current Price": 10.52,
+     "Price to Earning": null,
+     "Market Capitalization": 9.75,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.06,
+     "YOY Quarterly profit growth": -40.0,
+     "Sales latest quarter": 0.46,
+     "YOY Quarterly sales growth": -48.31,
+     "Return on capital employed": -0.13
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "519439",
+    "name": "Pion. Agro Extr.",
+    "company_id": "2480",
+    "fundamentals": {
+     "Current Price": 22.5,
+     "Price to Earning": null,
+     "Market Capitalization": 9.74,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.25,
+     "YOY Quarterly profit growth": -525.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -18.42
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530809",
+    "name": "BNR Udyog",
+    "company_id": "522",
+    "fundamentals": {
+     "Current Price": 32.33,
+     "Price to Earning": null,
+     "Market Capitalization": 9.7,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.59,
+     "YOY Quarterly profit growth": 110.71,
+     "Sales latest quarter": 0.97,
+     "YOY Quarterly sales growth": 86.54,
+     "Return on capital employed": -9.58
+    }
+   },
+   {
+    "symbol": "507609",
+    "name": "Olympic Oil Ind.",
+    "company_id": "2326",
+    "fundamentals": {
+     "Current Price": 33.99,
+     "Price to Earning": null,
+     "Market Capitalization": 9.69,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -28.4,
+     "YOY Quarterly profit growth": -35400.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -0.26
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "TVVISION",
+    "name": "TV Vision",
+    "company_id": "1273485",
+    "fundamentals": {
+     "Current Price": 2.5,
+     "Price to Earning": null,
+     "Market Capitalization": 9.69,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -3.64,
+     "YOY Quarterly profit growth": 29.87,
+     "Sales latest quarter": 0.24,
+     "YOY Quarterly sales growth": -96.83,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538881",
+    "name": "Galada Finance",
+    "company_id": "1228690",
+    "fundamentals": {
+     "Current Price": 32.28,
+     "Price to Earning": 19.76,
+     "Market Capitalization": 9.68,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.1,
+     "YOY Quarterly profit growth": 150.0,
+     "Sales latest quarter": 0.76,
+     "YOY Quarterly sales growth": 43.4,
+     "Return on capital employed": 10.31
+    }
+   },
+   {
+    "symbol": "511122",
+    "name": "First Custodian",
+    "company_id": "1024",
+    "fundamentals": {
+     "Current Price": 64.45,
+     "Price to Earning": null,
+     "Market Capitalization": 9.67,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.11,
+     "YOY Quarterly profit growth": 47.62,
+     "Sales latest quarter": 0.03,
+     "YOY Quarterly sales growth": 250.0,
+     "Return on capital employed": -1.63
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "542146",
+    "name": "Sh. Krish. Infr.",
+    "company_id": "1274595",
+    "fundamentals": {
+     "Current Price": 8.74,
+     "Price to Earning": 7.12,
+     "Market Capitalization": 9.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.16,
+     "YOY Quarterly profit growth": 114.68,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 0.92
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538422",
+    "name": "Jackson Invest",
+    "company_id": "926387",
+    "fundamentals": {
+     "Current Price": 0.33,
+     "Price to Earning": 3.75,
+     "Market Capitalization": 9.59,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.24,
+     "YOY Quarterly profit growth": 242.86,
+     "Sales latest quarter": 0.11,
+     "YOY Quarterly sales growth": -26.67,
+     "Return on capital employed": 5.33
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "534422",
+    "name": "Looks Health",
+    "company_id": "2115",
+    "fundamentals": {
+     "Current Price": 9.1,
+     "Price to Earning": 318.67,
+     "Market Capitalization": 9.56,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.0,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.12,
+     "YOY Quarterly sales growth": 71.43,
+     "Return on capital employed": 0.2
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "514248",
+    "name": "Sreechem Resins",
+    "company_id": "1268509",
+    "fundamentals": {
+     "Current Price": 22.65,
+     "Price to Earning": 237.75,
+     "Market Capitalization": 9.51,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.11,
+     "YOY Quarterly profit growth": 184.62,
+     "Sales latest quarter": 8.87,
+     "YOY Quarterly sales growth": 2.9,
+     "Return on capital employed": -0.66
+    }
+   },
+   {
+    "symbol": "531594",
+    "name": "Incon Engineers",
+    "company_id": "1411",
+    "fundamentals": {
+     "Current Price": 21.95,
+     "Price to Earning": null,
+     "Market Capitalization": 9.5,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.14,
+     "YOY Quarterly profit growth": -250.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -93.15
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509038",
+    "name": "Voltaire Leasing",
+    "company_id": "3706",
+    "fundamentals": {
+     "Current Price": 23.0,
+     "Price to Earning": null,
+     "Market Capitalization": 9.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.11,
+     "YOY Quarterly profit growth": -15.38,
+     "Sales latest quarter": 0.16,
+     "YOY Quarterly sales growth": -5.88,
+     "Return on capital employed": -0.11
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509024",
+    "name": "Golden Legand Ls",
+    "company_id": "1175",
+    "fundamentals": {
+     "Current Price": 6.37,
+     "Price to Earning": null,
+     "Market Capitalization": 9.47,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.17,
+     "YOY Quarterly profit growth": -97.97,
+     "Sales latest quarter": 7.05,
+     "YOY Quarterly sales growth": -90.81,
+     "Return on capital employed": 91.63
+    }
+   },
+   {
+    "symbol": "538707",
+    "name": "Rajasthan Cylind",
+    "company_id": "1119379",
+    "fundamentals": {
+     "Current Price": 28.1,
+     "Price to Earning": null,
+     "Market Capitalization": 9.45,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.64,
+     "YOY Quarterly profit growth": -88.24,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -9.08
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538894",
+    "name": "Octal Credit Cap",
+    "company_id": "1270570",
+    "fundamentals": {
+     "Current Price": 18.88,
+     "Price to Earning": null,
+     "Market Capitalization": 9.44,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.42,
+     "YOY Quarterly profit growth": 125.4,
+     "Sales latest quarter": 0.08,
+     "YOY Quarterly sales growth": -11.11,
+     "Return on capital employed": -6.72
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531387",
+    "name": "Hasti Finance",
+    "company_id": "1284",
+    "fundamentals": {
+     "Current Price": 8.69,
+     "Price to Earning": null,
+     "Market Capitalization": 9.42,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.04,
+     "YOY Quarterly profit growth": -100.0,
+     "Sales latest quarter": 0.05,
+     "YOY Quarterly sales growth": -44.44,
+     "Return on capital employed": -52.05
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "500202",
+    "name": "India Lease Dev.",
+    "company_id": "1426",
+    "fundamentals": {
+     "Current Price": 6.4,
+     "Price to Earning": 235.25,
+     "Market Capitalization": 9.41,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": 50.0,
+     "Sales latest quarter": 0.16,
+     "YOY Quarterly sales growth": 23.08,
+     "Return on capital employed": 0.2
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526869",
+    "name": "Kumbhat Fin.",
+    "company_id": "1845",
+    "fundamentals": {
+     "Current Price": 17.62,
+     "Price to Earning": 11.59,
+     "Market Capitalization": 9.39,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.1,
+     "YOY Quarterly profit growth": -9.09,
+     "Sales latest quarter": 1.97,
+     "YOY Quarterly sales growth": 34.93,
+     "Return on capital employed": 11.77
+    }
+   },
+   {
+    "symbol": "ARENTERP",
+    "name": "Rajdarshan Inds",
+    "company_id": "2638",
+    "fundamentals": {
+     "Current Price": 30.14,
+     "Price to Earning": null,
+     "Market Capitalization": 9.37,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.36,
+     "YOY Quarterly profit growth": 50.0,
+     "Sales latest quarter": 0.3,
+     "YOY Quarterly sales growth": 0.0,
+     "Return on capital employed": 0.19
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "516110",
+    "name": "Family Care",
+    "company_id": "722",
+    "fundamentals": {
+     "Current Price": 1.73,
+     "Price to Earning": null,
+     "Market Capitalization": 9.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.42,
+     "YOY Quarterly profit growth": 40.0,
+     "Sales latest quarter": 0.05,
+     "YOY Quarterly sales growth": 150.0,
+     "Return on capital employed": -23.2
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539486",
+    "name": "Geetanjali Cred.",
+    "company_id": "1273140",
+    "fundamentals": {
+     "Current Price": 21.13,
+     "Price to Earning": 71.85,
+     "Market Capitalization": 9.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.06,
+     "YOY Quarterly profit growth": -200.0,
+     "Sales latest quarter": 0.2,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.63
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "507833",
+    "name": "Computer Point",
+    "company_id": "695",
+    "fundamentals": {
+     "Current Price": 3.11,
+     "Price to Earning": null,
+     "Market Capitalization": 9.33,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.12,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.03
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540266",
+    "name": "Globe Commercial",
+    "company_id": "1273624",
+    "fundamentals": {
+     "Current Price": 15.54,
+     "Price to Earning": 0.36,
+     "Market Capitalization": 9.33,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 5.6,
+     "YOY Quarterly profit growth": 10.67,
+     "Sales latest quarter": 241.69,
+     "YOY Quarterly sales growth": 13.22,
+     "Return on capital employed": 5.01
+    },
+    "data_quality_flags": [
+     "P/E below 1 — earnings probably one-off or misreported"
+    ]
+   },
+   {
+    "symbol": "ANTGRAPHIC",
+    "name": "Antarctica",
+    "company_id": "206",
+    "fundamentals": {
+     "Current Price": 0.6,
+     "Price to Earning": 8.53,
+     "Market Capitalization": 9.3,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.55,
+     "YOY Quarterly profit growth": -20.29,
+     "Sales latest quarter": 40.41,
+     "YOY Quarterly sales growth": 709.82,
+     "Return on capital employed": 6.51
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "538496",
+    "name": "Tarini Internat.",
+    "company_id": "923886",
+    "fundamentals": {
+     "Current Price": 7.14,
+     "Price to Earning": 5.62,
+     "Market Capitalization": 9.28,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.66,
+     "YOY Quarterly profit growth": 17.86,
+     "Sales latest quarter": 1.25,
+     "YOY Quarterly sales growth": 11.61,
+     "Return on capital employed": 1.57
+    }
+   },
+   {
+    "symbol": "531338",
+    "name": "Milestone Global",
+    "company_id": "2083",
+    "fundamentals": {
+     "Current Price": 18.45,
+     "Price to Earning": 31.93,
+     "Market Capitalization": 9.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": -106.98,
+     "Sales latest quarter": 4.57,
+     "YOY Quarterly sales growth": 9.33,
+     "Return on capital employed": 9.79
+    }
+   },
+   {
+    "symbol": "524604",
+    "name": "Adline Chem Lab",
+    "company_id": "1269230",
+    "fundamentals": {
+     "Current Price": 15.79,
+     "Price to Earning": null,
+     "Market Capitalization": 9.24,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.04,
+     "YOY Quarterly profit growth": 180.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -1266.67
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "517397",
+    "name": "Pan Electronics",
+    "company_id": "2392",
+    "fundamentals": {
+     "Current Price": 23.0,
+     "Price to Earning": null,
+     "Market Capitalization": 9.2,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.41,
+     "YOY Quarterly profit growth": -583.33,
+     "Sales latest quarter": 0.79,
+     "YOY Quarterly sales growth": -59.69,
+     "Return on capital employed": -17.1
+    }
+   },
+   {
+    "symbol": "521161",
+    "name": "Sri Lak.Sar.Arni",
+    "company_id": "3168",
+    "fundamentals": {
+     "Current Price": 27.55,
+     "Price to Earning": null,
+     "Market Capitalization": 9.17,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -5.52,
+     "YOY Quarterly profit growth": -46.42,
+     "Sales latest quarter": 20.7,
+     "YOY Quarterly sales growth": -5.82,
+     "Return on capital employed": -13.53
+    }
+   },
+   {
+    "symbol": "539506",
+    "name": "Adcon Capital",
+    "company_id": "1272091",
+    "fundamentals": {
+     "Current Price": 0.46,
+     "Price to Earning": null,
+     "Market Capitalization": 9.12,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.55,
+     "YOY Quarterly profit growth": 14.58,
+     "Sales latest quarter": 1.62,
+     "YOY Quarterly sales growth": 74.19,
+     "Return on capital employed": -8.76
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "532072",
+    "name": "Interworld Digi.",
+    "company_id": "1530",
+    "fundamentals": {
+     "Current Price": 0.19,
+     "Price to Earning": null,
+     "Market Capitalization": 9.09,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.19,
+     "YOY Quarterly profit growth": -216.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -0.31
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "530281",
+    "name": "Quantum Digital",
+    "company_id": "2607",
+    "fundamentals": {
+     "Current Price": 29.93,
+     "Price to Earning": null,
+     "Market Capitalization": 9.08,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.14,
+     "YOY Quarterly profit growth": -450.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509760",
+    "name": "Modern Shares",
+    "company_id": "2104",
+    "fundamentals": {
+     "Current Price": 30.9,
+     "Price to Earning": 100.67,
+     "Market Capitalization": 9.06,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.14,
+     "YOY Quarterly profit growth": -12.5,
+     "Sales latest quarter": 0.98,
+     "YOY Quarterly sales growth": -5.77,
+     "Return on capital employed": 2.62
+    }
+   },
+   {
+    "symbol": "DIRL",
+    "name": "Dhanuka Infra Realty",
+    "company_id": "1273549",
+    "fundamentals": {
+     "Current Price": 9.5,
+     "Price to Earning": 8.47,
+     "Market Capitalization": 9.06,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.89,
+     "YOY Quarterly profit growth": -66.79,
+     "Sales latest quarter": 2.33,
+     "YOY Quarterly sales growth": -35.99,
+     "Return on capital employed": 8.96
+    }
+   },
+   {
+    "symbol": "543519",
+    "name": "Shashwat Furnis.",
+    "company_id": "1275214",
+    "fundamentals": {
+     "Current Price": 43.26,
+     "Price to Earning": null,
+     "Market Capitalization": 9.03,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.18,
+     "YOY Quarterly profit growth": -144.44,
+     "Sales latest quarter": 14.99,
+     "YOY Quarterly sales growth": 34.08,
+     "Return on capital employed": -2.99
+    }
+   },
+   {
+    "symbol": "530201",
+    "name": "Kallam Textiles",
+    "company_id": "1691",
+    "fundamentals": {
+     "Current Price": 1.7,
+     "Price to Earning": null,
+     "Market Capitalization": 8.98,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -29.79,
+     "YOY Quarterly profit growth": -235.47,
+     "Sales latest quarter": 47.87,
+     "YOY Quarterly sales growth": -26.21,
+     "Return on capital employed": -9.89
+    }
+   },
+   {
+    "symbol": "MAKS",
+    "name": "Maks Energy",
+    "company_id": "1275306",
+    "fundamentals": {
+     "Current Price": 12.9,
+     "Price to Earning": 11.47,
+     "Market Capitalization": 8.95,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.6,
+     "YOY Quarterly profit growth": 26.32,
+     "Sales latest quarter": 27.97,
+     "YOY Quarterly sales growth": -13.75,
+     "Return on capital employed": 9.34
+    }
+   },
+   {
+    "symbol": "531505",
+    "name": "Indergiri Fin.",
+    "company_id": "1418",
+    "fundamentals": {
+     "Current Price": 17.66,
+     "Price to Earning": null,
+     "Market Capitalization": 8.94,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.73,
+     "YOY Quarterly profit growth": -114.71,
+     "Sales latest quarter": 0.27,
+     "YOY Quarterly sales growth": -18.18,
+     "Return on capital employed": -0.96
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539117",
+    "name": "Sujala Trading &",
+    "company_id": "1270820",
+    "fundamentals": {
+     "Current Price": 15.61,
+     "Price to Earning": null,
+     "Market Capitalization": 8.93,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.09,
+     "YOY Quarterly profit growth": -160.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -0.1
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "FLEXITUFF",
+    "name": "Flexituff Vent.",
+    "company_id": "1033",
+    "fundamentals": {
+     "Current Price": 2.72,
+     "Price to Earning": null,
+     "Market Capitalization": 8.93,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -15.68,
+     "YOY Quarterly profit growth": 14.46,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -26.79
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "JIWANRAM",
+    "name": "Jiwanram Sheo",
+    "company_id": "1284481",
+    "fundamentals": {
+     "Current Price": 3.6,
+     "Price to Earning": 8.82,
+     "Market Capitalization": 8.91,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.36,
+     "YOY Quarterly profit growth": -66.97,
+     "Sales latest quarter": 42.77,
+     "YOY Quarterly sales growth": 21.75,
+     "Return on capital employed": 2.77
+    }
+   },
+   {
+    "symbol": "524624",
+    "name": "Gagan Gases",
+    "company_id": "1072",
+    "fundamentals": {
+     "Current Price": 19.7,
+     "Price to Earning": 32.96,
+     "Market Capitalization": 8.9,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.02,
+     "YOY Quarterly profit growth": 300.0,
+     "Sales latest quarter": 0.7,
+     "YOY Quarterly sales growth": -57.58,
+     "Return on capital employed": 5.57
+    }
+   },
+   {
+    "symbol": "544368",
+    "name": "Swasth Foodtech",
+    "company_id": "1285335",
+    "fundamentals": {
+     "Current Price": 15.2,
+     "Price to Earning": null,
+     "Market Capitalization": 8.9,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.22,
+     "YOY Quarterly profit growth": 106.78,
+     "Sales latest quarter": 111.01,
+     "YOY Quarterly sales growth": 38.16,
+     "Return on capital employed": 0.29
+    }
+   },
+   {
+    "symbol": "531541",
+    "name": "Kobo Biotech",
+    "company_id": "345",
+    "fundamentals": {
+     "Current Price": 3.73,
+     "Price to Earning": null,
+     "Market Capitalization": 8.89,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.33,
+     "YOY Quarterly profit growth": -8.13,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -125.57
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "507808",
+    "name": "United Leasing",
+    "company_id": "3552",
+    "fundamentals": {
+     "Current Price": 29.5,
+     "Price to Earning": null,
+     "Market Capitalization": 8.85,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.14,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 1.08,
+     "YOY Quarterly sales growth": -24.48,
+     "Return on capital employed": 4.26
+    }
+   },
+   {
+    "symbol": "514140",
+    "name": "Suryavanshi Spg.",
+    "company_id": "3300",
+    "fundamentals": {
+     "Current Price": 18.0,
+     "Price to Earning": 8.11,
+     "Market Capitalization": 8.84,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.18,
+     "YOY Quarterly profit growth": 261.9,
+     "Sales latest quarter": 2.17,
+     "YOY Quarterly sales growth": 92.04,
+     "Return on capital employed": 13.44
+    }
+   },
+   {
+    "symbol": "531486",
+    "name": "Filmcity Media",
+    "company_id": "1015",
+    "fundamentals": {
+     "Current Price": 1.78,
+     "Price to Earning": null,
+     "Market Capitalization": 8.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.06,
+     "YOY Quarterly profit growth": -20.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -9.49
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526799",
+    "name": "Union Qual. Pla.",
+    "company_id": "3537",
+    "fundamentals": {
+     "Current Price": 12.67,
+     "Price to Earning": null,
+     "Market Capitalization": 8.78,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.04,
+     "YOY Quarterly profit growth": -3366.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -4.01
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509073",
+    "name": "Hathway Bhawani",
+    "company_id": "1285",
+    "fundamentals": {
+     "Current Price": 10.8,
+     "Price to Earning": null,
+     "Market Capitalization": 8.75,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.1,
+     "YOY Quarterly profit growth": -400.0,
+     "Sales latest quarter": 0.52,
+     "YOY Quarterly sales growth": -13.33,
+     "Return on capital employed": -9.33
+    }
+   },
+   {
+    "symbol": "531878",
+    "name": "Anjani Finance",
+    "company_id": "195",
+    "fundamentals": {
+     "Current Price": 8.62,
+     "Price to Earning": 54.62,
+     "Market Capitalization": 8.74,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.11,
+     "YOY Quarterly sales growth": -15.38,
+     "Return on capital employed": 1.45
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "TRANSWIND",
+    "name": "Transwind Infra.",
+    "company_id": "1274097",
+    "fundamentals": {
+     "Current Price": 11.3,
+     "Price to Earning": 12.52,
+     "Market Capitalization": 8.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.4,
+     "YOY Quarterly profit growth": -29.82,
+     "Sales latest quarter": 19.16,
+     "YOY Quarterly sales growth": 68.22,
+     "Return on capital employed": 7.88
+    }
+   },
+   {
+    "symbol": "PPSL",
+    "name": "Picturepost Stu.",
+    "company_id": "1284884",
+    "fundamentals": {
+     "Current Price": 2.95,
+     "Price to Earning": 10.29,
+     "Market Capitalization": 8.64,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.6,
+     "YOY Quarterly profit growth": -76.83,
+     "Sales latest quarter": 8.22,
+     "YOY Quarterly sales growth": -58.08,
+     "Return on capital employed": 4.27
+    }
+   },
+   {
+    "symbol": "QUINTEGRA",
+    "name": "Quintegra Soln.",
+    "company_id": "2608",
+    "fundamentals": {
+     "Current Price": 3.22,
+     "Price to Earning": null,
+     "Market Capitalization": 8.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.05,
+     "YOY Quarterly profit growth": -66.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -34.04
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538770",
+    "name": "Crane Infra",
+    "company_id": "1270746",
+    "fundamentals": {
+     "Current Price": 11.92,
+     "Price to Earning": 15.98,
+     "Market Capitalization": 8.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.2,
+     "YOY Quarterly profit growth": 66.67,
+     "Sales latest quarter": 0.35,
+     "YOY Quarterly sales growth": 0.0,
+     "Return on capital employed": 2.08
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540914",
+    "name": "SRU Steels",
+    "company_id": "1274262",
+    "fundamentals": {
+     "Current Price": 1.44,
+     "Price to Earning": null,
+     "Market Capitalization": 8.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.07,
+     "YOY Quarterly profit growth": -105.19,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -1.22
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539090",
+    "name": "Rajputana Invest",
+    "company_id": "1270798",
+    "fundamentals": {
+     "Current Price": 28.0,
+     "Price to Earning": 123.14,
+     "Market Capitalization": 8.62,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": 150.0,
+     "Sales latest quarter": 1.43,
+     "YOY Quarterly sales growth": 58.89,
+     "Return on capital employed": 1.47
+    }
+   },
+   {
+    "symbol": "VERITAAS",
+    "name": "Veritaas Adver.",
+    "company_id": "1284781",
+    "fundamentals": {
+     "Current Price": 30.5,
+     "Price to Earning": 4.81,
+     "Market Capitalization": 8.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.05,
+     "YOY Quarterly profit growth": 61.54,
+     "Sales latest quarter": 7.55,
+     "YOY Quarterly sales growth": -8.48,
+     "Return on capital employed": 17.23
+    }
+   },
+   {
+    "symbol": "506313",
+    "name": "Sashwat Technoc",
+    "company_id": "3801",
+    "fundamentals": {
+     "Current Price": 276.75,
+     "Price to Earning": null,
+     "Market Capitalization": 8.58,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.12,
+     "YOY Quarterly profit growth": 1300.0,
+     "Sales latest quarter": 0.1,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -10.89
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531043",
+    "name": "Dhanvantri Jeev.",
+    "company_id": "811",
+    "fundamentals": {
+     "Current Price": 20.9,
+     "Price to Earning": 16.8,
+     "Market Capitalization": 8.57,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.18,
+     "YOY Quarterly profit growth": 200.0,
+     "Sales latest quarter": 7.8,
+     "YOY Quarterly sales growth": 41.56,
+     "Return on capital employed": 3.97
+    }
+   },
+   {
+    "symbol": "543372",
+    "name": "Getalong Enterp.",
+    "company_id": "1274972",
+    "fundamentals": {
+     "Current Price": 4.05,
+     "Price to Earning": 12.79,
+     "Market Capitalization": 8.57,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.55,
+     "YOY Quarterly profit growth": -39.56,
+     "Sales latest quarter": 0.5,
+     "YOY Quarterly sales growth": -56.52,
+     "Return on capital employed": 6.04
+    },
+    "data_quality_flags": [
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509449",
+    "name": "Bhagawati Oxygen",
+    "company_id": "443",
+    "fundamentals": {
+     "Current Price": 37.02,
+     "Price to Earning": 2.89,
+     "Market Capitalization": 8.55,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.33,
+     "YOY Quarterly profit growth": -1000.0,
+     "Sales latest quarter": 0.13,
+     "YOY Quarterly sales growth": -13.33,
+     "Return on capital employed": 48.88
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "519230",
+    "name": "Kisaan Parivar",
+    "company_id": "2753",
+    "fundamentals": {
+     "Current Price": 9.7,
+     "Price to Earning": 10.68,
+     "Market Capitalization": 8.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.18,
+     "YOY Quarterly profit growth": -133.96,
+     "Sales latest quarter": 0.5,
+     "YOY Quarterly sales growth": -69.14,
+     "Return on capital employed": 15.1
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526494",
+    "name": "Promact Plastics",
+    "company_id": "2581",
+    "fundamentals": {
+     "Current Price": 13.09,
+     "Price to Earning": null,
+     "Market Capitalization": 8.52,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.19,
+     "YOY Quarterly profit growth": 258.33,
+     "Sales latest quarter": 8.46,
+     "YOY Quarterly sales growth": 10475.0,
+     "Return on capital employed": -207.14
+    }
+   },
+   {
+    "symbol": "544961",
+    "name": "Dudani Retail",
+    "company_id": "1286208",
+    "fundamentals": {
+     "Current Price": 8.18,
+     "Price to Earning": 4.47,
+     "Market Capitalization": 8.5,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": null,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": null,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 20.98
+    }
+   },
+   {
+    "symbol": "COMPINFO",
+    "name": "Compuage Info.",
+    "company_id": "693",
+    "fundamentals": {
+     "Current Price": 0.99,
+     "Price to Earning": null,
+     "Market Capitalization": 8.49,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -137.42,
+     "YOY Quarterly profit growth": -1417.55,
+     "Sales latest quarter": 388.94,
+     "YOY Quarterly sales growth": -69.83,
+     "Return on capital employed": -2.12
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "502271",
+    "name": "Raasi Refractor",
+    "company_id": "2615",
+    "fundamentals": {
+     "Current Price": 18.0,
+     "Price to Earning": 30.29,
+     "Market Capitalization": 8.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.41,
+     "YOY Quarterly profit growth": 46.43,
+     "Sales latest quarter": 14.48,
+     "YOY Quarterly sales growth": 33.58,
+     "Return on capital employed": 10.53
+    }
+   },
+   {
+    "symbol": "500277",
+    "name": "Mid India Inds.",
+    "company_id": "2077",
+    "fundamentals": {
+     "Current Price": 5.2,
+     "Price to Earning": 49.88,
+     "Market Capitalization": 8.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.11,
+     "YOY Quarterly profit growth": -650.0,
+     "Sales latest quarter": 2.0,
+     "YOY Quarterly sales growth": 34.23,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "520081",
+    "name": "Eastcoast Steel",
+    "company_id": "872",
+    "fundamentals": {
+     "Current Price": 15.6,
+     "Price to Earning": 10.94,
+     "Market Capitalization": 8.42,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.34,
+     "YOY Quarterly profit growth": 126.67,
+     "Sales latest quarter": 16.49,
+     "YOY Quarterly sales growth": 164800.0,
+     "Return on capital employed": -0.61
+    }
+   },
+   {
+    "symbol": "507759",
+    "name": "Lime Chemicals",
+    "company_id": "1890",
+    "fundamentals": {
+     "Current Price": 12.9,
+     "Price to Earning": null,
+     "Market Capitalization": 8.39,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.19,
+     "YOY Quarterly profit growth": 533.33,
+     "Sales latest quarter": 6.23,
+     "YOY Quarterly sales growth": 236.76,
+     "Return on capital employed": -2.05
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off"
+    ]
+   },
+   {
+    "symbol": "544094",
+    "name": "Euphoria Infotec",
+    "company_id": "1284642",
+    "fundamentals": {
+     "Current Price": 28.9,
+     "Price to Earning": 5.45,
+     "Market Capitalization": 8.39,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.88,
+     "YOY Quarterly profit growth": 7.32,
+     "Sales latest quarter": 8.91,
+     "YOY Quarterly sales growth": 42.33,
+     "Return on capital employed": 12.9
+    }
+   },
+   {
+    "symbol": "511110",
+    "name": "V B Desai Fin.",
+    "company_id": "3581",
+    "fundamentals": {
+     "Current Price": 18.4,
+     "Price to Earning": 8.69,
+     "Market Capitalization": 8.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.29,
+     "YOY Quarterly profit growth": 45.0,
+     "Sales latest quarter": 1.08,
+     "YOY Quarterly sales growth": 12.5,
+     "Return on capital employed": 9.29
+    }
+   },
+   {
+    "symbol": "BLUECHIP",
+    "name": "Blue Chip India",
+    "company_id": "513",
+    "fundamentals": {
+     "Current Price": 1.5,
+     "Price to Earning": null,
+     "Market Capitalization": 8.3,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.22,
+     "YOY Quarterly profit growth": -120.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539014",
+    "name": "Kalpa Commer.",
+    "company_id": "1270771",
+    "fundamentals": {
+     "Current Price": 8.09,
+     "Price to Earning": 8.64,
+     "Market Capitalization": 8.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.5,
+     "YOY Quarterly profit growth": 233.33,
+     "Sales latest quarter": 9.76,
+     "YOY Quarterly sales growth": 62.94,
+     "Return on capital employed": 1.38
+    }
+   },
+   {
+    "symbol": "539492",
+    "name": "Garbi Finvest",
+    "company_id": "1273147",
+    "fundamentals": {
+     "Current Price": 7.07,
+     "Price to Earning": null,
+     "Market Capitalization": 8.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.82,
+     "YOY Quarterly profit growth": -168.91,
+     "Sales latest quarter": 0.46,
+     "YOY Quarterly sales growth": -33.33,
+     "Return on capital employed": -8.76
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "520131",
+    "name": "Coastal Roadways",
+    "company_id": "682",
+    "fundamentals": {
+     "Current Price": 19.95,
+     "Price to Earning": 5.05,
+     "Market Capitalization": 8.28,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.94,
+     "YOY Quarterly profit growth": 9.3,
+     "Sales latest quarter": 10.63,
+     "YOY Quarterly sales growth": 2.71,
+     "Return on capital employed": 8.7
+    }
+   },
+   {
+    "symbol": "PREMIER",
+    "name": "Premier",
+    "company_id": "2551",
+    "fundamentals": {
+     "Current Price": 2.72,
+     "Price to Earning": null,
+     "Market Capitalization": 8.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.76,
+     "YOY Quarterly profit growth": 9.28,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "542677",
+    "name": "Mahesh Developer",
+    "company_id": "1274668",
+    "fundamentals": {
+     "Current Price": 19.89,
+     "Price to Earning": 68.83,
+     "Market Capitalization": 8.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": -50.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 1.24
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "514240",
+    "name": "Kush Industries",
+    "company_id": "3109",
+    "fundamentals": {
+     "Current Price": 5.35,
+     "Price to Earning": null,
+     "Market Capitalization": 8.16,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -5.22
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539111",
+    "name": "Sheshadri Indus.",
+    "company_id": "1270814",
+    "fundamentals": {
+     "Current Price": 16.46,
+     "Price to Earning": 2.13,
+     "Market Capitalization": 8.16,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.73,
+     "YOY Quarterly profit growth": -61.22,
+     "Sales latest quarter": 5.78,
+     "YOY Quarterly sales growth": -8.83,
+     "Return on capital employed": 51.26
+    }
+   },
+   {
+    "symbol": "530429",
+    "name": "Ashish Polyplast",
+    "company_id": "278",
+    "fundamentals": {
+     "Current Price": 23.89,
+     "Price to Earning": 14.76,
+     "Market Capitalization": 8.12,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.05,
+     "YOY Quarterly profit growth": 171.43,
+     "Sales latest quarter": 3.88,
+     "YOY Quarterly sales growth": 5.15,
+     "Return on capital employed": 3.79
+    }
+   },
+   {
+    "symbol": "513488",
+    "name": "Sh. Steel Wire",
+    "company_id": "3021",
+    "fundamentals": {
+     "Current Price": 24.46,
+     "Price to Earning": null,
+     "Market Capitalization": 8.1,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.23,
+     "YOY Quarterly profit growth": 221.05,
+     "Sales latest quarter": 2.43,
+     "YOY Quarterly sales growth": 122.94,
+     "Return on capital employed": -3.84
+    }
+   },
+   {
+    "symbol": "521206",
+    "name": "Samtex Fashion",
+    "company_id": "2863",
+    "fundamentals": {
+     "Current Price": 1.08,
+     "Price to Earning": null,
+     "Market Capitalization": 8.05,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.14,
+     "YOY Quarterly profit growth": -16.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -0.11
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530027",
+    "name": "Aadi Industries",
+    "company_id": "17",
+    "fundamentals": {
+     "Current Price": 8.02,
+     "Price to Earning": null,
+     "Market Capitalization": 8.02,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.06,
+     "YOY Quarterly profit growth": -50.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -13.95
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539406",
+    "name": "Swagtam Trading",
+    "company_id": "1273097",
+    "fundamentals": {
+     "Current Price": 67.36,
+     "Price to Earning": 53.47,
+     "Market Capitalization": 8.02,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.04,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 2.14
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "534708",
+    "name": "Shanti Guru Inds",
+    "company_id": "146361",
+    "fundamentals": {
+     "Current Price": 6.51,
+     "Price to Earning": 0.71,
+     "Market Capitalization": 8.01,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 11.46,
+     "YOY Quarterly profit growth": 9650.0,
+     "Sales latest quarter": 0.23,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 71.68
+    },
+    "data_quality_flags": [
+     "P/E below 1 — earnings probably one-off or misreported",
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "quarterly profit exceeds sales — other income / exceptional item",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "535657",
+    "name": "Objectone Inform",
+    "company_id": "439569",
+    "fundamentals": {
+     "Current Price": 7.62,
+     "Price to Earning": 7.93,
+     "Market Capitalization": 8.01,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.1,
+     "YOY Quarterly profit growth": 112.2,
+     "Sales latest quarter": 2.96,
+     "YOY Quarterly sales growth": 7.64,
+     "Return on capital employed": 2.99
+    }
+   },
+   {
+    "symbol": "540811",
+    "name": "Diggi Multitrade",
+    "company_id": "1274222",
+    "fundamentals": {
+     "Current Price": 8.25,
+     "Price to Earning": null,
+     "Market Capitalization": 7.98,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.0,
+     "YOY Quarterly profit growth": 100.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -1.19
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538794",
+    "name": "Jet Solar",
+    "company_id": "1133810",
+    "fundamentals": {
+     "Current Price": 6.7,
+     "Price to Earning": null,
+     "Market Capitalization": 7.96,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.02,
+     "YOY Quarterly profit growth": 112.5,
+     "Sales latest quarter": 0.2,
+     "YOY Quarterly sales growth": 253.85,
+     "Return on capital employed": -4.62
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "517044",
+    "name": "Intl. Data Mgt.",
+    "company_id": "1527",
+    "fundamentals": {
+     "Current Price": 36.08,
+     "Price to Earning": null,
+     "Market Capitalization": 7.94,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.07,
+     "YOY Quarterly profit growth": -40.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -280.0
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "513117",
+    "name": "Amforge Inds.",
+    "company_id": "166",
+    "fundamentals": {
+     "Current Price": 5.49,
+     "Price to Earning": 79.0,
+     "Market Capitalization": 7.9,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.37,
+     "YOY Quarterly profit growth": 1025.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -1.12
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off",
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526143",
+    "name": "MPL Plastics",
+    "company_id": "2086",
+    "fundamentals": {
+     "Current Price": 6.3,
+     "Price to Earning": null,
+     "Market Capitalization": 7.88,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.13,
+     "YOY Quarterly profit growth": -8.33,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -226.67
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "521080",
+    "name": "Pasari Spinning",
+    "company_id": "2430",
+    "fundamentals": {
+     "Current Price": 5.7,
+     "Price to Earning": null,
+     "Market Capitalization": 7.87,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": -133.33,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 16.28
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "INDIFRA",
+    "name": "Indifra Ltd",
+    "company_id": "1284614",
+    "fundamentals": {
+     "Current Price": 10.8,
+     "Price to Earning": null,
+     "Market Capitalization": 7.87,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": 157.69,
+     "Sales latest quarter": 14.81,
+     "YOY Quarterly sales growth": 582.49,
+     "Return on capital employed": -0.72
+    }
+   },
+   {
+    "symbol": "530797",
+    "name": "Sh. Ganesh Elas.",
+    "company_id": "3000",
+    "fundamentals": {
+     "Current Price": 14.26,
+     "Price to Earning": 18.69,
+     "Market Capitalization": 7.85,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.99,
+     "YOY Quarterly profit growth": 890.0,
+     "Sales latest quarter": 4.07,
+     "YOY Quarterly sales growth": 1407.41,
+     "Return on capital employed": -10.84
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off"
+    ]
+   },
+   {
+    "symbol": "531458",
+    "name": "Boston Commerce",
+    "company_id": "538",
+    "fundamentals": {
+     "Current Price": 11.18,
+     "Price to Earning": null,
+     "Market Capitalization": 7.83,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.65,
+     "YOY Quarterly profit growth": -32.65,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -112.36
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "512405",
+    "name": "I Power Solution",
+    "company_id": "1381",
+    "fundamentals": {
+     "Current Price": 13.26,
+     "Price to Earning": null,
+     "Market Capitalization": 7.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.24,
+     "YOY Quarterly profit growth": 125.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -24.64
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "514414",
+    "name": "Oxford Industrie",
+    "company_id": "2377",
+    "fundamentals": {
+     "Current Price": 13.16,
+     "Price to Earning": 37.24,
+     "Market Capitalization": 7.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.03,
+     "YOY Quarterly profit growth": -110.71,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 38.0
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531585",
+    "name": "Devine Impex",
+    "company_id": "797",
+    "fundamentals": {
+     "Current Price": 8.2,
+     "Price to Earning": 130.33,
+     "Market Capitalization": 7.82,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": -66.67,
+     "Sales latest quarter": 0.23,
+     "YOY Quarterly sales growth": -37.84,
+     "Return on capital employed": 0.29
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "GATECHDVR",
+    "name": "GACM Tech-DVR",
+    "company_id": "1274169",
+    "fundamentals": {
+     "Current Price": 0.41,
+     "Price to Earning": 1.13,
+     "Market Capitalization": 7.78,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 1.52,
+     "YOY Quarterly profit growth": -53.09,
+     "Sales latest quarter": 4.5,
+     "YOY Quarterly sales growth": -32.84,
+     "Return on capital employed": 11.27
+    },
+    "data_quality_flags": [
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "537784",
+    "name": "Karnimata Cold",
+    "company_id": "762686",
+    "fundamentals": {
+     "Current Price": 15.25,
+     "Price to Earning": 9.81,
+     "Market Capitalization": 7.75,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.31,
+     "YOY Quarterly profit growth": 720.0,
+     "Sales latest quarter": 2.14,
+     "YOY Quarterly sales growth": 28.92,
+     "Return on capital employed": 8.9
+    },
+    "data_quality_flags": [
+     "quarterly profit up >500% on a small base — likely a one-off"
+    ]
+   },
+   {
+    "symbol": "526441",
+    "name": "Vision Cinemas",
+    "company_id": "3691",
+    "fundamentals": {
+     "Current Price": 1.09,
+     "Price to Earning": null,
+     "Market Capitalization": 7.72,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.13,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -1.8
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "544231",
+    "name": "Broach Lifecare",
+    "company_id": "1284903",
+    "fundamentals": {
+     "Current Price": 12.7,
+     "Price to Earning": null,
+     "Market Capitalization": 7.71,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.13,
+     "YOY Quarterly profit growth": -58.06,
+     "Sales latest quarter": 3.86,
+     "YOY Quarterly sales growth": 48.46,
+     "Return on capital employed": 2.52
+    }
+   },
+   {
+    "symbol": "530151",
+    "name": "Vijay Textiles",
+    "company_id": "3652",
+    "fundamentals": {
+     "Current Price": 4.17,
+     "Price to Earning": null,
+     "Market Capitalization": 7.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -3.83,
+     "YOY Quarterly profit growth": 80.03,
+     "Sales latest quarter": 1.41,
+     "YOY Quarterly sales growth": -53.77,
+     "Return on capital employed": -2.2
+    }
+   },
+   {
+    "symbol": "535910",
+    "name": "Money Masters",
+    "company_id": "486104",
+    "fundamentals": {
+     "Current Price": 0.76,
+     "Price to Earning": 14.13,
+     "Market Capitalization": 7.63,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.06,
+     "YOY Quarterly profit growth": -45.45,
+     "Sales latest quarter": 0.31,
+     "YOY Quarterly sales growth": -3.12,
+     "Return on capital employed": 3.42
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "526431",
+    "name": "Welterman Intl.",
+    "company_id": "3744",
+    "fundamentals": {
+     "Current Price": 17.16,
+     "Price to Earning": null,
+     "Market Capitalization": 7.62,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": -100.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "524808",
+    "name": "Phyto Chem (I)",
+    "company_id": "2473",
+    "fundamentals": {
+     "Current Price": 17.7,
+     "Price to Earning": null,
+     "Market Capitalization": 7.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.9,
+     "YOY Quarterly profit growth": -87.5,
+     "Sales latest quarter": 0.03,
+     "YOY Quarterly sales growth": -98.0,
+     "Return on capital employed": -1.57
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "524458",
+    "name": "Indo Euro Indch.",
+    "company_id": "462332",
+    "fundamentals": {
+     "Current Price": 8.4,
+     "Price to Earning": 28.19,
+     "Market Capitalization": 7.61,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.11,
+     "YOY Quarterly profit growth": -26.67,
+     "Sales latest quarter": 4.05,
+     "YOY Quarterly sales growth": 162.99,
+     "Return on capital employed": 3.88
+    }
+   },
+   {
+    "symbol": "530271",
+    "name": "Rich Universe",
+    "company_id": "2751",
+    "fundamentals": {
+     "Current Price": 10.48,
+     "Price to Earning": 9.62,
+     "Market Capitalization": 7.6,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.15,
+     "YOY Quarterly profit growth": 350.0,
+     "Sales latest quarter": 0.21,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 5.59
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "RITEZONE",
+    "name": "Rite Zone",
+    "company_id": "1275350",
+    "fundamentals": {
+     "Current Price": 17.95,
+     "Price to Earning": 22.32,
+     "Market Capitalization": 7.59,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.16,
+     "YOY Quarterly profit growth": -42.86,
+     "Sales latest quarter": 13.79,
+     "YOY Quarterly sales growth": 15.49,
+     "Return on capital employed": 4.12
+    }
+   },
+   {
+    "symbol": "519285",
+    "name": "Tarai Foods",
+    "company_id": "3358",
+    "fundamentals": {
+     "Current Price": 4.25,
+     "Price to Earning": null,
+     "Market Capitalization": 7.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.13,
+     "YOY Quarterly profit growth": 7.14,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "538919",
+    "name": "Skyline Ventures",
+    "company_id": "1242254",
+    "fundamentals": {
+     "Current Price": 19.0,
+     "Price to Earning": null,
+     "Market Capitalization": 7.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.2,
+     "YOY Quarterly profit growth": -400.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -7.7
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539800",
+    "name": "CHD Chemicals",
+    "company_id": "1273308",
+    "fundamentals": {
+     "Current Price": 7.46,
+     "Price to Earning": null,
+     "Market Capitalization": 7.54,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.12,
+     "YOY Quarterly profit growth": 20.0,
+     "Sales latest quarter": 1.62,
+     "YOY Quarterly sales growth": 27.56,
+     "Return on capital employed": -0.42
+    }
+   },
+   {
+    "symbol": "543460",
+    "name": "Quality RO Indu.",
+    "company_id": "1275166",
+    "fundamentals": {
+     "Current Price": 29.5,
+     "Price to Earning": null,
+     "Market Capitalization": 7.52,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.7,
+     "YOY Quarterly profit growth": -142.94,
+     "Sales latest quarter": 6.99,
+     "YOY Quarterly sales growth": -13.7,
+     "Return on capital employed": 0.44
+    }
+   },
+   {
+    "symbol": "538081",
+    "name": "Haria Apparels",
+    "company_id": "824238",
+    "fundamentals": {
+     "Current Price": 4.9,
+     "Price to Earning": 11.18,
+     "Market Capitalization": 7.49,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.28,
+     "YOY Quarterly profit growth": -12.5,
+     "Sales latest quarter": 0.94,
+     "YOY Quarterly sales growth": -3.09,
+     "Return on capital employed": 14.67
+    }
+   },
+   {
+    "symbol": "530173",
+    "name": "Oscar Global",
+    "company_id": "2366",
+    "fundamentals": {
+     "Current Price": 22.68,
+     "Price to Earning": null,
+     "Market Capitalization": 7.48,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": 66.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -3.76
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531221",
+    "name": "Mayur Floorings",
+    "company_id": "2038",
+    "fundamentals": {
+     "Current Price": 14.7,
+     "Price to Earning": 33.86,
+     "Market Capitalization": 7.45,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.06,
+     "YOY Quarterly profit growth": 100.0,
+     "Sales latest quarter": 2.54,
+     "YOY Quarterly sales growth": 30.93,
+     "Return on capital employed": 6.81
+    }
+   },
+   {
+    "symbol": "511463",
+    "name": "Alexander Stamps",
+    "company_id": "540264",
+    "fundamentals": {
+     "Current Price": 7.99,
+     "Price to Earning": null,
+     "Market Capitalization": 7.44,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.02,
+     "YOY Quarterly profit growth": null,
+     "Sales latest quarter": 0.07,
+     "YOY Quarterly sales growth": 0.0,
+     "Return on capital employed": -0.06
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "526877",
+    "name": "Siddhes. Garment",
+    "company_id": "1269444",
+    "fundamentals": {
+     "Current Price": 22.47,
+     "Price to Earning": 372.0,
+     "Market Capitalization": 7.44,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.09
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "FELDVR",
+    "name": "Future Ent. DVR",
+    "company_id": "1270588",
+    "fundamentals": {
+     "Current Price": 1.89,
+     "Price to Earning": null,
+     "Market Capitalization": 7.44,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 6.1,
+     "YOY Quarterly profit growth": -90.68,
+     "Sales latest quarter": 2899.46,
+     "YOY Quarterly sales growth": 22.43,
+     "Return on capital employed": null
+    }
+   },
+   {
+    "symbol": "530187",
+    "name": "Atharv Enter",
+    "company_id": "313",
+    "fundamentals": {
+     "Current Price": 4.37,
+     "Price to Earning": 37.15,
+     "Market Capitalization": 7.43,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.05,
+     "YOY Quarterly profit growth": 25.0,
+     "Sales latest quarter": 0.14,
+     "YOY Quarterly sales growth": 600.0,
+     "Return on capital employed": 1.3
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "535205",
+    "name": "Mystic Electron.",
+    "company_id": "359111",
+    "fundamentals": {
+     "Current Price": 3.76,
+     "Price to Earning": 16.15,
+     "Market Capitalization": 7.43,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.08,
+     "YOY Quarterly profit growth": 200.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 0.87
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "506906",
+    "name": "Saptak Chem &",
+    "company_id": "1267961",
+    "fundamentals": {
+     "Current Price": 24.08,
+     "Price to Earning": null,
+     "Market Capitalization": 7.4,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": 50.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -48.0
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "539410",
+    "name": "Muzali Arts",
+    "company_id": "1273093",
+    "fundamentals": {
+     "Current Price": 1.24,
+     "Price to Earning": 17.07,
+     "Market Capitalization": 7.34,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.0,
+     "YOY Quarterly profit growth": -100.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": 5.34
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531578",
+    "name": "KMF Builders",
+    "company_id": "1805",
+    "fundamentals": {
+     "Current Price": 6.02,
+     "Price to Earning": null,
+     "Market Capitalization": 7.33,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.14,
+     "YOY Quarterly profit growth": 56.25,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -3.47
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "503863",
+    "name": "Shree Mfg. Co.",
+    "company_id": "247883",
+    "fundamentals": {
+     "Current Price": 8.79,
+     "Price to Earning": null,
+     "Market Capitalization": 7.3,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": 0.0,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531323",
+    "name": "Jayatma Industri",
+    "company_id": "2886",
+    "fundamentals": {
+     "Current Price": 11.8,
+     "Price to Earning": null,
+     "Market Capitalization": 7.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.43,
+     "YOY Quarterly profit growth": -72.0,
+     "Sales latest quarter": 5.68,
+     "YOY Quarterly sales growth": 8.19,
+     "Return on capital employed": -1.46
+    }
+   },
+   {
+    "symbol": "521003",
+    "name": "Shiva Suitings",
+    "company_id": "2989",
+    "fundamentals": {
+     "Current Price": 47.0,
+     "Price to Earning": null,
+     "Market Capitalization": 7.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.04,
+     "YOY Quarterly profit growth": -500.0,
+     "Sales latest quarter": 0.37,
+     "YOY Quarterly sales growth": -57.47,
+     "Return on capital employed": -5.9
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540386",
+    "name": "Ontic Finserve",
+    "company_id": "1272424",
+    "fundamentals": {
+     "Current Price": 0.81,
+     "Price to Earning": null,
+     "Market Capitalization": 7.29,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.04,
+     "YOY Quarterly profit growth": -112.9,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 19.26
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "532676",
+    "name": "P B A Infra.",
+    "company_id": "2440",
+    "fundamentals": {
+     "Current Price": 5.39,
+     "Price to Earning": null,
+     "Market Capitalization": 7.28,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.18,
+     "YOY Quarterly profit growth": -237.14,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -23.43
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "519262",
+    "name": "Prima Agro",
+    "company_id": "2561",
+    "fundamentals": {
+     "Current Price": 14.0,
+     "Price to Earning": 16.52,
+     "Market Capitalization": 7.27,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.19,
+     "YOY Quarterly profit growth": 161.29,
+     "Sales latest quarter": 2.74,
+     "YOY Quarterly sales growth": 5.38,
+     "Return on capital employed": -0.4
+    }
+   },
+   {
+    "symbol": "524590",
+    "name": "Hemo Organic",
+    "company_id": "832",
+    "fundamentals": {
+     "Current Price": 20.99,
+     "Price to Earning": null,
+     "Market Capitalization": 7.27,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.01,
+     "YOY Quarterly profit growth": 133.33,
+     "Sales latest quarter": 1.43,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -23.81
+    }
+   },
+   {
+    "symbol": "511664",
+    "name": "BGIL Films & Tec",
+    "company_id": "440",
+    "fundamentals": {
+     "Current Price": 6.41,
+     "Price to Earning": 34.57,
+     "Market Capitalization": 7.26,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.08,
+     "YOY Quarterly profit growth": 57.89,
+     "Sales latest quarter": 0.02,
+     "YOY Quarterly sales growth": -66.67,
+     "Return on capital employed": 1.28
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "540955",
+    "name": "Tasty Dairy",
+    "company_id": "1274267",
+    "fundamentals": {
+     "Current Price": 3.55,
+     "Price to Earning": null,
+     "Market Capitalization": 7.25,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.33,
+     "YOY Quarterly profit growth": 83.74,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -5.36
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "509835",
+    "name": "Prem. Synthetic",
+    "company_id": "2553",
+    "fundamentals": {
+     "Current Price": 15.69,
+     "Price to Earning": null,
+     "Market Capitalization": 7.21,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": 0.22,
+     "YOY Quarterly profit growth": 450.0,
+     "Sales latest quarter": 1.34,
+     "YOY Quarterly sales growth": -58.39,
+     "Return on capital employed": -4.57
+    }
+   },
+   {
+    "symbol": "530063",
+    "name": "Yashraj Contain.",
+    "company_id": "3781",
+    "fundamentals": {
+     "Current Price": 4.23,
+     "Price to Earning": null,
+     "Market Capitalization": 7.19,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.2,
+     "YOY Quarterly profit growth": 13.04,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": null
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "542206",
+    "name": "Nivaka Fashions",
+    "company_id": "1274604",
+    "fundamentals": {
+     "Current Price": 0.7,
+     "Price to Earning": null,
+     "Market Capitalization": 7.19,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.15,
+     "YOY Quarterly profit growth": 68.75,
+     "Sales latest quarter": 0.01,
+     "YOY Quarterly sales growth": -80.0,
+     "Return on capital employed": -59.2
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)",
+     "price below ₹1"
+    ]
+   },
+   {
+    "symbol": "521188",
+    "name": "United Textiles",
+    "company_id": "3556",
+    "fundamentals": {
+     "Current Price": 23.9,
+     "Price to Earning": null,
+     "Market Capitalization": 7.17,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -1.36,
+     "YOY Quarterly profit growth": -13700.0,
+     "Sales latest quarter": 0.29,
+     "YOY Quarterly sales growth": -91.83,
+     "Return on capital employed": -12.69
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "543171",
+    "name": "R O Jewels",
+    "company_id": "1274742",
+    "fundamentals": {
+     "Current Price": 1.42,
+     "Price to Earning": null,
+     "Market Capitalization": 7.16,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.01,
+     "YOY Quarterly profit growth": -116.67,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": 0.21
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "533149",
+    "name": "Yunik Managing",
+    "company_id": "960",
+    "fundamentals": {
+     "Current Price": 5.0,
+     "Price to Earning": null,
+     "Market Capitalization": 7.15,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.02,
+     "YOY Quarterly profit growth": 50.0,
+     "Sales latest quarter": 0.05,
+     "YOY Quarterly sales growth": null,
+     "Return on capital employed": -108.7
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "531928",
+    "name": "Golden Carpets",
+    "company_id": "1173",
+    "fundamentals": {
+     "Current Price": 11.0,
+     "Price to Earning": null,
+     "Market Capitalization": 7.14,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.07,
+     "YOY Quarterly profit growth": -450.0,
+     "Sales latest quarter": 0.12,
+     "YOY Quarterly sales growth": -53.85,
+     "Return on capital employed": -5.41
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   },
+   {
+    "symbol": "530771",
+    "name": "KLG Capital",
+    "company_id": "1799",
+    "fundamentals": {
+     "Current Price": 22.2,
+     "Price to Earning": null,
+     "Market Capitalization": 7.1,
+     "Dividend yield": 0.0,
+     "Net Profit latest quarter": -0.04,
+     "YOY Quarterly profit growth": 42.86,
+     "Sales latest quarter": 0.0,
+     "YOY Quarterly sales growth": -100.0,
+     "Return on capital employed": -458.53
+    },
+    "data_quality_flags": [
+     "negligible sales (≤ ₹0.5 Cr last quarter)"
+    ]
+   }
+  ]
+ }
+}

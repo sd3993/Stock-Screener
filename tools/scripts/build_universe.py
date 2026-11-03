@@ -4,9 +4,9 @@ from config import run_dir
 # P2: builds <run>/universe.csv from every saved screener page in <run>/screens/ (<ID>_p<NN>.json, saved by scr_save.py):
 # screen pages T*, whole-market band pages B* (<ID>_<desc|asc>_p<NN>.json). One row per symbol: hits (screens that matched), in_sweep, and every field
 # found, under screener's field names. Checks that each band's rows add up to its total and that every column in
-# process/screens.json came back.
+# process/future/screens.json came back.
 base = run_dir()
-cfg = json.load(open('process/screens.json', encoding='utf-8'))
+cfg = json.load(open('process/future/screens.json', encoding='utf-8'))
 rows, hits, swept, totals, warn = {}, {}, set(), {}, []
 for fn in sorted(glob.glob(os.path.join(base, 'screens', '*_p*.json'))):
     sid = re.sub(r'_(asc|desc)$', '', re.match(r'(.+)_p\d+\.json$', os.path.basename(fn)).group(1))

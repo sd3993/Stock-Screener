@@ -1,19 +1,7 @@
-# Commit only the process and its tools: CLAUDE.md, process/, tools/, study plans and findings, and this file.
-# Everything fetched or produced at runtime stays out.
-
-# Run outputs and fetched data (documents, screener and Tapetide answers, call log)
-runs/
+# Commit the process, its tools and every run (runs/). Fetched company data stays out: it is large (GBs of
+# exchange PDFs and cached answers), would double the project's OneDrive storage inside .git, and can be re-fetched.
 data/
 acknowledgements.md
-
-# Studies: keep each study's plan and written findings; ignore fetched pages and generated tables
-studies/*/universe/
-studies/*/universe.csv
-studies/*/outcomes.csv
-studies/*/features.csv
-studies/*/sample.csv
-studies/*/*.json
-studies/*/stages/*.json
 
 # Run data set aside (abandoned runs, replaced fetches)
 archive/

@@ -1,9 +1,9 @@
 import bisect, csv, datetime as dt, glob, json, os, sys
-# Multibagger study, step 1 (process/study_multibaggers/s1_universe.md): from every saved chart history (data/companies/*/scr/history.json, by
+# Multibagger study, step 1 (process/historical/s1_universe.md): from every saved chart history (data/companies/*/scr/history.json, by
 # mb_history.py), the price and market-cap multiples over 2-, 3-, 5-, 7- and 10-year windows starting at each quarter end
 # from Mar 2006, with the starting market cap, P/E and TTM EPS/sales, and the peak multiple inside the window (for fallen
 # winners), and what could be seen at the start: P/E and its own 5-year median, TTM EPS and sales growth over 1 and 3
-# years, and the prior 1-year price return. Market cap = market-cap-to-sales x TTM sales on the same date. Writes studies/multibaggers/outcomes.csv.
+# years, and the prior 1-year price return. Market cap = market-cap-to-sales x TTM sales on the same date. Writes runs/historical/<date>/outcomes.csv.
 #   python tools/scripts/mb_outcomes.py
 YEARS = (2, 3, 5, 7, 10)
 today = dt.date.today()
@@ -80,7 +80,9 @@ for fn in glob.glob(os.path.join('data', 'companies', '*', 'scr', 'history.json'
 keys = ['sym', 'start', 'px0', 'mc0', 'pe0', 'pe_med5', 'eps0', 'sales0', 'eps_g1', 'eps_g3', 'sales_g1', 'sales_g3', 'px_ret1',
         'last_price_date'] + \
        [f'{k}_{n}y' for n in YEARS for k in ('px', 'mc', 'pxpeak')]
-out = os.path.join('studies', 'multibaggers', 'outcomes.csv')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import hist_dir
+out = os.path.join(hist_dir(), 'outcomes.csv')
 with open(out, 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=keys)
     w.writeheader()

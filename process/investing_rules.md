@@ -162,7 +162,7 @@ Filings are ground truth; data providers' figures (screener and any other) are c
 A falling price is not a negative on its own: when the business is intact and the fall has a found, temporary cause, the risk is lower, not higher. Buy in 2-3 tranches. Prefer names where the hurt metric has already turned for at least one quarter over catching a falling price (avoids value traps). For cyclicals, buy when earnings are depressed and the cycle indicators turn, not when the trailing P/E looks low. [Yours, 20 Oct 2026; Expert: Marks; Piotroski; Lynch; Rakesh Jhunjhunwala (crashes as the time to accumulate quality)]
 
 ## 20. Research process and rechecks
-The process, rechecks and stopping rules are in `process/README.md` and the phase files. [Yours, 20 Oct 2026; revised 23 Oct 2026]
+The process, rechecks and stopping rules are in `process/future/README.md` and the phase files. [Yours, 20 Oct 2026; revised 23 Oct 2026]
 
 ## 21. Sector preferences [Yours]
 Prefer bottleneck-solving industrial supply-chain sectors in India: BESS and pumped storage hydro, Stage 2 nuclear (fast breeder reactors), semiconductor manufacturing and 5-axis CNC import substitution, naval defence engineering, data-centre infrastructure, circular-economy materials recycling. Start research with sectors that have strong tailwinds (now or upcoming) and no major headwinds; headwind sectors only for exceptional stocks.
