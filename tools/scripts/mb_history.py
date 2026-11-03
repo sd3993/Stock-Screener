@@ -2,8 +2,8 @@ import asyncio, csv, datetime as dt, json, os, sys, time
 # Multibagger study, step 1 (process/historical/s1_universe.md): long price and valuation history per company from screener.in's public chart API
 # (no login, no model tokens), back to about 2005: price and volume, P/E with the TTM EPS behind it, and market cap to
 # sales with TTM sales (market cap = the ratio x sales). Saved as data/companies/<SYM>/scr/history.json; a company already
-# saved is skipped unless --refresh, or --recheck-empty (re-fetches saved companies with a series that has no values, unless both consolidated and standalone were
-# already tried). --workers N fetches N companies at once (default 1); the library's shared pacing and 429 cooldown still apply. Input: symbols, or a CSV with columns sym and (optionally) screener_id.
+# saved is skipped unless --refresh, or --recheck-empty (re-fetches saved companies with a series that has no values, unless the standalone series were
+# already checked). --workers N fetches N companies at once (default 1); the library's shared pacing and 429 cooldown still apply. Input: symbols, or a CSV with columns sym and (optionally) screener_id.
 #   uvx --from screener-mcp==0.5.0 python tools/scripts/mb_history.py SYM ... | --csv runs/historical/<date>/universe.csv [--refresh | --recheck-empty] [--workers N]
 # Starts 1.2 s between requests, where screener stopped answering 429 at the same throughput as the library's 0.25 s
 # (3 Nov 2026), and adds 0.05 s after each cooldown, up to 3 s, in case its limit tightens.
@@ -33,22 +33,24 @@ async def one(client, sym, cid):
         if not recheck:
             return 'cached'
         old = json.load(open(out, encoding='utf-8'))
-        if old.get('both_tried') or all(has_data((old['data'].get(k) or {}).get('datasets') or {}) for k in QUERIES):
+        if old.get('standalone_checked') or all(has_data((old['data'].get(k) or {}).get('datasets') or {}) for k in QUERIES):
             return 'cached'
         cid = cid or old['args'].get('company_id')
     if not cid:
         cid = (await fetch_company_page(sym, 'consolidated')).company_id
     series = {}
     for key, q in QUERIES.items():
-        for consolidated in ('true', ''):  # consolidated where the company files it, else standalone
-            r = await client.get_json(f'/api/company/{cid}/chart/', params={'q': q, 'days': 10000, 'consolidated': consolidated})
+        for consolidated in (True, False):  # consolidated where the company files it, else standalone
+            # standalone = no consolidated parameter at all: any value, even '' or 'false', returns the consolidated series
+            params = {'q': q, 'days': 10000, **({'consolidated': 'true'} if consolidated else {})}
+            r = await client.get_json(f'/api/company/{cid}/chart/', params=params)
             ds = {d.get('metric') or d.get('label'): d.get('values') for d in (r or {}).get('datasets', [])}
             if has_data(ds):
-                series[key] = {'consolidated': bool(consolidated), 'datasets': ds}
+                series[key] = {'consolidated': consolidated, 'datasets': ds}
                 break
     os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump({'fetched_at': dt.datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S'), 'via': 'screener-public',
-               'tool': 'chart', 'args': {'symbol': sym, 'company_id': cid, 'days': 10000}, 'both_tried': True, 'data': series},
+               'tool': 'chart', 'args': {'symbol': sym, 'company_id': cid, 'days': 10000}, 'standalone_checked': True, 'data': series},
               open(out, 'w', encoding='utf-8'), ensure_ascii=False)
     return 'saved'
 
