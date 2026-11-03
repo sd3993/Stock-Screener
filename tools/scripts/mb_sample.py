@@ -4,12 +4,12 @@ import csv, os, random, sys
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
 # of the same type), counts the peers flags and runs the checks; outputs and rules in s2_sample.md, "Script".
-#   python -I tools/scripts/mb_sample.py [--seed 1] | --finalize [--companies <dir>]
+#   python -I tools/scripts/mb_sample.py [--seed 1] | --finalize [--companies <dir>]  [--dir DIR: read and write there, not the run folder]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import hist_dir
 a = sys.argv[1:]
 SEED = int(a[a.index('--seed') + 1]) if '--seed' in a else 1
-D = hist_dir()
+D = a[a.index('--dir') + 1] if '--dir' in a else hist_dir()
 # horizon: (multiple columns tried in order, threshold, last window start, winners to pick)
 H = {'short': (['px_2y'], 2, '2023-12-31', 70), 'medium': (['px_5y'], 3, '2021-12-31', 80),
      'long': (['px_7y', 'px_10y'], 10, '2019-12-31', 50)}

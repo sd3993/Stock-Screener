@@ -20,8 +20,8 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 #     stamped within 6 days of a quarter end counts from that quarter end + 45 (+ 60 for the fiscal year's last quarter);
 #     other changes from their own date. P/E is recomputed as price / that EPS (so it differs from screener's chart P/E
 #     and from outcomes.csv's pe0 where the stamp was early). Market cap = market-cap-to-sales on the last weekly point x
-#     the TTM sales screener had on that same point's date (mb_outcomes.py takes the sales on the start date instead, which
-#     can be a quarter-end-stamped later figure). pe_med5 needs 156+ weekly positive P/Es in the 5 years (pe_med5_wks).
+#     the TTM sales screener had on that same point's date (Company.mcap; mb_outcomes.py uses the same Company, so its start
+#     figures follow these rules too). pe_med5 needs 156+ weekly positive P/Es in the 5 years (pe_med5_wks).
 # Shares: shares_chg1/3 from chart-implied shares (market cap / adjusted price, 13-week mean), so splits and bonuses don't
 #   count; ~1-2% noise from the one-decimal market-cap-to-sales. eq_cap_chg3 (equity capital) rises with bonuses too.
 # Lenders (P&L with 'Financing Profit'): opm is the financing margin; de, int_cover, debt_ebitda, roce, cash conversion
@@ -124,6 +124,10 @@ class Step:
         self.steps = sorted(steps)  # by effective date
         self.eff = [s[0] for s in self.steps]
         self.redated = sum(1 for e, t, _ in steps if e != t)
+        self.best, b = [], None  # best[k]: value of the latest period among steps[:k + 1]
+        for s in self.steps:
+            b = s if b is None or s[1] > b[1] else b
+            self.best.append(b[2])
 
     def lookup(self, d, max_gap=400):  # some series are annual-only for years
         i = bisect.bisect_right(self.raw, d) - 1
@@ -132,7 +136,7 @@ class Step:
         k = bisect.bisect_right(self.eff, d)
         if not k:
             return None
-        return max(self.steps[:k], key=lambda s: s[1])[2]  # the latest period already filed
+        return self.best[k - 1]  # the latest period already filed
 
 
 class Table:
@@ -175,7 +179,8 @@ class Company:
         self.sales_raw, self.sales_raw_d = sales_raw, [t for t, _ in sales_raw]
         self.pxd = [t for t, _ in self.px]
         self.st = {}
-        for st in (() if chart_only else ('profit_loss', 'balance_sheet', 'cash_flow', 'ratios', 'quarterly')):
+        # chart-only still reads the P&L (where saved) for the fiscal year end, which sets the Q4 lag of chart steps
+        for st in (('profit_loss',) if chart_only else ('profit_loss', 'balance_sheet', 'cash_flow', 'ratios', 'quarterly')):
             self.st[st] = {'consolidated': Table(load(os.path.join(d, st + '.json'))),
                            'standalone': Table(load(os.path.join(d, st + '_standalone.json')))}
         pl = self.st.get('profit_loss', {})
@@ -227,6 +232,19 @@ class Company:
         return q
 
     # ---------- point-in-time helpers ----------
+    def mcap(self, d, gap=40):
+        """(market cap in crore, chart date): market-cap-to-sales on the last weekly point on or before d (within gap days)
+        x the TTM sales screener divided by on that same date. Not the sales on d: a quarter-end-stamped sales step after
+        the last weekly point would mix two figures (mb_outcomes.py did, before 4 Nov 2026)."""
+        i = bisect.bisect_right([t for t, _ in self.mcs], d) - 1
+        if i < 0 or (d - self.mcs[i][0]).days > gap:
+            return None, None
+        td, r = self.mcs[i]
+        j = bisect.bisect_right(self.sales_raw_d, td) - 1
+        if r is None or j < 0 or (td - self.sales_raw_d[j]).days > 400 or not self.sales_raw[j][1]:
+            return None, td
+        return r * self.sales_raw[j][1], td
+
     def px_at(self, d, gap=40):
         i = bisect.bisect_right(self.pxd, d) - 1
         return self.px[i][1] if i >= 0 and (d - self.px[i][0]).days <= gap else None
@@ -283,14 +301,7 @@ def features(c, as_of, chart_only=False):
     # ---------------- chart (any listed company) ----------------
     p0 = c.px_at(as_of)
     f['px0'] = rnd(p0)
-    r, s_raw = None, None
-    i = bisect.bisect_right([t for t, _ in c.mcs], as_of) - 1
-    if i >= 0 and (as_of - c.mcs[i][0]).days <= 40:
-        td, r = c.mcs[i]
-        j = bisect.bisect_right([t for t, _ in c.sales_raw], td) - 1  # the sales screener divided by on that date
-        if j >= 0 and (td - c.sales_raw[j][0]).days <= 400:
-            s_raw = c.sales_raw[j][1]
-    mc = r * s_raw if r is not None and s_raw else None
+    mc = c.mcap(as_of)[0]
     f['mcap_cr'] = rnd(mc, 1)
     f['size_band'] = None if mc is None else '<50' if mc < 50 else '50-500' if mc < 500 else '500-2k' if mc < 2000 \
         else '2k-10k' if mc < 10000 else '10k+'
