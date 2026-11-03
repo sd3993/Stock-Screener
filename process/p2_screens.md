@@ -1,6 +1,6 @@
 # P2: market screens and the whole-market sweep (helper, Sonnet low)
 
-Runs every screen in `process/screens.json` and the whole-market sweep on screener.in through its MCP, saves every page, and builds the universe. No analysis. Do not call any mcp__hearthbot__ tools. Working directory: the project root (PowerShell). The run folder (`runs/<FYyyQn>/`) and a unique tag are in your brief.
+Runs every screen in `process/screens.json` and the whole-market sweep on screener.in through its MCP, saves every page, and builds the universe. No analysis. Working directory: the project root (PowerShell). The run folder (`runs/<FYyyQn>/`) and a unique tag are in your brief.
 
 - **screens** are the user's idea screens (T1…): every company that hits one joins the universe.
 - **The sweep** covers the whole market (`base`: market cap above ₹250 cr, positive P/E) and gives P3 the figures it needs for every company, so names outside the screens can still qualify.

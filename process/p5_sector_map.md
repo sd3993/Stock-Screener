@@ -1,7 +1,7 @@
 # P5: sector map (Opus medium helper) and company list (orchestrator)
 
 ## Sector map (helper)
-Build the sector map that decides which companies are analysed first. Do not call any mcp__hearthbot__ tools. Write only the files named below. Working directory: the project root (PowerShell). The run folder and the list of gate survivors and holdings are in your brief. If the previous quarter's run folder has a `sector_map.md`, review and update it rather than rebuild it.
+Build the sector map that decides which companies are analysed first. Write only the files named below. Working directory: the project root (PowerShell). The run folder and the list of gate survivors and holdings are in your brief. If the previous quarter's run folder has a `sector_map.md`, review and update it rather than rebuild it.
 
 Inputs: the company list in your brief; `process/investing_rules.md` rule 21 (the user's sector preferences).
 

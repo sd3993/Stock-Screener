@@ -82,7 +82,7 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
   - `get_company_announcements`: NSE; `category` results / board_meeting / insider_trading / agm / acquisition / fund_raise / credit_rating / …; `days` ≤3650; at most 50 rows per answer, so use categories and windows.
   - `get_document_list`: annual reports back to about 2013, with BSE links; transcripts, some of them on the company website.
   - `get_bulk_deals` (last 90 days), `get_company_overview`, `get_peer_comparison`.
-- **Cache:** `data/companies/<SYM>/scr/<name>.json`, each `{fetched_at (IST), via, tool, args, warnings, partial, data}`. Names: `profit_loss`, `balance_sheet`, `cash_flow`, `ratios` (and `_standalone` versions), `quarterly`, `shareholding`, `insider`, `announcements`, `documents`, `overview`, `peers`, `credit_ratings`, `pledge_nse`, `sast`, `corporate_actions`, `shareholding_nse`, `history` (task 2).
+- **Cache:** `data/companies/<SYM>/scr/<name>.json`, each `{fetched_at (IST), via, tool, args, warnings, partial, data}`. Names: `profit_loss`, `balance_sheet`, `cash_flow`, `ratios` (and `_standalone` versions), `quarterly`, `shareholding`, `insider`, `announcements`, `documents`, `overview`, `peers`, `credit_ratings`, `pledge_nse`, `sast`, `corporate_actions`, `shareholding_nse`, `history` (multibagger study).
 - **Quirks:**
   - Figures are rounded to whole crore.
   - "Public" includes the shareholders Tapetide lists as "Others".

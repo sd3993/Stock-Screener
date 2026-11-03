@@ -2,7 +2,7 @@ import datetime as dt, json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tt
 from config import COMPANIES_DIR as FILINGS_DIR
-# Shared by tt_gate.py and tt_company.py: reads Tapetide's filings and documents lists (REST or MCP shapes),
+# Shared helpers (scr_docs.py uses the downloads): reads Tapetide's filings and documents lists (REST or MCP shapes),
 # downloads documents into data/companies/<SYM>/<FYyyQn>/ and records them in index.json (process/data_rules.md).
 
 def fy_quarter(d):

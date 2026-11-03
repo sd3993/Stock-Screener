@@ -11,7 +11,7 @@ Judgement work is rechecked instead of being redone from scratch. This file hold
 
 Why the gate and sector map get fewer: they are filters and orderings whose survivors get the full analysis and two rechecks in P7, so a second recheck adds something only when the first found a mistake. P7 and P9 produce the verdicts and actions the user acts on.
 
-Do not call any mcp__hearthbot__ tools. Working directory: the project root (PowerShell). Your brief gives the work file to check, your recheck number (1, 2…), your checklist file and your output file.
+ Working directory: the project root (PowerShell). Your brief gives the work file to check, your recheck number (1, 2…), your checklist file and your output file.
 
 ## How to check
 1. Read the phase file the work was done under (and everything it says to read), your checklist file, then the work file.
@@ -34,5 +34,5 @@ Reply with: items checked, changes made (one line each), contrary searches (conf
 ## For the orchestrator
 - Run the rechecks in the table above, one after the other, each on the previous one's output. If the last allowed recheck still changes a verdict, flag it to the user (`acknowledgements.md`); never go past 3.
 - Model: as in `process/README.md`. Anything a recheck leaves `unresolved` goes to an Opus high helper with both sides and their sources, before the next recheck.
-- After each recheck, apply its learnings (fetch gaps into `process/p6_fetch.md` or `process/data_rules.md`, sector notes into `process/investing_rules.md`, process gaps into the phase or checklist file) before the next company, and add them to `acknowledgements.md`.
+- After each recheck, apply its learnings (fetch gaps into `process/p6_fetch.md` or `process/data_rules.md`, sector notes into `process/investing_rules.md`, process gaps into the phase or checklist file) before the next company; those that can alter outcomes go in `acknowledgements.md` (`CLAUDE.md`, "Updates from learnings").
 - Keep each company's contrary searches: append them to `data/companies/<SYM>/search_log.json` (date, quarter, phase, claim, searched_for, where, found, result), so later rechecks and quarters see what was already looked for.

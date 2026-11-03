@@ -18,24 +18,24 @@ P2 screens ──┴─> P3 triage ─> P4 gate (+P4R) ─> P5 sector map & comp
 ```
 
 ## Phases
-screener.in (through its MCP for screens, and `scr_company.py` for company data) is the main source; Tapetide fills only what it lacks (free plan, 50 calls a day across all phases). Tapetide calls are per company unless noted.
+screener.in (through its MCP for screens, and `scr_company.py` for company data) is the main source, with NSE/BSE for the rest (`process/data_rules.md`). No phase needs Tapetide.
 
-| # | Phase | Who | Model / effort | File | Output (in `runs/<FYyyQn>/` unless noted) | Done when | Tapetide calls |
-|---|---|---|---|---|---|---|---|
-| P1 | Holdings from Kite; run setup | orchestrator | (orchestrator's) | `p1_holdings.md` | `holdings.csv`, sheet's pending tab | holdings saved (or last ones kept, user told) | 0 |
-| P2 | Market screens and the whole-market sweep | helper | Sonnet low | `p2_screens.md` | `screens/`, `universe.csv` | every screen and band page saved, totals match | 0 (about 25 screener MCP calls) |
-| P3 | Number triage and gate batches | script | none | `p3_triage.md` | `triage.csv`, `gate_batches.json` | every universe company and holding has a triage row | 0 |
-| P4 | Gate, one batch of ~10 | helper | Opus medium | `p4_gate.md` | `gate/bNN.json`, `gate/<SYM>.json` | every company in the batch has a decision | 0 |
-| P4R | Gate recheck | helper | Opus medium | `p4r_gate_recheck.md` | `gate/bNN_rc1.json` (rc2 if needed) | per `recheck.md` | 0-3 |
-| P5 | Sector map and company list | helper (map), orchestrator (list) | Opus medium | `p5_sector_map.md` | `sector_map.md`, `sector_of.tsv`, `company_list.csv` | every listed company has a sector and tier | ~1 (profile, if not cached) |
-| P5R | Sector map recheck | helper | Opus medium | `p5r_sector_recheck.md` | `sector_map_rc1.md` (rc2 if needed) | per `recheck.md` | 0 |
-| P6 | Fetch one company | scripts + helper | Sonnet medium | `p6_fetch.md` | `data/companies/<SYM>/` (documents, `scr/`, `api/`, `facts.json`) | reply `CHANGED: yes/no` | 0 |
-| P7 | Deep analysis, one company | helper | Opus high | `p7_analysis.md` | `analysis/<SYM>/main.json`, `.md` | reply with buckets and EPS paths, or `NEW_RESULTS` | 0-3 |
-| P7R | Analysis rechecks 1 and 2 | helper each | Opus medium (Opus high for an `unresolved` judgement call) | `p7r_analysis_recheck.md` | `analysis/<SYM>/recheck1.json`, `recheck2.json` (+ `.md`) | per `recheck.md` | 0-3 each |
-| P8 | Sheet listing, batch of agreed analyses | helper | Sonnet low | `p8_listing.md` | Data, Data Flags, pending tabs; `runs/verdict_history.csv` | every agreed analysis since the last listing is in the sheet | 0 (stored price from screener) |
-| P9 | Allocation and holdings decision | helper | Opus medium | `p9_allocation.md` | `allocation/main.json` | decisions written with reasons | 0 |
-| P9R | Allocation rechecks 1 and 2 | helper each | Opus medium | `p9r_allocation_recheck.md` | `allocation/recheck1.json`, `recheck2.json` | per `recheck.md` | 0 |
-| P9W | Sheet write of the allocation | helper | Sonnet low | `p9_allocation.md` (part "write") | Holdings and Allocation tabs | rows match the last recheck exactly | 0 |
+| # | Phase | Who | Model / effort | File | Output (in `runs/<FYyyQn>/` unless noted) | Done when |
+|---|---|---|---|---|---|---|
+| P1 | Holdings from Kite; run setup | orchestrator | (orchestrator's) | `p1_holdings.md` | `holdings.csv`, sheet's pending tab | holdings saved (or last ones kept, user told) |
+| P2 | Market screens and the whole-market sweep | helper | Sonnet low | `p2_screens.md` | `screens/`, `universe.csv` | every screen and band page saved, totals match |
+| P3 | Number triage and gate batches | script | none | `p3_triage.md` | `triage.csv`, `gate_batches.json` | every universe company and holding has a triage row |
+| P4 | Gate, one batch of ~10 | helper | Opus medium | `p4_gate.md` | `gate/bNN.json`, `gate/<SYM>.json` | every company in the batch has a decision |
+| P4R | Gate recheck | helper | Opus medium | `p4r_gate_recheck.md` | `gate/bNN_rc1.json` (rc2 if needed) | per `recheck.md` |
+| P5 | Sector map and company list | helper (map), orchestrator (list) | Opus medium | `p5_sector_map.md` | `sector_map.md`, `sector_of.tsv`, `company_list.csv` | every listed company has a sector and tier |
+| P5R | Sector map recheck | helper | Opus medium | `p5r_sector_recheck.md` | `sector_map_rc1.md` (rc2 if needed) | per `recheck.md` |
+| P6 | Fetch one company | scripts + helper | Sonnet medium | `p6_fetch.md` | `data/companies/<SYM>/` (documents, `scr/`, `api/`, `facts.json`) | reply `CHANGED: yes/no` |
+| P7 | Deep analysis, one company | helper | Opus high | `p7_analysis.md` | `analysis/<SYM>/main.json`, `.md` | reply with buckets and EPS paths, or `NEW_RESULTS` |
+| P7R | Analysis rechecks 1 and 2 | helper each | Opus medium (Opus high for an `unresolved` judgement call) | `p7r_analysis_recheck.md` | `analysis/<SYM>/recheck1.json`, `recheck2.json` (+ `.md`) | per `recheck.md` |
+| P8 | Sheet listing, batch of agreed analyses | helper | Sonnet low | `p8_listing.md` | Data, Data Flags, pending tabs; `runs/verdict_history.csv` | every agreed analysis since the last listing is in the sheet |
+| P9 | Allocation and holdings decision | helper | Opus medium | `p9_allocation.md` | `allocation/main.json` | decisions written with reasons |
+| P9R | Allocation rechecks 1 and 2 | helper each | Opus medium | `p9r_allocation_recheck.md` | `allocation/recheck1.json`, `recheck2.json` | per `recheck.md` |
+| P9W | Sheet write of the allocation | helper | Sonnet low | `p9_allocation.md` (part "write") | Holdings and Allocation tabs | rows match the last recheck exactly |
 
 Orchestrator: Sonnet medium (Opus medium when judging a recheck conflict or a rule change; Opus high only when clearly needed, saying why). Every to-do list names each phase's model and effort (e.g. "P7 [Opus high]").
 
@@ -54,7 +54,7 @@ Orchestrator: Sonnet medium (Opus medium when judging a recheck conflict or a ru
 - **Pending results:** companies are analysed on their latest declared results. At run start, create the sheet tab "Pending <FYyyQn> results" (replacing the previous quarter's; only one exists) and put its name in Data!BA1. P8 lists there the companies that haven't declared the run quarter. After the quarter's SEBI deadline, schedule a reminder to the user to re-run them.
 - **Re-research:** a company is re-researched only when it has declared newer results than those used, or when the user asks; a quarter passing isn't a reason. An interrupted analysis is resumed from `status.csv`, not restarted. The sheet keeps a company's last row until its replacement completes.
 - **New quarter:** each results season starts the new quarter's run: P1-P5 again (P5 reviews, not rebuilds, the previous sector map; `process/screens.json` is reviewed, not rebuilt), then companies flow as above, with P6 fetching only what is new.
-- **Learnings:** after each P6, fold anything new in `process/fetch_learnings.md` into `p6_fetch.md` or `data_rules.md`; after each recheck, apply its learnings per `recheck.md`. List every such change in `acknowledgements.md`.
+- **Learnings:** after each P6, fold anything new in `process/fetch_learnings.md` into `p6_fetch.md` or `data_rules.md`; after each recheck, apply its learnings per `recheck.md`. Changes that can alter outcomes go in `acknowledgements.md` (`CLAUDE.md`, "Updates from learnings").
 
 ## Orchestrator duties
 - **Claim the run:** one orchestrator per run. It writes at the top of `progress.md`: "Orchestrator: <session or thread>, since <time>, last update <time>", and refreshes the last-update time at every hand-off. Another session takes over only if the user asks, or the claim hasn't been updated for 2+ hours and that session is gone; it notes the takeover.
@@ -62,7 +62,6 @@ Orchestrator: Sonnet medium (Opus medium when judging a recheck conflict or a ru
 - **Before every hand-off** update `status.csv` and `progress.md`, so a new orchestrator can resume exactly:
   - `status.csv` columns: `sym, phase, state, stage, loops_to_p6, results_used, updated, note`. `phase` is P4-P9; `state` is queued / running / done / blocked; `stage` is main / recheck1 / recheck2 for P7.
   - `progress.md`: the claim line, then a checklist: phases done, running (with model), next, open items for the user. Short lines, no prose paragraphs. The thread's to-do list mirrors it.
-- **Tapetide quota:** before a phase that calls Tapetide, check the remaining quota (`python tools/scripts/tt.py usage`). If the phase can't finish today, do what fits and carry on with other work; never leave one company half-fetched.
 
 ## Resuming
 1. Read `CLAUDE.md`, this file, the run's `progress.md` and `status.csv`.

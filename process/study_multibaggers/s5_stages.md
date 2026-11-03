@@ -2,7 +2,7 @@
 
 About 30 winners (10 per horizon) and about 10 fallen winners, picked in `backtest.md` across business types and periods. One company at a time; each study's learnings go into the next helper's brief.
 
-**Helper brief:** the company, its winning window, its business type from `business_types.csv`, and `backtest.md`'s patterns to test. Working directory: the project root. Do not call any mcp__hearthbot__ tools.
+**Helper brief:** the company, its winning window, its business type from `business_types.csv`, and `backtest.md`'s patterns to test. Working directory: the project root.
 
 1. **No hindsight:** for each stage, read only documents dated before it (annual reports from the screener list back to about 2013, results, transcripts and presentations from BSE/NSE; `process/data_rules.md`, `tools/tools.md`). Older years only from what was filed then.
 2. **The actual business:** what the company does, how it earns, what drives revenue and margins (volumes, prices, order book, capacity, mix, regulation), and how that changed across the window. Confirm or correct its business type, saying why.

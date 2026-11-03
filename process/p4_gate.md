@@ -1,9 +1,9 @@
 # P4: gate, one batch (Opus medium)
 
-Decide NEXT or REJECT for each company in your batch, from its figures, its latest guidance and its last 12 months of exchange filings. The gate is a filter: it removes companies that clearly can't meet the rules, and keeps borderline ones for the full analysis (P7). Do not edit any existing file except a company's `index.json` when you download a filing. Do not call any mcp__hearthbot__ tools. Working directory: the project root (PowerShell). Your brief gives the run folder, the batch number and whether the data was pre-fetched by script.
+Decide NEXT or REJECT for each company in your batch, from its figures, its latest guidance and its last 12 months of exchange filings. The gate is a filter: it removes companies that clearly can't meet the rules, and keeps borderline ones for the full analysis (P7). Do not edit any existing file except a company's `index.json` when you download a filing. Working directory: the project root (PowerShell). Your brief gives the run folder, the batch number and whether the data was pre-fetched by script.
 
 ## Read first
-`process/investing_rules.md` (rules 1, 4, 5, 6, 8, 16 and the buckets section), `process/data_rules.md`, the "screener.in MCP" and "Tapetide" sections of `tools/tools.md`, and earlier decisions in `<run>/gate/b*.json` for calibration.
+`process/investing_rules.md` (rules 1, 4, 5, 6, 8, 16 and the buckets section), `process/data_rules.md`, the top two sections and the "screener.in MCP" section of `tools/tools.md`, and earlier decisions in `<run>/gate/b*.json` for calibration.
 
 ## Per company (write its file before starting the next)
 1. **Data:**

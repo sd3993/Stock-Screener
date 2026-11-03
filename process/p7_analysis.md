@@ -1,12 +1,12 @@
 # P7: in-depth analysis (Opus high, one company per helper)
 
-You analyse one company in depth and write one analysis file (`main`); two rechecks then correct it (`process/recheck.md`). Never read an earlier quarter's analysis of this company unless your brief says this is a re-research, and then only after your own analysis is finished, to write the "what changed" note. Do not edit `process/investing_rules.md`, the sheet or any file outside your output. Do not call any mcp__hearthbot__ tools. Working directory: the project root (PowerShell). Your brief gives the company, the run folder (`runs/<FYyyQn>/`), whether the company is a holding, and whether this is a re-research.
+You analyse one company in depth and write one analysis file (`main`); two rechecks then correct it (`process/recheck.md`). Never read an earlier quarter's analysis of this company unless your brief says this is a re-research, and then only after your own analysis is finished, to write the "what changed" note. Do not edit `process/investing_rules.md`, the sheet or any file outside your output. Working directory: the project root (PowerShell). Your brief gives the company, the run folder (`runs/<FYyyQn>/`), whether the company is a holding, and whether this is a re-research.
 
 ## Read first
 - `process/investing_rules.md` in full, including the sector notes for this company's sector.
-- `process/data_rules.md` and the "screener.in MCP" and "Tapetide" sections of `tools/tools.md`.
+- `process/data_rules.md` and the top two sections and the "screener.in MCP" section of `tools/tools.md`.
 - The company's sector entry in `<run>/sector_map.md`, and its gate file `<run>/gate/<SYM>.json` if it has one (its `for_p7` items must be answered).
-- `data/companies/<SYM>/`: `index.json`, `facts.json`, `facts_check.json` and the documents (never the `_superseded` ones); `data/companies/<SYM>/api/`.
+- `data/companies/<SYM>/`: `index.json`, `facts.json`, `facts_check.json` and the documents (never the `_superseded` ones); the cached answers in `scr/` (and `bse/`, `api/` where present).
 
 ## Before analysing: newer results?
 Refresh the company's announcements (`uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py <SYM> --only announcements`; no model tokens). If the company has declared results newer than `latest_declared_quarter` in `index.json`, stop and reply only `NEW_RESULTS: <FYyyQn>` (unless your brief says the loop cap is reached; then note it and carry on).
