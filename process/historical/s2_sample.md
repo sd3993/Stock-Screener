@@ -13,7 +13,7 @@ From `outcomes.csv` (S1), pick about 400 companies, each with its reason, into `
 **Order (fewer tags, nothing lost to a usage cut-off):**
 - Fetch once for S2 and S3: one background run, winners and fallen winners first, then candidates in distance order (`scr_company.py --syms-file <list> --only statements,quarterly,shareholding,peers,overview,documents,announcements,nse --skip-saved`), so S3 needs no second pass. Tagging helpers start on the first batches of 25 while it runs.
 - Tag in rounds: winners, fallen winners and each winner's nearest candidate first; then, only for winners still without a same-type control, their next candidate; and so on. The pick rule (nearest candidate of the winner's type) is unchanged; candidates past the first match are never tagged.
-- Each helper writes its own batch file (`business_types/batch_<n>.csv`); the orchestrator merges them into `business_types.csv`. A helper cut off mid-batch loses only that batch, which is re-run.
+- Each batch's input is built by `python tools/scripts/mb_tag_batch.py runs/historical/<date>` (next 25 untagged, fetched companies from `needs_next.csv`); helpers follow `business_types/brief.md` in the run folder (a copy of `process/historical/s2_tagging_brief.md`). Each helper writes its own batch file (`business_types/batch_<n>.csv`); the orchestrator merges them into `business_types.csv`. A helper cut off mid-batch loses only that batch, which is re-run.
 
 The selection itself is `tools/scripts/mb_sample.py` (see Script).
 
