@@ -6,4 +6,4 @@ Normally already done by S2's single fetch (`s2_sample.md`, "Order"); then S3 on
 
 This gives about 12 years of annual statements (consolidated and standalone), 13 quarters, 12 quarters of shareholding and pledge (`shp_history.json`), the annual-report list with exchange links back to about 2013, and NSE announcements.
 
-Record in `status.md` the companies fetched and any failures with the reason. Older shareholding and filings for the stage studies (S5) are read from BSE/NSE documents there, not fetched here.
+Record in `status.md` the companies fetched and any failures with the reason. BSE-only companies have no NSE announcements or insider feed; the script saves an empty marker for them (`nse_listed: false`), so they aren't failures and `--skip-saved` doesn't ask again. No step needs them. Older shareholding and filings for the stage studies (S5) are read from BSE/NSE documents there, not fetched here.

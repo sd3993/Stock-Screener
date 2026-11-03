@@ -53,6 +53,11 @@ async def main():
             await fn()
             done.append(name)
         except Exception as e:  # one failed item doesn't stop the rest
+            if name in ('announcements', 'insider') and 'has no NSE listing' in str(e):
+                # BSE-only: NSE feeds don't exist; save a marker so --skip-saved never asks again
+                save(name, 'none', {'symbol': sym}, {'symbol': sym, 'nse_listed': False, 'rows': []}, [str(e)[:200]])
+                done.append(f'{name} (BSE-only, none)')
+                return
             failed.append(f'{name}: {type(e).__name__}: {e}'[:300])
 
     pages = {}
