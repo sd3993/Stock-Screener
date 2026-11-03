@@ -15,6 +15,9 @@ studies/*/sample.csv
 studies/*/*.json
 studies/*/stages/*.json
 
+# Run data set aside (abandoned runs, replaced fetches)
+archive/
+
 # Local settings, caches and scratch
 .claude/settings.local.json
 __pycache__/
