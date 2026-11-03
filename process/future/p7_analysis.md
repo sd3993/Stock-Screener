@@ -4,7 +4,7 @@ You analyse one company in depth and write one analysis file (`main`); two reche
 
 ## Read first
 - `process/investing_rules.md` in full, including the sector notes for this company's sector.
-- `process/data_rules.md` and the top two sections and the "screener.in MCP" section of `tools/tools.md`.
+- `process/data_rules.md` and the top two sections and the "screener.in" section of `tools/tools.md`.
 - The company's sector entry in `<run>/sector_map.md`, and its gate file `<run>/gate/<SYM>.json` if it has one (its `for_p7` items must be answered).
 - `data/companies/<SYM>/`: `index.json`, `facts.json`, `facts_check.json` and the documents (never the `_superseded` ones); the cached answers in `scr/` (and `bse/`, `api/` where present).
 

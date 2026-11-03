@@ -20,7 +20,7 @@ The study looks for patterns that recur and can be seen at the time, not stories
 ## Steps
 | # | Step | Who | Model / effort | File | Output (`runs/historical/<date>/`) | Done when |
 |---|---|---|---|---|---|---|
-| S1 | Universe, history and outcomes | scripts (+ MCP screens) | orchestrator | `s1_universe.md` | `universe.csv`, `outcomes.csv` | every universe company has a history or a recorded failure; outcomes written |
+| S1 | Universe, history and outcomes | scripts (screens through `scr_tool.py --login`) | orchestrator | `s1_universe.md` | `universe.csv`, `outcomes.csv` | every universe company has a history or a recorded failure; outcomes written |
 | S2 | Sample: winners, controls, fallen winners; business types | script (selection, controls, checks), helpers (types in batches) | Opus medium | `s2_sample.md` | `sample.csv`, `business_types.csv` | ~400 companies, each with its reason and business type; checks pass |
 | S3 | Statements for the sample | script | none | `s3_statements.md` | `data/companies/<SYM>/scr/` | every sample company fetched or its failure recorded |
 | S4 | Pattern back-test | script, then helper (mechanisms) | Opus medium | `s4_backtest.md` | `features.csv`, `backtest.md` | every hypothesis scored in-sample, out-of-sample and on the whole market |

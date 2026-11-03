@@ -5,7 +5,7 @@ How to reach each source, and what has already been found about each, so no sess
 ## Where each item comes from (start here)
 | Need | Source | How (no model tokens unless noted) |
 |---|---|---|
-| Whole-market fields, idea screens (P2) | screener screens (MCP, logged in) | `p2_screens.md`; 200-row pages to file, `scr_save.py`, `build_universe.py` |
+| Whole-market fields, idea screens (P2) | screener screens (logged in) | `p2_screens.md`; `scr_tool.py screen_stocks … --login`, 200-row pages to file; `build_universe.py` |
 | Statements: 12 years, 13 quarters, both bases | screener public company page | `scr_company.py` → `scr/profit_loss…quarterly` |
 | Shareholding, 12 quarters; promoter % and pledge per quarter | screener page; NSE filed SHP XBRL | `scr_company.py` → `scr/shareholding`, `scr/shp_history` |
 | Promoter pledge (latest), SAST Reg 29, corporate actions, SHP list (about 26 quarters) | NSE feeds | `scr_company.py` → `scr/pledge_nse`, `sast`, `corporate_actions`, `shareholding_nse` |
@@ -18,16 +18,15 @@ How to reach each source, and what has already been found about each, so no sess
 | Tapetide | not needed by any phase | `tools/tapetide.md` (reference only) |
 
 ## Settled findings (don't re-research; re-check only when something breaks)
-- **screener MCP:**
-  - Answers over `MAX_MCP_OUTPUT_TOKENS` (3,000 here) go to a file automatically.
+- **screener tools** (the removed MCP's, now called through the library by `scr_tool.py`):
   - `screen_stocks` takes `limit` up to 200, and its sort is server-side.
   - A field named in a query drops the rows where it is empty; column-set fields come back as null.
   - Free accounts keep 15 columns.
-  - The MCP's per-company tools cut to 8 quarters and 50 announcements; the public page and NSE feeds don't.
+  - The per-company tools cut to 8 quarters and 50 announcements; the public page and NSE feeds (`scr_company.py`) don't.
   - Company pages are public; only screens need login.
 - **screener has no pledge history** (only the current pledge, as a sentence in its cons, when significant). Pledge history is read from NSE's filed SHP XBRLs.
 - **BSE's API is bot-protected:** scripts and curl get 403, and working around it (browser headers, cookies or fingerprints faked) isn't allowed. BSE's API is browser-pane only; its PDFs download with plain curl. NSE goes first for NSE-listed companies.
-- **Browser pane can't reach local addresses:** a page's request to 127.0.0.1 gets `ERR_BLOCKED_BY_CLIENT`, and bseindia.com's CSP blocks `eval`, so a snippet can't be loaded from a local server. Data leaves the pane only through a tool result: a result over MAX_MCP_OUTPUT_TOKENS is saved to a tool-results file and shown as a short notice (pad small results so they're saved too).
+- **Browser pane can't reach local addresses:** a page's request to 127.0.0.1 gets `ERR_BLOCKED_BY_CLIENT`, and bseindia.com's CSP blocks `eval`, so a snippet can't be loaded from a local server. Data leaves the pane only through a tool result: a result over MAX_MCP_OUTPUT_TOKENS (3,000 tokens, `.claude/settings.local.json`, set at the user's request on 3 Nov 2026) is saved to a tool-results file and shown as a short notice (pad small results so they're saved too).
 - **BSE announcements API** (`AnnSubCategoryGetData`) sends 50 rows a page and no page count: page until a page adds no new `NEWSID`.
 - **NSE:**
   - Feeds work from scripts through the screener-mcp library's session.
@@ -46,29 +45,28 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
 - **BSE:** `bse_fetch.py job|save` with `bse_fetch.js` (pledge, shareholding, results, corporate actions and announcements for companies NSE doesn't cover, through the browser pane; steps in the script's header).
 - **Documents:** `pdf_text.py <pdf> 1 9999 <out.txt>` (PDF → text with page markers). BSE/NSE fallback only: `bse_pdf.py`, `save_b64_pdf.py`, `save_js_file.py`, `save_last_js.py`.
 
-## screener.in MCP (main source; `mcp__screener__*`)
-- **Account:** the MCP server logs in with the account the user configured in its settings; never read or use those credentials.
+## screener.in (main source; the screener library through scripts)
+The screener MCP was removed on 3 Nov 2026. Company data: `scr_company.py`; any single tool call (screens, peers, …): `scr_tool.py` (both in "Scripts" above).
+- **Account:** scripts run with `--login` log in with `SCREENER_USERNAME` and `SCREENER_PASSWORD` from the user-level Claude env config; never read, print or copy them.
   - The account's column set (screener.in → Edit columns, `/user/columns/`) decides which fields every screen row carries; fields named in a query are added on top.
   - The user allowed changing it for this project (3 Nov 2026). Free accounts keep at most 15 columns (screener silently drops the rest on save). It holds exactly the fields in `process/future/screens.json` → `columns`; change both together.
   - To change it, use the browser pane, where the account is logged in, at `/user/columns/`: filter, tick or untick, then Save columns. The list's remove buttons re-render after each click, so re-read the page between clicks.
   - After changing it, check one screen row has every listed field.
-- **Public mode, for scripts (no login, no model tokens):** `scr_company.py` and `mb_history.py` import the screener-mcp library through `uvx --from screener-mcp==0.5.0 python …`. The library logs in by itself when `SCREENER_USERNAME` and `SCREENER_PASSWORD` are in the environment (the user sets them in the user-level Claude env config; never read or print them), so these scripts drop them and stay public unless run with `--login`, keeping bulk fetches off the account the MCP uses. Login is for screens (P2), which public mode can't run.
-  - It reads screener's public company pages (all 12 years and 13 quarters, 12 quarters of shareholding, and the credit-rating letters; the MCP tools cut to 8), NSE's feeds (announcements, every row, where the MCP tool caps at 50; insider trades; promoter pledge, latest only; SAST Reg 29; corporate actions; the shareholding-pattern list, about 26 quarters), and the public chart API.
+- **Public mode, for scripts (no login, no model tokens):** `scr_company.py` and `mb_history.py` import the screener-mcp library through `uvx --from screener-mcp==0.5.0 python …`. The library logs in by itself when `SCREENER_USERNAME` and `SCREENER_PASSWORD` are in the environment (the user sets them in the user-level Claude env config; never read or print them), so these scripts drop them and stay public unless run with `--login`, keeping bulk fetches off the account. Login is for screens (P2, `scr_tool.py screen_stocks … --login`), which public mode can't run.
+  - It reads screener's public company pages (all 12 years and 13 quarters, 12 quarters of shareholding, and the credit-rating letters; the per-company tools cut to 8), NSE's feeds (announcements, every row, where `get_company_announcements` caps at 50; insider trades; promoter pledge, latest only; SAST Reg 29; corporate actions; the shareholding-pattern list, about 26 quarters), and the public chart API.
   - NSE feeds query both `index=equities` and `index=sme`, since a company that moved boards has rows under both. The shareholding-pattern XBRLs (`xbrl` link in each quarter's row) are fetched through the library's NSE session; plain curl gets nothing. The promoter-group context `ShareholdingOfPromoterAndPromoterGroup_ContextI` holds the promoter shares and the pledged % of them (`EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares`, a fraction); `ShareholdingPattern_ContextI` holds total shares. In NSE's pledge feed, `percPromoterShares` is the promoter pledge (% of promoter shares); `percSharesPledged` counts every holder.
   - The chart API (`/api/company/<id>/chart/?q=…&days=10000`) gives price and volume, P/E with TTM EPS, and market cap to sales with TTM sales back to about 2005, including merged and delisted companies. `&consolidated=true` gives the consolidated series; for standalone, leave the parameter out entirely, since any value (even empty or `false`) returns consolidated, which is all empty for a company without subsidiaries. The answer lists every date with null values where there's no data, so check for values, not for a non-empty list.
-  - Only screens need the logged-in MCP.
-- **Paging without inline answers:** a page under about 190 rows comes back inline and costs context. Cover a query of T rows (T ≥ 200) with full 200-row pages only: `sort_by` "Market Capitalization", order desc, pages 1..floor(T/200), then one asc page 1 for the remainder (overlap is fine).
+- **Paging:** cover a query of T rows (T ≥ 200) with full 200-row pages only: `sort_by` "Market Capitalization", order desc, pages 1..floor(T/200), then one asc page 1 for the remainder (overlap is fine).
 - **Keeping answers out of context:**
-  - An answer over the tool-result limit is saved by the app to a file, and the call returns only the path: pass it to `scr_save.py --file`. Nothing enters context. The limit is set to 3,000 tokens for this project (`MAX_MCP_OUTPUT_TOKENS` in `.claude/settings.local.json`, set at the user's request on 3 Nov 2026), so most screens go to file; still ask for big pages (`screen_stocks` `limit` 200). An answer from any MCP tool that must be read goes to a file the same way: read it from the file.
-  - A small answer comes inline: save it right away with `scr_save.py --marker <a word in it> --tag <your brief's tag>`.
-  - Run `scr_save.py` from the Bash tool: PowerShell splits the `--args` JSON at its inner quotes.
+  - `scr_tool.py` writes every answer to its `<out>` file (the cache envelope below) and prints only the page and totals for screens, or "saved"; it exits non-zero on an error answer, with the reason in the file.
+  - Run it from the Bash tool: PowerShell splits the JSON argument at its inner quotes.
   - Never read a saved file whole into context; scripts read it.
-- **`screen_stocks`:**
+- **`screen_stocks`** (`scr_tool.py screen_stocks '<args>' <out> --login`):
   - `limit` up to 200 rows. Page N makes the server re-fetch pages 1..N from screener (slow; rate limits), so split a big query into market-cap bands of at most 200 rows rather than paging deep.
   - Always set `min_market_cap` 0 (it otherwise adds a ₹100 cr floor) and `exclude_flagged` false (it otherwise drops odd rows).
   - Rows: `symbol`, `name`, `company_id`, `fundamentals` {field: value}. AND/OR/parentheses run natively; field names are screener's exact ones ("Price to Earning", "Historical PE 5Years").
   - A field in the column set comes back on every row, empty or not. A field used in a condition (`X > -9999999`) drops the companies where it is empty, so whole-market fields belong in the column set, not in the query.
-- **Per company:**
+- **Per company** (`scr_tool.py <tool> '<args>' <out>`, no login; `scr_company.py` covers the usual items in full):
   - `get_financials`: `statement` profit_loss / balance_sheet / cash_flow / ratios, `financial_type` consolidated / standalone, `years` ≤12, but only the years on screener's page (KRISHNADEF: 4).
   - `get_quarterly_results`: last 8 quarters.
   - `get_shareholding_pattern`: 8 quarters. Pledge is only a flag; the current % is the screen field "Pledged percentage", and the history is `scr/shp_history.json`.
@@ -81,7 +79,7 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
   - Figures are rounded to whole crore.
   - "Public" includes the shareholders Tapetide lists as "Others".
   - Results announcements include newspaper copies: take the "Outcome of Board Meeting" / "Financial Result Updates" filing.
-  - The connection can drop mid-run: run ToolSearch again before calling it unavailable.
+  - A call can fail mid-run (429, dropped connection): the script exits non-zero with the reason; wait and re-run before calling screener unavailable.
 
 ## BSE/NSE directly (for what the scripts above don't cover; `process/data_rules.md`)
 - **BSE PDFs:** `www.bseindia.com/xml-data/corpfiling/AttachHis/<id>.pdf` (same-day filings often under `AttachLive`) with `curl.exe` and its default identity; `AnnPdfOpen.aspx?Pname=<id>.pdf` is the same file. `bse_pdf.py SYM "regex" files...` downloads and extracts. Some transcript links return an HTML page from both paths: use the NSE copy. Large companies sometimes file only a cover letter linking to a website transcript: read the linked file and say so.

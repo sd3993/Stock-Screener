@@ -1,5 +1,6 @@
 import argparse, datetime as dt, glob, json, os, sys
-# Saves a screener MCP answer to a file, so it is cached without re-typing it (and without reading it into context):
+# Saves a screener MCP answer to a file, so it is cached without re-typing it (and without reading it into context).
+# Only for old answers in transcripts: the MCP was removed on 3 Nov 2026; new calls go through scr_tool.py.
 #   --file PATH      an oversized answer the app already saved (the path printed in the tool's "exceeds maximum
 #                    allowed tokens" message); nothing enters context.
 #   --marker WORD    otherwise, the newest tool result containing WORD in this project's transcripts (sessions and

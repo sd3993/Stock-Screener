@@ -18,7 +18,7 @@ P2 screens ──┴─> P3 triage ─> P4 gate (+P4R) ─> P5 sector map & comp
 ```
 
 ## Phases
-screener.in (through its MCP for screens, and `scr_company.py` for company data) is the main source, with NSE/BSE for the rest (`process/data_rules.md`). No phase needs Tapetide.
+screener.in (through the screener library in scripts: `scr_tool.py` for screens, `scr_company.py` for company data; `tools/tools.md`) is the main source, with NSE/BSE for the rest (`process/data_rules.md`). No phase needs Tapetide.
 
 | # | Phase | Who | Model / effort | File | Output (in `runs/future/<FYyyQn>/` unless noted) | Done when |
 |---|---|---|---|---|---|---|

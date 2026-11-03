@@ -3,9 +3,9 @@
 How to reach each source (routes, scripts, quirks) is in `tools/tools.md`. This file says which sources count and how to treat them.
 
 ## Sources
-- **screener.in (its MCP) is the main source:**
-  - figures: annual statements (up to 12 years), the last 8 quarters, ratios, screens;
-  - shareholding (8 quarters) with screener's pledge flag;
+- **screener.in (the screener library through scripts: `scr_company.py`, `scr_tool.py`) is the main source:**
+  - figures: annual statements (up to 12 years), the last 13 quarters, ratios, screens;
+  - shareholding (12 quarters) with screener's pledge flag;
   - insider trades (NSE PIT feeds) and NSE bulk deals;
   - announcements (NSE, up to 10 years back, with the exchange PDF link);
   - the list of annual reports and call transcripts (exchange links, back to about 2013).
@@ -27,7 +27,7 @@ How to reach each source (routes, scripts, quirks) is in `tools/tools.md`. This 
 - **Basis:** use consolidated figures where the company files them, standalone otherwise, and say which. Confirm against the results filing on a company's first fetch and record it in `index.json`.
 - **BSE/NSE directly** for what neither source has:
   - a filing missing from both lists;
-  - shareholding patterns older than screener's 8 quarters;
+  - shareholding patterns older than screener's 12 quarters;
   - an unreadable document;
   - an SME company not covered;
   - a SAST per-person annexure;
@@ -45,7 +45,7 @@ How to reach each source (routes, scripts, quirks) is in `tools/tools.md`. This 
 - **Known quirks of each source:** `tools/tools.md`.
 
 ## Calls and caching
-- **Every answer is saved:** screener answers in `data/companies/<SYM>/scr/` (market-wide ones in the run folder or `data/market/`) with `python tools/scripts/scr_save.py`; Tapetide answers in `data/companies/<SYM>/api/`, each Tapetide call logged (`tools/tools.md`).
+- **Every answer is saved:** screener answers in `data/companies/<SYM>/scr/` (market-wide ones in the run folder or `data/market/`), written by `scr_company.py` and `scr_tool.py`; Tapetide answers in `data/companies/<SYM>/api/`, each Tapetide call logged (`tools/tools.md`).
 - Read the cache before calling. Call again only when the data may have changed since (new results, shareholding or filings since the fetch date) or when a doubt needs a fresh copy.
 - Downloads from document links (exchange PDFs, `filings.tapetide.com`) are free.
 

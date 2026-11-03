@@ -1,7 +1,7 @@
 import asyncio, datetime as dt, json, os, re, sys
 # P4/P6: one company's screener.in data into data/companies/<SYM>/scr/, with no model tokens and no login: the
 # screener-mcp library in public mode reads screener's public company page (every year and quarter on it, not the
-# MCP tools' 8-quarter cut) and NSE's feeds: announcements, insider trades, promoter pledge (latest), SAST Reg 29 disclosures,
+# library tools' 8-quarter cut) and NSE's feeds: announcements, insider trades, promoter pledge (latest), SAST Reg 29 disclosures,
 # corporate actions and the shareholding-pattern list (about 26 quarters), plus promoter holding and pledge per quarter read
 # from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed):
 #   uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py SYM [SYM ...] [--syms-file list.txt] [--days 1100]
@@ -122,7 +122,7 @@ async def main():
                  for a in (box.find_all('a') if box else []) if a.get('href', '').startswith('http')]
         save('credit_ratings', 'company_page', {'symbol': sym, 'section': 'credit-ratings'}, {'symbol': sym, 'ratings': links})
 
-    async def nse_items():  # NSE feeds the MCP tools don't expose; SME companies sit under index=sme
+    async def nse_items():  # NSE feeds the library's tools don't expose; SME companies sit under index=sme
         nse = await get_nse_client()
         for name, path, extra in (('pledge_nse', '/api/corporate-pledgedata', {}),
                                   ('sast', '/api/corporate-sast-reg29', {}),
