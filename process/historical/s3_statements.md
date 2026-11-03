@@ -1,6 +1,6 @@
 # S3: statements for the sample (script, run by the orchestrator)
 
-For every company in `sample.csv`:
+Normally already done by S2's single fetch (`s2_sample.md`, "Order"); then S3 only checks that every `sample.csv` company has its files and fetches any that don't. For every company in `sample.csv`:
 `uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py <SYM> --only statements,quarterly,shareholding,overview,documents,announcements,nse`
 (no login, no model tokens; run them in a loop in the background, paced, and skip companies whose `scr/` is fresh from this study run).
 

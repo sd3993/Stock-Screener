@@ -2,6 +2,8 @@
 
 About 30 winners (10 per horizon) and about 10 fallen winners, picked in `backtest.md` across business types and periods. One company at a time; each study's learnings go into the next helper's brief.
 
+**Prefetch:** while one helper works, the orchestrator downloads the next company's annual reports for its window years in the background (the exchange links in `scr/documents.json`, with curl; no model tokens; `scr_docs.py` doesn't fit, as it takes only recent filings), so each helper starts with its files in place.
+
 **Helper brief:** the company, its winning window, its business type from `business_types.csv`, and `backtest.md`'s patterns to test. Working directory: the project root.
 
 1. **No hindsight:** for each stage, read only documents dated before it (annual reports from the screener list back to about 2013, results, transcripts and presentations from BSE/NSE; `process/data_rules.md`, `tools/tools.md`). Older years only from what was filed then.
