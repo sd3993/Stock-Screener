@@ -4,7 +4,7 @@ import csv, os, random, sys
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
 # of the same type), counts the peers flags and runs the checks; outputs and rules in s2_sample.md, "Script".
-#   python -I tools/scripts/mb_sample.py [--seed 1] | --finalize [--companies <dir>]  [--dir DIR: read and write there, not the run folder]
+#   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv>] | --finalize [--companies <dir>]  [--dir DIR: read and write there, not the run folder]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import hist_dir
 a = sys.argv[1:]
@@ -389,57 +389,179 @@ for r in rows:
     for k, v in r.items():
         if k not in ('sym', 'start', 'last_price_date'):
             r[k] = f(v)
+outc = {(r['sym'], r['start']): r for r in rows}
 rows = [r for r in rows if r['mc0'] and r['mc0'] >= MIN_MC and '2006' <= r['start'][:4] <= '2023']
 by_start = {}
 for r in rows:
     by_start.setdefault(r['start'], []).append(r)
 
-rng = random.Random(SEED)
-out = []
-for hz, (cols, thr, last, n) in H.items():
-    yrs = cols[0].split('_')[1][:-1]
-    first = {}  # each company's first qualifying window for this horizon
-    for r in sorted(rows, key=lambda r: r['start']):
-        m = mult(r, cols)
-        if r['start'] <= last and m is not None and m >= thr and r['sym'] not in first:
-            first[r['sym']] = r
-    winners = pick_strat(list(first.values()), n, rng)
-    for w in winners:
-        m = mult(w, cols)
-        strong = hz == 'medium' and m >= 5
-        out.append({'group': 'winner', 'sym': w['sym'], 'horizon': hz, 'start': w['start'], 'mc0': w['mc0'],
-                    'multiple': m, 'strong': 'yes' if strong else '', 'matched_to': '',
-                    'reason': f'{hz}: {m:.1f}x price over {"7-10" if hz == "long" else yrs} years from {w["start"]}{dilution_note(w, yrs)}'})
-        # control candidates: same start, mc0 within 0.5-2x, did not reach the threshold; nearest on growth and valuation
-        cands = []
-        for c in by_start[w['start']]:
-            cm = mult(c, cols)
-            if c['sym'] == w['sym'] or cm is None or cm >= thr or not (0.5 <= c['mc0'] / w['mc0'] <= 2):
-                continue
-            dist = abs((c['sales_g3'] or 0) - (w['sales_g3'] or 0)) / 20 + abs((c['eps_g3'] or 0) - (w['eps_g3'] or 0)) / 40 \
-                + abs((c['pe0'] or 0) - (w['pe0'] or 0)) / 20 + abs(c['mc0'] / w['mc0'] - 1)
-            cands.append((dist, c, cm))
-        for dist, c, cm in sorted(cands, key=lambda x: x[0])[:N_CAND]:
-            out.append({'group': 'control_candidate', 'sym': c['sym'], 'horizon': hz, 'start': c['start'], 'mc0': c['mc0'],
-                        'multiple': cm, 'strong': '', 'matched_to': w['sym'],
-                        'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}); reached {cm:.1f}x'})
-    if hz in ('short', 'medium'):
-        fallen = {}
+def pools():
+    """{(group, horizon): {sym: the company's first qualifying window}} for winners and (short, medium) fallen winners."""
+    P = {}
+    for hz, (cols, thr, last, n) in H.items():
+        yrs = cols[0].split('_')[1][:-1]
+        first, fallen = {}, {}
         for r in sorted(rows, key=lambda r: r['start']):
+            if r['start'] > last:
+                continue
+            m = mult(r, cols)
+            if m is not None and m >= thr and r['sym'] not in first:
+                first[r['sym']] = r
             pk, end = r.get(f'pxpeak_{yrs}y'), r.get(f'px_{yrs}y')
-            if r['start'] <= last and pk and end and pk >= thr and end <= pk / 2 and r['sym'] not in fallen:
+            if hz != 'long' and pk and end and pk >= thr and end <= pk / 2 and r['sym'] not in fallen:
                 fallen[r['sym']] = r
-        for r in pick_strat(list(fallen.values()), FALLEN, rng):
-            out.append({'group': 'fallen_winner', 'sym': r['sym'], 'horizon': hz, 'start': r['start'], 'mc0': r['mc0'],
-                        'multiple': r[f'px_{yrs}y'], 'strong': '', 'matched_to': '',
-                        'reason': f'{hz}: peaked at {r[f"pxpeak_{yrs}y"]:.1f}x within {yrs} years from {r["start"]}, ended at {r[f"px_{yrs}y"]:.1f}x'})
-    print(f'{hz}: pool {len(first)} winners')
+        P[('winner', hz)] = first
+        if hz != 'long':
+            P[('fallen_winner', hz)] = fallen
+    return P
+
+def winner_row(w, hz):
+    cols = H[hz][0]
+    yrs = cols[0].split('_')[1][:-1]
+    m = mult(w, cols)
+    return {'group': 'winner', 'sym': w['sym'], 'horizon': hz, 'start': w['start'], 'mc0': w['mc0'], 'multiple': m,
+            'strong': 'yes' if hz == 'medium' and m >= 5 else '', 'matched_to': '',
+            'reason': f'{hz}: {m:.1f}x price over {"7-10" if hz == "long" else yrs} years from {w["start"]}{dilution_note(w, yrs)}'}
+
+def fallen_row(r, hz):
+    yrs = H[hz][0][0].split('_')[1][:-1]
+    return {'group': 'fallen_winner', 'sym': r['sym'], 'horizon': hz, 'start': r['start'], 'mc0': r['mc0'],
+            'multiple': r[f'px_{yrs}y'], 'strong': '', 'matched_to': '',
+            'reason': f'{hz}: peaked at {r[f"pxpeak_{yrs}y"]:.1f}x within {yrs} years from {r["start"]}, ended at {r[f"px_{yrs}y"]:.1f}x'}
+
+def candidates(w, hz):
+    """Control candidates: same start, mc0 within 0.5-2x, did not reach the threshold; nearest on growth and valuation."""
+    cols, thr = H[hz][0], H[hz][1]
+    cands = []
+    for c in by_start[w['start']]:
+        cm = mult(c, cols)
+        if c['sym'] == w['sym'] or cm is None or cm >= thr or not (0.5 <= c['mc0'] / w['mc0'] <= 2):
+            continue
+        dist = abs((c['sales_g3'] or 0) - (w['sales_g3'] or 0)) / 20 + abs((c['eps_g3'] or 0) - (w['eps_g3'] or 0)) / 40 \
+            + abs((c['pe0'] or 0) - (w['pe0'] or 0)) / 20 + abs(c['mc0'] / w['mc0'] - 1)
+        cands.append((dist, c, cm))
+    return [{'group': 'control_candidate', 'sym': c['sym'], 'horizon': hz, 'start': c['start'], 'mc0': c['mc0'],
+             'multiple': cm, 'strong': '', 'matched_to': w['sym'],
+             'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}); reached {cm:.1f}x'}
+            for dist, c, cm in sorted(cands, key=lambda x: x[0])[:N_CAND]]
+
+P = pools()
+rng = random.Random(SEED)
+out, rep = [], None
+if '--repair' in a:
+    # Keep the old sample's winners and fallen winners that still qualify (same first qualifying window, same size band);
+    # replace the rest from the same stratum (group x horizon x period x size band, seeded; never a company already a winner
+    # or fallen winner in the sample, nor the one replaced); recompute every winner's candidates from the current outcomes.csv.
+    src = a[a.index('--repair') + 1]
+    old = list(csv.DictReader(open(src, encoding='utf-8')))
+    picks = [r for r in old if r['group'] in ('winner', 'fallen_winner')]
+    kept, dropped = [], []
+    for r in picks:
+        n = P[(r['group'], r['horizon'])].get(r['sym'])
+        o = outc.get((r['sym'], r['start'])) or {}
+        if n and n['start'] == r['start'] and band(n['mc0']) == band(f(r['mc0'])):
+            kept.append(r)
+            continue
+        if n and n['start'] != r['start']:
+            why = (f"first qualifying window now {n['start']} (mc0 {n['mc0']:g} cr); "
+                   f"at {r['start']} mc0 was {r['mc0']}, now {o.get('mc0')}")
+        elif n:
+            why = f"size band now {band(n['mc0'])} (mc0 {n['mc0']:g} cr, was {r['mc0']})"
+        else:
+            why = f"left the pool: mc0 at {r['start']} now {o.get('mc0')} cr (was {r['mc0']}), no other qualifying window with mc0 >= {MIN_MC}"
+        dropped.append((r, why))
+    used = {r['sym'] for r in picks}  # kept and replaced companies are never picked again
+    repl, short, by_cell = {}, [], {}
+    for r, why in dropped:
+        by_cell.setdefault((r['group'], r['horizon'], period(r['start']), band(f(r['mc0']))), []).append(r)
+    for cell in sorted(by_cell):
+        g, hz, per, bd = cell
+        pool = sorted((x for x in P[(g, hz)].values() if (period(x['start']), band(x['mc0'])) == (per, bd)), key=lambda x: x['sym'])
+        rng.shuffle(pool)
+        for r in by_cell[cell]:
+            while pool and pool[-1]['sym'] in used:
+                pool.pop()
+            if not pool:
+                short.append(f"{g} {hz} {per} {bd}: no company left for {r['sym']}")
+                continue
+            x = pool.pop()
+            used.add(x['sym'])
+            repl[(r['group'], r['sym'], r['horizon'])] = winner_row(x, hz) if g == 'winner' else fallen_row(x, hz)
+    keep = {(r['group'], r['sym'], r['horizon']) for r in kept}
+    old_c = {}
+    for r in old:
+        if r['group'] == 'control_candidate':
+            old_c.setdefault((r['matched_to'], r['horizon']), []).append(r['sym'])
+    changed, nearest = [], []
+    for r in picks:  # in the old order, each replacement in its predecessor's place
+        k = (r['group'], r['sym'], r['horizon'])
+        if k in keep:
+            nr = outc[(r['sym'], r['start'])]
+            row = winner_row(nr, r['horizon']) if r['group'] == 'winner' else fallen_row(nr, r['horizon'])
+        elif k in repl:
+            row = repl[k]
+        else:
+            continue
+        out.append(row)
+        if row['group'] == 'winner':
+            cs = candidates(outc[(row['sym'], row['start'])], row['horizon'])
+            out += cs
+            if k in keep:
+                was, now = old_c.get((r['sym'], r['horizon']), []), [c['sym'] for c in cs]
+                if was != now:
+                    changed.append(f"- {r['sym']} {r['horizon']} {r['start']}: {', '.join(was)} -> {', '.join(now)}")
+                    if was[:1] != now[:1]:
+                        nearest.append(f"{r['sym']} {r['horizon']} ({(was or ['-'])[0]} -> {(now or ['-'])[0]})")
+    rep = ['# S2 sample repair', '', f'Written by `mb_sample.py --repair` (seed {SEED}) from `{src}` and the current '
+           '`outcomes.csv`. A pick is kept when its first qualifying window and size band are unchanged; candidate lists are '
+           'recomputed for every winner.', '',
+           f'- Winners and fallen winners: {len(picks)}; kept {len(kept)} (winners {sum(1 for r in kept if r["group"] == "winner")}, '
+           f'fallen {sum(1 for r in kept if r["group"] == "fallen_winner")}); replaced {len(repl)}; unfilled {len(short)}.',
+           f'- Kept winners whose candidate list changed: {len(changed)}; nearest candidate changed: {len(nearest)}.', '',
+           '## Replaced (old pick: why -> new pick)', ''] + \
+          [f"- {r['group']} {r['sym']} {r['horizon']} {r['start']} ({period(r['start'])} {band(f(r['mc0']))}): {why} -> "
+           + (f"{repl[(r['group'], r['sym'], r['horizon'])]['sym']} {repl[(r['group'], r['sym'], r['horizon'])]['start']}"
+              if (r['group'], r['sym'], r['horizon']) in repl else 'unfilled') for r, why in dropped] + \
+          ['', '## Unfilled', ''] + ([f'- {s}' for s in short] or ['- none']) + \
+          ['', '## Nearest candidate changed', ''] + ([f'- {s}' for s in nearest] or ['- none']) + \
+          ['', '## Candidate lists changed (old -> new, nearest first)', ''] + (changed or ['- none'])
+else:
+    for hz, (cols, thr, last, n) in H.items():
+        for w in pick_strat(list(P[('winner', hz)].values()), n, rng):
+            out.append(winner_row(w, hz))
+            out += candidates(w, hz)
+        if hz in ('short', 'medium'):
+            for r in pick_strat(list(P[('fallen_winner', hz)].values()), FALLEN, rng):
+                out.append(fallen_row(r, hz))
+        print(f'{hz}: pool {len(P[("winner", hz)])} winners')
 
 keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'reason']
 with open(os.path.join(D, 'sample_candidates.csv'), 'w', newline='', encoding='utf-8') as fh:
-    w = csv.DictWriter(fh, fieldnames=keys)
+    w = csv.DictWriter(fh, fieldnames=keys, extrasaction='ignore')
     w.writeheader()
     w.writerows(out)
+if rep:
+    # fetch_order.txt: companies without the S2/S3 fetch (no scr/overview.json): new winners and fallen winners first, then
+    # the other winners and fallen winners, then candidates by rank (every winner's nearest, then each one's second, ...)
+    new = {(r['group'], r['sym'], r['horizon']) for r in repl.values()}
+    rank = {}
+    for r in out:
+        if r['group'] == 'control_candidate':
+            rank[(r['matched_to'], r['horizon'])] = r['_rank'] = rank.get((r['matched_to'], r['horizon']), 0) + 1
+    picked = [r for r in out if r['group'] != 'control_candidate']
+    seq = [r for r in picked if (r['group'], r['sym'], r['horizon']) in new] + \
+          [r for r in picked if (r['group'], r['sym'], r['horizon']) not in new] + \
+          sorted((r for r in out if r['group'] == 'control_candidate'), key=lambda r: r['_rank'])
+    order = []
+    for r in seq:
+        if r['sym'] not in order and not os.path.exists(os.path.join(COMPANIES, r['sym'], 'scr', 'overview.json')):
+            order.append(r['sym'])
+    open(os.path.join(D, 'fetch_order.txt'), 'w', encoding='utf-8').write(''.join(s + '\n' for s in order))
+    psyms = {r['sym'] for r in picked}
+    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without `scr/overview.json` '
+                f'({sum(1 for s in order if s in psyms)} of them winners or fallen winners).']
+    open(os.path.join(D, 'sample_repair.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
+    print('\n'.join(rep[4:7]))
 cnt = {}
 for r in out:
     k = (r['group'], r['horizon'], period(r['start']), band(r['mc0']))
