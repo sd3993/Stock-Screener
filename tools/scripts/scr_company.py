@@ -7,7 +7,7 @@ import asyncio, datetime as dt, json, os, re, sys
 #   uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py SYM [SYM ...] [--syms-file list.txt] [--days 1100]
 #       [--only quarterly,shareholding] [--skip-saved]
 # Several companies in one run save the start-up time; --skip-saved skips a company whose --only items are all saved already
-# (item names that match a file: overview, documents, peers, shareholding, quarterly, insider, announcements, credit_ratings).
+# (statements count as saved when profit_loss.json exists, nse when shareholding_nse.json does).
 # Writes {fetched_at (IST), via: "screener-public", tool, args, warnings, data} per item, the same envelope as scr_save.py.
 os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')  # fewer 429 cooldowns at the same throughput (tools/tools.md)
 if '--login' not in sys.argv:  # public mode by default, even when the screener login is in the environment (tools/tools.md)
@@ -166,12 +166,14 @@ async def main():
     print(f'{sym}: saved {", ".join(done) or "nothing"} in {out_dir}' + (f'; FAILED: {"; ".join(failed)}' if failed else ''), flush=True)
     return not failed
 
+SAVED_AS = {'statements': 'profit_loss', 'nse': 'shareholding_nse'}  # items saved under other names
+
 async def run_all():
     global sym, out_dir
     ok = True
     for sym in syms:
         out_dir = os.path.join('data', 'companies', sym, 'scr')
-        if skip_saved and only and all(os.path.exists(os.path.join(out_dir, n + '.json')) for n in only):
+        if skip_saved and only and all(os.path.exists(os.path.join(out_dir, SAVED_AS.get(n, n) + '.json')) for n in only):
             continue
         try:
             ok = await main() and ok
