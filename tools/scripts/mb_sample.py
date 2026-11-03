@@ -2,8 +2,9 @@ import csv, os, random, sys
 # Multibagger study, step 2 (process/historical/s2_sample.md): picks winners, fallen winners and ~5 control candidates per
 # winner from outcomes.csv (S1), seeded so the picks repeat. Writes runs/historical/<date>/sample_candidates.csv (group, sym,
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
-# The control for each winner is chosen from its candidates after business types are tagged (S2 helper).
-#   python -I tools/scripts/mb_sample.py [--seed 1]
+# --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
+# of the same type), counts the peers flags and runs the checks; outputs and rules in s2_sample.md, "Script".
+#   python -I tools/scripts/mb_sample.py [--seed 1] | --finalize [--companies <dir>]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import hist_dir
 a = sys.argv[1:]
@@ -22,15 +23,6 @@ def f(x):
     except (TypeError, ValueError):
         return None
 
-rows = [r for r in csv.DictReader(open(os.path.join(D, 'outcomes.csv'), encoding='utf-8'))]
-for r in rows:
-    for k, v in r.items():
-        if k not in ('sym', 'start', 'last_price_date'):
-            r[k] = f(v)
-rows = [r for r in rows if r['mc0'] and r['mc0'] >= MIN_MC and '2006' <= r['start'][:4] <= '2023']
-by_start = {}
-for r in rows:
-    by_start.setdefault(r['start'], []).append(r)
 
 def mult(r, cols):
     vals = [r.get(c) for c in cols if r.get(c) is not None]
@@ -61,6 +53,346 @@ def pick_strat(pool, n, rng):
             if cells[k] and len(out) < n:
                 out.append(cells[k].pop())
     return out
+
+# --- --finalize: once business types are tagged (s2_sample.md, "Checks") ---
+COMPANIES = a[a.index('--companies') + 1] if '--companies' in a else os.path.join('data', 'companies')  # tests point it at a copy
+# Artefact limits: a start mc under FLOOR_NEAR cr is near the floor, and thin if the median weekly traded value in the 13
+# weeks before the start is under THIN_VALUE lakh or THIN_ZERO+ of those weeks had no volume (the chart's volume points are
+# weekly totals); weekly price steps of STEP x are checked, and a market-cap-to-sales step off by more than MISMATCH x fails;
+# gaps over GAP_BREAK days are breaks (over GAP_WARN, a warning); a start price older than STALE days is stale.
+FLOOR_NEAR, THIN_VALUE, THIN_ZERO = 100, 5.0, 4
+STEP, MISMATCH, GAP_BREAK, GAP_WARN, STALE = 1.5, 1.5, 90, 35, 14
+BT_COLS = ['sym', 'as_of', 'business_type', 'sub_type', 'revenue_drivers', 'cyclicality', 'capital_intensity', 'pricing_power',
+           'customers', 'evidence', 'peers', 'flag']
+import bisect, datetime as dt, glob, json, re
+
+def type_list():
+    """Types from s2_sample.md's "Business type" list plus business_types/new_types*.md: [(name, definition, source)]."""
+    txt = open(os.path.join('process', 'historical', 's2_sample.md'), encoding='utf-8').read()
+    m = re.search(r'Keep the type list short and economic, e\.g\. (.*?); add a type', txt)
+    out, depth, cur = [], 0, ''
+    for ch in (m.group(1) if m else '') + ',':
+        depth += (ch == '(') - (ch == ')')
+        if ch == ',' and depth == 0:
+            nm = cur.strip()
+            base = nm.split(' (')[0] if nm.startswith('specialty manufacturer') else nm  # the bracket is its definition
+            out.append((base, nm[len(base):].strip(' ()'), 's2_sample.md'))
+            cur = ''
+        else:
+            cur += ch
+    for fn in sorted(glob.glob(os.path.join(D, 'business_types', 'new_types*.md'))):
+        for line in open(fn, encoding='utf-8'):
+            m = re.match(r'\s*-\s*\*\*(.+?)\*\*\s*(\(.*?\))?\s*:\s*(.+)', line)
+            if m and m.group(1).strip().lower() not in {t[0].lower() for t in out}:
+                out.append((m.group(1).strip(), m.group(3).strip(), f'{os.path.basename(fn)} {m.group(2) or ""}'.strip()))
+    return out
+
+def norm_type(t, types):
+    k = (t or '').strip().lower()
+    for name, _, _ in types:
+        if name.lower() in (k, k.split(' (')[0]):
+            return name
+    return None
+
+_hist = {}
+def history(sym):
+    if sym not in _hist:
+        fn = os.path.join(COMPANIES, sym, 'scr', 'history.json')
+        h = json.load(open(fn, encoding='utf-8'))['data'] if os.path.exists(fn) else None
+        def ser(key, name):
+            out = []
+            for p in ((h or {}).get(key) or {}).get('datasets', {}).get(name) or []:
+                try:
+                    out.append((dt.date.fromisoformat(p[0]), float(p[1])))
+                except (TypeError, ValueError, IndexError):
+                    pass
+            return sorted(out)
+        _hist[sym] = None if h is None else {'px': ser('price', 'Price'), 'vol': ser('price', 'Volume'),
+                                              'mcs': ser('mcap_sales', 'Market Cap to Sales'), 'sales': ser('mcap_sales', 'Sales')}
+    return _hist[sym]
+
+def at(s, d, max_gap):
+    i = bisect.bisect_right([x[0] for x in s], d) - 1
+    return s[i][1] if i >= 0 and (d - s[i][0]).days <= max_gap else None
+
+def add_years(d, n):
+    try:
+        return d.replace(year=d.year + n)
+    except ValueError:
+        return d.replace(year=d.year + n, day=28)
+
+def artefacts(sym, start, n, mc0, o, group):
+    """(fails, warnings) for one window. Screener's prices are adjusted for splits and bonuses, so a fail needs evidence:
+    a split/bonus ex-date (NSE corporate actions, where saved) with a price step around it; a price step whose
+    market-cap-to-sales step disagrees beyond that ratio's rounding to one decimal (only where TTM sales didn't change in
+    between); a one-week spike that sets a fallen winner's peak; a step into the window end; a gap that hides a price step;
+    a stale start price; thin trading near the floor. Steps that can't be verified, other gaps and a price multiple far
+    above the market-cap multiple are warnings."""
+    fails, warns = [], []
+    h = history(sym)
+    if not h or not h['px']:
+        return fails, ['no history.json to check']
+    st = dt.date.fromisoformat(start)
+    end = add_years(st, n)
+    before = [x for x in h['px'] if x[0] <= st]
+    if not before or (st - before[-1][0]).days > STALE:
+        fails.append(f'stale start price (last {before[-1][0] if before else "none"})')
+    pts = ([before[-1]] if before else []) + [x for x in h['px'] if st < x[0] <= end]
+    if pts and pts[-1][0] < end - dt.timedelta(days=GAP_BREAK):
+        fails.append(f'series break: last price {pts[-1][0]}, window ends {end}')
+    sales_dates = [t for t, _ in h['sales']]
+    peak = max(pts[1:], key=lambda x: x[1]) if len(pts) > 1 else None
+    for i, ((t0, p0), (t1, p1)) in enumerate(zip(pts, pts[1:])):
+        r, gap = (p1 / p0 if p0 else 1), (t1 - t0).days
+        big = r >= STEP or r <= 1 / STEP
+        if gap > GAP_BREAK:
+            (fails if big else warns).append(f'series break: no price {t0}..{t1} (price {r:.2f}x across it)')
+            continue
+        if gap > GAP_WARN:
+            warns.append(f'price gap {t0}..{t1}')
+        if not big:
+            continue
+        nxt = pts[i + 2][1] if i + 2 < len(pts) else None
+        if r >= STEP and nxt and nxt / p0 <= r ** 0.5:  # the next week gives back half the move or more
+            msg = f'one-week spike to {p1:g} on {t1} ({r:.2f}x up, then {nxt / p1:.2f}x)'
+            (fails if group == 'fallen_winner' and (t1, p1) == peak else warns).append(msg)
+            continue
+        if r >= STEP and i + 2 == len(pts):
+            fails.append(f'price step {r:.2f}x into the window end ({t1}), not confirmed by later prices')
+            continue
+        m0, m1 = at(h['mcs'], t0, 3), at(h['mcs'], t1, 3)  # same chart dates as the price
+        if m0 and m1 and m0 > 0.05 and not any(t0 < d <= t1 for d in sales_dates):
+            lo, hi = (m1 - 0.05) / (m0 + 0.05), (m1 + 0.05) / (m0 - 0.05)  # the ratio has one decimal
+            if not lo / MISMATCH <= r <= hi * MISMATCH:
+                fails.append(f'price step {r:.2f}x on {t1} vs market cap to sales {m0:g} to {m1:g} (unadjusted split/bonus?)')
+        else:
+            warns.append(f'price step {r:.2f}x on {t1}, market cap cannot confirm it')
+    for d, subj in actions(sym):
+        if st < d <= end:
+            near = [x for x in pts if abs((x[0] - d).days) <= 10]
+            r = max(x[1] for x in near) / min(x[1] for x in near) if len(near) > 1 else 1
+            if r >= STEP:
+                fails.append(f'{subj.strip()} ex {d} with a {r:.2f}x price move around it (unadjusted?)')
+    if mc0 < FLOOR_NEAR:
+        vals = sorted(v * (at(h['px'], t, 7) or 0) / 1e5 for t, v in h['vol'] if st - dt.timedelta(days=91) < t <= st)
+        zero = 13 - sum(1 for v in vals if v > 0)
+        med = vals[len(vals) // 2] if vals else 0
+        if med < THIN_VALUE or zero >= THIN_ZERO:
+            fails.append(f'thin trading near the floor: mc0 {mc0:.0f} cr, median weekly value {med:.1f} lakh, '
+                         f'{zero} of 13 weeks without volume')
+    px, mcm = o.get(f'px_{n}y'), o.get(f'mc_{n}y')
+    if group in ('winner', 'fallen_winner') and px and mcm and mcm / px < 0.5:
+        warns.append(f'price {px:.1f}x vs market cap {mcm:.1f}x over {n}y (market cap from screener ratios can be off: check)')
+    return fails, warns
+
+def actions(sym):
+    """Split, bonus and consolidation ex-dates from the saved NSE corporate actions (scr/corporate_actions.json), if any."""
+    fn = os.path.join(COMPANIES, sym, 'scr', 'corporate_actions.json')
+    out = []
+    if os.path.exists(fn):
+        for r in (json.load(open(fn, encoding='utf-8')).get('data') or {}).get('rows') or []:
+            s = r.get('subject') or ''
+            if re.search(r'bonus|split|sub-division|consolidat', s, re.I):
+                try:
+                    out.append((dt.datetime.strptime(r['exDate'], '%d-%b-%Y').date(), s))
+                except (KeyError, ValueError):
+                    pass
+    return out
+
+def finalize():
+    bt_dir = os.path.join(D, 'business_types')
+    types = type_list()
+    # 1. merge the batch files (never the *_input.csv files)
+    batches = sorted((int(os.path.basename(fn)[6:-4]), fn) for fn in glob.glob(os.path.join(bt_dir, 'batch_*.csv'))
+                     if os.path.basename(fn)[6:-4].isdigit())
+    tags, merged, conflicts, unknown, malformed = {}, [], [], [], []
+    LEVELS = ('low', 'medium', 'high')
+    for b, fn in batches:
+        for r in csv.DictReader(open(fn, encoding='utf-8')):
+            r = {k: (r.get(k) or '').strip() for k in BT_COLS}
+            r['batch'] = b
+            key = (r['sym'], r['as_of'])
+            t = norm_type(r['business_type'], types)
+            if t is None:
+                unknown.append(f"{r['sym']} {r['as_of']} '{r['business_type']}' (batch {b})")
+            r['business_type'] = t or r['business_type']
+            bad = [f'{k}={r[k]!r}' for k, ok in (('peers', ('helped', 'misled', 'neutral')), ('cyclicality', LEVELS),
+                                                 ('capital_intensity', LEVELS), ('pricing_power', LEVELS)) if r[k] not in ok]
+            if r['flag'] and not re.match(r'(shell|no real operations|unclear)\b', r['flag'], re.I):
+                bad.append(f"flag {r['flag'][:50]!r}... is not shell / no real operations / unclear (still treated as a flag)")
+            if bad:
+                malformed.append(f"{r['sym']} {r['as_of']} (batch {b}): " + '; '.join(bad))
+            if key in tags:
+                if tags[key]['business_type'] != r['business_type']:
+                    conflicts.append(f"{key[0]} {key[1]}: '{tags[key]['business_type']}' (batch {tags[key]['batch']}) vs "
+                                     f"'{r['business_type']}' (batch {b}); first kept")
+                continue
+            tags[key] = r
+            merged.append(r)
+    with open(os.path.join(D, 'business_types.csv'), 'w', newline='', encoding='utf-8') as fh:
+        w = csv.DictWriter(fh, fieldnames=BT_COLS + ['batch'])
+        w.writeheader()
+        w.writerows(merged)
+    with open(os.path.join(D, 'business_types_list.md'), 'w', encoding='utf-8') as fh:
+        fh.write('# Business types\n\nWritten by `mb_sample.py --finalize` from `s2_sample.md` and `business_types/new_types*.md`.\n\n')
+        fh.writelines(f'- **{name}**{": " + defn if defn else ""} ({src})\n' for name, defn, src in types)
+    # 3. peers flags, overall and per batch
+    peers = {}
+    for r in merged:
+        for k in ('all', r['batch']):
+            p = peers.setdefault(k, {})
+            p[r['peers'] or 'blank'] = p.get(r['peers'] or 'blank', 0) + 1
+    # 2 and 4. controls, with artefact checks on winners, fallen winners and every tagged same-type candidate reached
+    out_rows = {(r['sym'], r['start']): r for r in csv.DictReader(open(os.path.join(D, 'outcomes.csv'), encoding='utf-8'))}
+    cand = list(csv.DictReader(open(os.path.join(D, 'sample_candidates.csv'), encoding='utf-8')))
+    for r in cand:
+        r['mc0'], r['multiple'] = f(r['mc0']), f(r['multiple'])
+    art, flagged, sample, needs, limits, status = {}, [], [], {}, [], {}
+    names = {t[0] for t in types}
+    def check(r, group):
+        k = (r['sym'], r['start'], r['horizon'], group)
+        if k not in art:
+            o = {c: f(v) for c, v in out_rows.get((r['sym'], r['start']), {}).items()}
+            n = 2 if r['horizon'] == 'short' else 5 if r['horizon'] == 'medium' else \
+                max((7, 10), key=lambda y: o.get(f'px_{y}y') if o.get(f'px_{y}y') is not None else -1)  # the window behind the multiple
+            art[k] = artefacts(r['sym'], r['start'], n, r['mc0'], o, group)
+        return art[k]
+    def need(sym, as_of, group, why, w):
+        e = needs.setdefault((sym, as_of), {'groups': set(), 'for': set(), 'status': set()})
+        e['groups'].add(group)
+        e['for'].add(w)
+        e['status'].add(why)
+    for w in [r for r in cand if r['group'] in ('winner', 'fallen_winner')]:
+        tag = tags.get((w['sym'], w['start']))
+        fails, warns = check(w, w['group'])
+        wk, who = (w['sym'], w['horizon'], w['group']), f"{w['sym']} {w['horizon']}"
+        if tag and tag['flag']:
+            flagged.append((w, tag['flag']))
+        if fails or (tag and tag['flag']):  # dropped or replaced by the orchestrator: no tags or control needed
+            status[wk] = 'artefact' if fails else 'flagged'
+            continue
+        if not tag:
+            need(w['sym'], w['start'], w['group'], 'untagged', who)
+            status[wk] = 'untagged'
+        elif tag['business_type'] not in names:  # the orchestrator adds the type to new_types.md or fixes the row
+            status[wk] = 'type not in list'
+            continue
+        if w['group'] == 'fallen_winner':
+            if tag:
+                sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], checks='; '.join(warns)))
+            continue
+        cs = [c for c in cand if c['group'] == 'control_candidate' and c['matched_to'] == w['sym'] and c['horizon'] == w['horizon']]
+        if not cs:
+            status[wk] = 'no candidates'
+            continue
+        if not tag:  # round 1 tags the nearest candidate with the winner; later ones wait for the winner's type
+            if (cs[0]['sym'], cs[0]['start']) not in tags:
+                need(cs[0]['sym'], cs[0]['start'], 'control_candidate', 'candidate 1', who)
+            continue
+        pick, skipped = None, []
+        for i, c in enumerate(cs):
+            ct = tags.get((c['sym'], c['start']))
+            if not ct:
+                need(c['sym'], c['start'], 'control_candidate', f'candidate {i + 1}', who)
+                status[wk] = f'needs candidate {i + 1} ({c["sym"]})'
+                break
+            if ct['business_type'] != tag['business_type']:
+                skipped.append(f"{c['sym']} ({ct['business_type']})")
+                continue
+            cf, cw = check(c, 'control')
+            if ct['flag'] or cf:
+                skipped.append(f"{c['sym']} (same type, {'flagged: ' + ct['flag'] if ct['flag'] else '; '.join(cf)})")
+                continue
+            pick = (c, ct, cw)
+            break
+        else:
+            status[wk] = f'no same-type candidate among {len(cs)}'
+        if not pick:
+            status[wk] += f"; skipped {', '.join(skipped)}" if skipped else ''
+            continue
+        c, ct, cw = pick
+        ratio = c['mc0'] / w['mc0']
+        ok = c['start'] == w['start'] and 0.5 <= ratio <= 2 and c['multiple'] < H[w['horizon']][1] and c['sym'] != w['sym']
+        if not ok:
+            limits.append(f"- {c['sym']} for {w['sym']} {w['horizon']}: start {c['start']} vs {w['start']}, mc0 ratio {ratio:.2f}, "
+                          f"multiple {c['multiple']}")
+        status[wk] = f"control {c['sym']} (candidate {cs.index(c) + 1})" + (f"; skipped {', '.join(skipped)}" if skipped else '')
+        if not (tag['flag'] or fails or not ok):
+            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], control=c['sym'], checks='; '.join(warns)))
+            sample.append(dict(c, group='control', business_type=ct['business_type'], sub_type=ct['sub_type'], checks='; '.join(cw)))
+    # 5. outputs
+    keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'control', 'business_type', 'sub_type',
+            'reason', 'checks']
+    with open(os.path.join(D, 'sample.csv'), 'w', newline='', encoding='utf-8') as fh:
+        wr = csv.DictWriter(fh, fieldnames=keys, extrasaction='ignore')
+        wr.writeheader()
+        wr.writerows(sample)
+    with open(os.path.join(D, 'needs_next.csv'), 'w', newline='', encoding='utf-8') as fh:
+        wr = csv.writer(fh)
+        wr.writerow(['sym', 'as_of', 'groups', 'for_winner', 'status'])
+        for (s, d), e in sorted(needs.items()):
+            wr.writerow([s, d, ';'.join(sorted(e['groups'])), ';'.join(sorted(e['for'])), ';'.join(sorted(e['status']))])
+    winners = [r for r in cand if r['group'] == 'winner']
+    fallen = [r for r in cand if r['group'] == 'fallen_winner']
+    cnt = lambda pre: sum(1 for k, v in status.items() if k[2] == 'winner' and v.startswith(pre))
+    arts = [(k, v[0]) for k, v in art.items() if v[0]]
+    warns = [(k, v[1]) for k, v in art.items() if v[1]]
+    rep = ['# S2 checks', '', f'Written by `mb_sample.py --finalize`. Batches merged: {len(batches)} '
+           f'({", ".join(str(b) for b, _ in batches)}); tagged rows {len(merged)}; {len(types)} types in `business_types_list.md`.', '',
+           f'- Winners {len(winners)}: tagged {sum(1 for w in winners if (w["sym"], w["start"]) in tags)}; with a same-type control '
+           f'{cnt("control")}; needing a next candidate {cnt("needs")}; no same-type candidate left {cnt("no same")}; '
+           f'untagged {cnt("untagged")}; no candidates {cnt("no candidates")}; flagged {cnt("flagged")}; '
+           f'artefact {cnt("artefact")}; type not in list {cnt("type not")}.',
+           f'- Fallen winners {len(fallen)}: tagged {sum(1 for r in fallen if (r["sym"], r["start"]) in tags)}.',
+           f'- sample.csv: {len(sample)} rows, ' + ', '.join(f'{g} {sum(1 for r in sample if r["group"] == g)}'
+                                                         for g in ('winner', 'control', 'fallen_winner')) + '.',
+           f'- needs_next.csv: {len(needs)} rows to tag next (sym, as_of, groups as in batch inputs; for_winner, status).', '',
+           '## Peers flags', '', '| batch | helped | misled | neutral | misled share |', '|---|---|---|---|---|']
+    for k in ['all'] + [b for b, _ in batches]:
+        p = peers.get(k, {})
+        rep.append(f"| {k} | {p.get('helped', 0)} | {p.get('misled', 0)} | {p.get('neutral', 0)} | "
+                   f"{p.get('misled', 0) / (sum(p.values()) or 1):.0%} |")
+    cells = sorted({(period(r['start']), band(r['mc0'])) for r in sample})
+    rep += ['', '## Balance of sample.csv (period, size band in ₹ cr)', '',
+            '| group | horizon | ' + ' | '.join(f'{p} {b}' for p, b in cells) + ' | total |', '|---|---|' + '---|' * (len(cells) + 1)]
+    for g in ('winner', 'control', 'fallen_winner'):
+        for hz in H:
+            rs = [r for r in sample if r['group'] == g and r['horizon'] == hz]
+            if rs:
+                rep.append(f'| {g} | {hz} | ' + ' | '.join(str(sum(1 for r in rs if (period(r['start']), band(r['mc0'])) == c))
+                                                           for c in cells) + f' | {len(rs)} |')
+    in_sample = {(r['sym'], r['start']) for r in cand if r['group'] != 'control_candidate'}
+    rep += ['', '## Flagged by the taggers (drop or replace)', ''] + \
+           ([f"- {w['group']} {w['sym']} {w['horizon']} {w['start']}: {fl}" for w, fl in flagged] +
+            [f"- candidate {r['sym']} {r['as_of']}: {r['flag']}" for r in merged if r['flag'] and (r['sym'], r['as_of']) not in in_sample]
+            or ['- none'])
+    rep += ['', '## Data artefacts (row left out of sample.csv; a candidate is skipped as control)', ''] + \
+           ([f'- {k[3]} {k[0]} {k[2]} {k[1]}: ' + '; '.join(v) for k, v in arts] or ['- none'])
+    rep += ['', '## Warnings (row kept; look if in doubt)', ''] + \
+           ([f'- {k[3]} {k[0]} {k[2]} {k[1]}: ' + '; '.join(v) for k, v in warns] or ['- none'])
+    rep += ['', '## Controls outside the matching limits', ''] + (limits or ['- none'])
+    rep += ['', '## Malformed tag values (fix in the batch file)', ''] + ([f'- {m}' for m in malformed] or ['- none'])
+    rep += ['', '## Types not in the list', ''] + ([f'- {u}' for u in unknown] or ['- none'])
+    rep += ['', '## Same company and date typed differently by two batches', ''] + ([f'- {c}' for c in conflicts] or ['- none'])
+    rep += ['', '## Control per winner', ''] + [f'- {k[0]} {k[1]}: {v}' for k, v in sorted(status.items()) if k[2] == 'winner']
+    open(os.path.join(D, 'sample_checks.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
+    print('\n'.join(rep[4:9]))
+    print(f'flagged {len(flagged)} | artefacts {len(arts)} | warnings {len(warns)} | outside limits {len(limits)} | '
+          f'types not in list {len(unknown)} | conflicts {len(conflicts)} | malformed {len(malformed)}')
+    print('wrote business_types.csv, business_types_list.md, sample.csv, needs_next.csv, sample_checks.md in', D)
+
+if '--finalize' in a:
+    finalize()
+    sys.exit()
+rows = [r for r in csv.DictReader(open(os.path.join(D, 'outcomes.csv'), encoding='utf-8'))]
+for r in rows:
+    for k, v in r.items():
+        if k not in ('sym', 'start', 'last_price_date'):
+            r[k] = f(v)
+rows = [r for r in rows if r['mc0'] and r['mc0'] >= MIN_MC and '2006' <= r['start'][:4] <= '2023']
+by_start = {}
+for r in rows:
+    by_start.setdefault(r['start'], []).append(r)
 
 rng = random.Random(SEED)
 out = []
