@@ -171,14 +171,18 @@ async def main():
     print(f'{sym}: saved {", ".join(done) or "nothing"} in {out_dir}' + (f'; FAILED: {"; ".join(failed)}' if failed else ''), flush=True)
     return not failed
 
-SAVED_AS = {'statements': 'profit_loss', 'nse': 'shareholding_nse'}  # items saved under other names
+SAVED_AS = {'statements': ('profit_loss', 'profit_loss_standalone'), 'quarterly': ('quarterly', 'quarterly_standalone'),
+            'nse': ('shareholding_nse',)}  # items saved under other names (standalone-only companies have only the _standalone files)
+
+def saved(n):
+    return any(os.path.exists(os.path.join(out_dir, f + '.json')) for f in SAVED_AS.get(n, (n,)))
 
 async def run_all():
     global sym, out_dir
     ok = True
     for sym in syms:
         out_dir = os.path.join('data', 'companies', sym, 'scr')
-        if skip_saved and only and all(os.path.exists(os.path.join(out_dir, SAVED_AS.get(n, n) + '.json')) for n in only):
+        if skip_saved and only and all(saved(n) for n in only):
             continue
         try:
             ok = await main() and ok
