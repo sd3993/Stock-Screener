@@ -1,10 +1,9 @@
 import os, re, subprocess, sys
 # Downloads BSE announcement PDFs into data/companies/<SYM>/ in the project folder, extracts text with pdf_text.py,
 # and prints the lines that match a keyword pattern.
-# usage: python tools/scripts/bse_pdf.py SYM "regex" file1.pdf [file2.pdf ...]   (env MAXL = lines per file, default 40)
-SCRATCH = os.environ.get('SCRATCH', r'C:\Users\sd391\OneDrive\Documents\Projects\Stock Screener\data')
+# usage (from the project root): python tools/scripts/bse_pdf.py SYM "regex" file1.pdf [file2.pdf ...]   (env MAXL = lines per file, default 40)
 sym, pat, files = sys.argv[1], re.compile(sys.argv[2], re.I), sys.argv[3:]
-d = os.path.join(SCRATCH, 'companies', sym)
+d = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data', 'companies', sym)
 os.makedirs(d, exist_ok=True)
 maxl = int(os.environ.get('MAXL', 40))
 here = os.path.dirname(os.path.abspath(__file__))
