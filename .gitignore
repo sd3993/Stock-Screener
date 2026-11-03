@@ -15,9 +15,6 @@ studies/*/sample.csv
 studies/*/*.json
 studies/*/stages/*.json
 
-# Retired files (the user may move this folder out)
-archive/
-
 # Local settings, caches and scratch
 .claude/settings.local.json
 __pycache__/

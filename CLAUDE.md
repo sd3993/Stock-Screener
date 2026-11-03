@@ -12,7 +12,6 @@ This file holds the user's standing instructions in their latest version. Update
 - `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/`, BSE answers in `bse/` and Tapetide answers in `api/`, and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide Tapetide answers. `data/calls.csv`: the Tapetide call log.
 - `runs/<FYyyQn>/`: one folder per quarter (`progress.md`, `status.csv`, phase outputs). `runs/verdict_history.csv` is shared across quarters.
 - `studies/<name>/`: one-off studies that refine the rules (e.g. `multibaggers/`: task 2, plan in `plan.md`).
-- `archive/`: older retired material from before 3 Nov 2026 (git-ignored); never depend on it. Newly retired files are deleted instead (see "Git").
 
 ## How to work
 - **Approval:** don't execute research on a new or changed plan until the user approves it. When asked to pause or stop, stop all helpers at once and keep their files.
