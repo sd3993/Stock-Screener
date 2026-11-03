@@ -6,6 +6,7 @@ import asyncio, datetime as dt, json, os, re, sys
 # from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed):
 #   uvx --from screener-mcp==0.5.0 python tools/scripts/scr_company.py SYM [--days 1100] [--only quarterly,shareholding]
 # Writes {fetched_at (IST), via: "screener-public", tool, args, warnings, data} per item, the same envelope as scr_save.py.
+os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')  # fewer 429 cooldowns at the same throughput (tools/tools.md)
 from screener_mcp.core.company_page import fetch_company_page
 from screener_mcp.parsers.company import parse_quarterly_results
 from screener_mcp.tools import company_tools as ct

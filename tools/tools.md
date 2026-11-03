@@ -35,7 +35,7 @@ How to reach each source, and what has already been found about each, so no sess
   - Archive PDFs download with curl from `archives.nseindia.com` (not `nsearchives`).
 
   Nothing it uniquely offers is needed now.
-- **Throughput:** `mb_history.py` manages about 13 companies a minute, and screener rate-limits the browser while it runs (login pages show "Too many requests").
+- **Throughput:** `mb_history.py` manages about 9-13 companies a minute, and screener rate-limits the browser while it runs (login pages show "Too many requests"). `--workers 2` was tested on 3 Nov 2026: about 11 a minute against 9, but 207 cooldowns from 429 errors in 7 minutes, against 124 for 1 worker over the same time: screener's limit is the bottleneck either way, so it stays at 1 worker. Spacing requests further apart keeps the same ~10 a minute with fewer waits: 1.0 s drew 24 cooldowns instead of 124, and 1.2 s none (`SCREENER_MIN_INTERVAL=1.2`, the default in `mb_history.py`, which also widens it 0.05 s per cooldown, and in `scr_company.py`; the library's is 0.25 s). Use it for other bulk screener scripts too.
 
 ## Scripts (`tools/scripts/`)
 Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
