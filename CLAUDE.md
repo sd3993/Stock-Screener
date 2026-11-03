@@ -7,11 +7,11 @@
 This file holds the user's standing instructions in their latest version. Update it whenever the user gives a new or changed instruction, replacing the old wording. Each instruction lives in exactly one place: the process and orchestration in `process/README.md`, step work in the phase files (`process/p*.md`), investing rules in `process/investing_rules.md`, data rules in `process/data_rules.md`, tool how-to and the sheet's layout in `tools/tools.md`. Don't copy text between them; point to it.
 
 ## Layout
-- `process/`: `README.md` (the map), one file per phase (`p1_holdings.md` … `p9_allocation.md`) and per recheck (`p4r_…`, `p5r_…`, `p7r_…`, `p9r_…`), `recheck.md` (what all rechecks share), `investing_rules.md` (only copy), `data_rules.md`, `fetch_learnings.md`, `screens.json`.
+- `process/`: `README.md` (the map), `study_multibaggers/` (the repeatable multibagger study: its own map and step files), one file per phase (`p1_holdings.md` … `p9_allocation.md`) and per recheck (`p4r_…`, `p5r_…`, `p7r_…`, `p9r_…`), `recheck.md` (what all rechecks share), `investing_rules.md` (only copy), `data_rules.md`, `fetch_learnings.md`, `screens.json`.
 - `tools/`: `tools.md` (how to reach each source; scripts; the sheet's layout), `scripts/`.
 - `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/`, BSE answers in `bse/` and Tapetide answers in `api/`, and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide Tapetide answers. `data/calls.csv`: the Tapetide call log.
 - `runs/<FYyyQn>/`: one folder per quarter (`progress.md`, `status.csv`, phase outputs). `runs/verdict_history.csv` is shared across quarters.
-- `studies/<name>/`: one-off studies that refine the rules (e.g. `multibaggers/`: task 2, plan in `plan.md`).
+- `studies/<name>/`: outputs of studies that refine the rules, with the current run's `status.md` (e.g. `multibaggers/`, method in `process/study_multibaggers/`).
 - `archive/`: run data set aside rather than deleted (git-ignored, so git can't bring it back): an abandoned or superseded run's folder, or company data replaced by a fresh fetch, moved to `archive/<what>_<date>/`. Never depend on it.
 
 ## How to work
