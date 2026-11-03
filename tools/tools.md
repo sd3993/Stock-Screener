@@ -96,8 +96,11 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
 ## Zerodha Kite MCP
 `get_holdings`, `login`. Sessions expire; ask the user to log in, with the warning in `CLAUDE.md`.
 
-## Google Sheets MCP
-`get_values`, `update_values`, `update_formulas`, `update_spreadsheet` (copyPaste for formats, conditional formatting), `batch_clear_values`; parameter `spreadsheetId`. Old verdicts (before 23 Oct 2026) are in the Drive copy "Stock Screener (archive, old verdicts as of 23 Oct 2026)".
+## Google Sheets (`gws` CLI)
+The Google Sheets and Drive connectors were removed on 3 Nov 2026; scripts reach the sheet with Google's `gws` CLI (googleworkspace/cli, v0.22.5, not an officially supported Google product), no model tokens.
+- **Install and login (set up 3 Nov 2026):** `C:\Users\sd391\AppData\Local\Programs\gws\gws.exe` (on the user PATH). OAuth client "gws-cli" (Desktop app) in the user's Google Cloud project, published "In production" so the login doesn't lapse after 7 days; its `client_secret.json` and the encrypted login live in `C:\Users\sd391\.config\gws\` (never open or copy them). Logged in as the sheet's owner with the Sheets scope only (`gws auth login -s sheets`, which prints a link the user opens on this computer). `gws auth status` shows the account, scopes and storage. Other projects reuse the same client; more scopes means a new login with more `-s` services.
+- **Calls:** output is JSON; exit codes 0 ok, 1 API error, 2 auth error, 3 validation. Read: `gws sheets spreadsheets values get --params '{"spreadsheetId": "<id>", "range": "Data!A1:E3"}'`. Writes use the same Discovery form (`values update`/`append`/`batchUpdate` with `--params` and `--json`); send values with `"valueInputOption": "RAW"` (to be tested when the P8/P9W writer is built) so tickers, codes and "TRUE" aren't converted the way typed input is, use numeric sheetIds for formatting, and read back to verify.
+- Old verdicts (before 23 Oct 2026) are in the Drive copy "Stock Screener (archive, old verdicts as of 23 Oct 2026)".
 
 ## The sheet (built 24 Oct 2026; `1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`)
 Final outcomes only, light colours only, related columns merged to limit horizontal scrolling.
