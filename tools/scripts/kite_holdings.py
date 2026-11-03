@@ -1,7 +1,8 @@
 # Pulls holdings through the official Kite CLI (read-only) and writes the same data to two copies:
 #   - data/kite/: holdings_<YYYY-MM-DD_HHMM>.json (the CLI's answer as is) and holdings.csv (the latest, one row per stock);
 #   - the sheet's Holdings tab (sheetId 104) through the gws CLI: only the data columns (layout: tools/tools.md, "Holdings tab").
-#     Status (F) and Notes (M) are P9's decisions and are never written; rows are never deleted (sold => Qty 0).
+#     Status (F) and the Notes cells (M2 down) are P9's decisions and are never written; only the header M1 gets the fetch time.
+#     Rows are never deleted (sold => Qty 0).
 # Kite unavailable: changes nothing except the sheet's Kite-stale column (Q = TRUE on every holding row), prints when each
 #   copy was last fetched and which is newer, exits 3.
 # gws unavailable or a sheet write fails: the local copy is still saved; prints a line starting "SHEET NOT UPDATED", exits 0.
@@ -9,14 +10,16 @@
 #   python tools/scripts/kite_holdings.py                 fetch from Kite, write local and sheet
 #   python tools/scripts/kite_holdings.py --latest PATH   no Kite: write the newer of local holdings.csv / sheet to PATH
 # Overrides (tests): env KITE_EXE, GWS_EXE.
-import argparse, csv, datetime as dt, json, os, subprocess, sys, time
+import argparse, csv, datetime as dt, json, os, re, subprocess, sys, time
 
 KITE = os.environ.get('KITE_EXE') or os.path.expandvars(r'%LOCALAPPDATA%\Programs\kite\kite.exe')
 GWS = os.environ.get('GWS_EXE') or os.path.expandvars(r'%LOCALAPPDATA%\Programs\gws\gws.exe')
 SHEET = '1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU'
 TAB = 'Holdings'
 FIRST, LAST = 2, 100            # rows with pre-filled formulas
-STAMP_LABEL, STAMP, ISIN_HDR = 'T1', 'U1', 'V1'   # "Kite fetched" label, its value, header of the ISIN column V
+HDR, HDR_TEXT = 'M1', 'Notes · Kite fetched '      # Notes header cell carries the fetch time: "Notes · Kite fetched YYYY-MM-DD HH:MM"
+OLD_STAMP = 'T1:U1'     # old home of the stamp (label, value); read as a fallback for one transition, then cleared
+STAMP_RE = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}')
 OUT = os.path.join('data', 'kite')
 LATEST = os.path.join(OUT, 'holdings.csv')
 FIELDS = ['sym', 'exchange', 'isin', 'name', 'qty', 'avg_cost', 'last_price', 'google_code', 'screener_url', 'fetched_at']
@@ -62,13 +65,17 @@ def col(vals, i):  # column i of a 2-D answer, padded to rows FIRST..LAST
 
 def read_tab():
     """Sheet holdings rows {row: {...}} and the Kite-fetched stamp."""
-    v, stamp = sheet_get([f'{TAB}!A{FIRST}:Z{LAST}', f'{TAB}!{STAMP}'])
+    v, hdr, old = sheet_get([f'{TAB}!A{FIRST}:Z{LAST}', f'{TAB}!{HDR}', f'{TAB}!{OLD_STAMP}'])
     idx = {k: ord(k) - 65 for k in 'BCDNOPQVZ'}
     cols = {k: col(v, i) for k, i in idx.items()}
     rows = {}
     for n in range(LAST - FIRST + 1):
         rows[FIRST + n] = {k: cols[k][n] for k in idx}
-    return rows, (stamp[0][0] if stamp and stamp[0] else '')
+    m = STAMP_RE.search(str(hdr[0][0])) if hdr and hdr[0] else None
+    if m:
+        return rows, m.group(0)
+    o = old[0][1] if old and len(old[0]) > 1 else ''   # transition: the old U1 stamp
+    return rows, (str(o) if STAMP_RE.fullmatch(str(o)) else '')
 
 
 def last_local():
@@ -221,8 +228,11 @@ def sync_sheet(rows, stamp):
             if s['C'] not in (0, '0'):
                 notes.append(f'sold: {s["Z"]} (row {n}) Qty set to 0; P9 removes the row')
             writes += [(f'C{n}', [[0]]), (f'Q{n}', [[False]])]
-    writes += [(f'{STAMP_LABEL}:{ISIN_HDR}', [['Kite fetched', stamp, '[h] ISIN']])]
+    writes += [(HDR, [[HDR_TEXT + stamp]])]
     try:
+        old, = sheet_get([f'{TAB}!{OLD_STAMP}'])
+        if any(c != '' for r in old for c in r):   # clear the old stamp cells once
+            writes += [(OLD_STAMP, [['', '']])]
         sheet_put(writes)
         after, astamp = read_tab()
     except SheetError as e:
@@ -234,7 +244,7 @@ def sync_sheet(rows, stamp):
             bad.append(row['sym'])
     if astamp != stamp:
         bad.append(f'stamp {astamp!r}')
-    status = f'SHEET CHECK FAILED for {bad}' if bad else f'sheet Holdings tab updated and read back ({len(rows)} holdings, Kite fetched {stamp} in {STAMP})'
+    status = f'SHEET CHECK FAILED for {bad}' if bad else f'sheet Holdings tab updated and read back ({len(rows)} holdings, Kite fetched {stamp} in {HDR})'
     return '\n'.join(notes + [status])
 
 
