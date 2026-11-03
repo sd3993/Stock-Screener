@@ -1,4 +1,4 @@
-# S4: pattern back-test (script, then the orchestrator at Opus medium)
+# S4: pattern back-test (script, then an Opus medium helper for the mechanisms)
 
 Inputs: `sample.csv`, `business_types.csv`, `outcomes.csv`, each sample company's `scr/` statements and `history.json`, the hypotheses H1-Hn in `experts.md`, and every testable general rule in `process/investing_rules.md`. Apply the tests in `README.md`, "What a pattern must pass".
 
@@ -10,5 +10,5 @@ Inputs: `sample.csv`, `business_types.csv`, `outcomes.csv`, each sample company'
    - at the chosen threshold and at nearby thresholds;
    - for current rules: winners each rule would have rejected (missed) and controls it would have passed (false alarms).
 3. **Whole-market check** for every pattern that passes 2: apply it at each past quarter-end start to every listed company in `outcomes.csv` with the features computable from the chart series (growth, P/E, P/E ÷ median, size, prior return); report how many it passed, the share that met the winner threshold against the base rate, and their median and mean multiples against all companies. For a business-type pattern, tag the business type (as in `s2_sample.md`) of the companies the pattern passes, only as many as needed, and score precision within that type.
-4. **Mechanism check (orchestrator):** for each surviving pattern, write the economic reason it should work and whether S5 or `experts.md` supports it; mark the rest "possibly chance".
+4. **Mechanism check (helper, Opus medium):** given the script's surviving patterns and `experts.md`, for each surviving pattern, write the economic reason it should work and whether S5 or `experts.md` supports it; mark the rest "possibly chance".
 5. Write `backtest.md`: per horizon, general patterns, business-type patterns, exit/avoid patterns, rejected patterns (and why), with every figure and sample size. Pick the S5 companies from here: winners the current rules caught and missed, and fallen winners, spread across business types and periods.

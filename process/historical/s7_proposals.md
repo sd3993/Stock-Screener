@@ -1,4 +1,4 @@
-# S7: proposals (orchestrator at Opus high), then a figure check (script) and a reasoning recheck (Opus medium helper)
+# S7: proposals (Opus high helper), then a figure check (script) and a reasoning recheck (Opus medium helper)
 
 Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`.
 

@@ -23,10 +23,10 @@ The study looks for patterns that recur and can be seen at the time, not stories
 | S1 | Universe, history and outcomes | scripts (+ MCP screens) | orchestrator | `s1_universe.md` | `universe.csv`, `outcomes.csv` | every universe company has a history or a recorded failure; outcomes written |
 | S2 | Sample: winners, controls, fallen winners; business types | script (selection, controls, checks), helpers (types in batches) | Opus medium | `s2_sample.md` | `sample.csv`, `business_types.csv` | ~400 companies, each with its reason and business type; checks pass |
 | S3 | Statements for the sample | script | none | `s3_statements.md` | `data/companies/<SYM>/scr/` | every sample company fetched or its failure recorded |
-| S4 | Pattern back-test | script, then orchestrator | Opus medium | `s4_backtest.md` | `features.csv`, `backtest.md` | every hypothesis scored in-sample, out-of-sample and on the whole market |
+| S4 | Pattern back-test | script, then helper (mechanisms) | Opus medium | `s4_backtest.md` | `features.csv`, `backtest.md` | every hypothesis scored in-sample, out-of-sample and on the whole market |
 | S5 | Stage studies, one company at a time | helper each, + one recheck | Opus high (recheck Opus medium) | `s5_stages.md` | `stages/<SYM>.md` | ~30 winners and ~10 fallen winners studied and rechecked |
 | S6 | Expert evidence | helper | Opus medium | `s6_experts.md` | `experts.md` | findings and hypotheses written, tagged with sources |
-| S7 | Proposals, figure check, reasoning recheck | orchestrator, script, helper | Opus high (recheck Opus medium) | `s7_proposals.md` | `proposals.md` | both rechecks agree; sent to the user |
+| S7 | Proposals, figure check, reasoning recheck | helper, script, helper | Opus high (recheck Opus medium) | `s7_proposals.md` | `proposals.md` | both rechecks agree; sent to the user |
 
 ## Order of work
 1. S6 can run any time (it needs no data). S1 next; its history fetch runs for hours in the background, watched by a half-hourly watchdog (`CLAUDE.md`, "Watchdog").

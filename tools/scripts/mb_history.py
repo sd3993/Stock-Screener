@@ -8,6 +8,9 @@ import asyncio, csv, datetime as dt, json, os, sys, time
 # Starts 1.2 s between requests, where screener stopped answering 429 at the same throughput as the library's 0.25 s
 # (3 Nov 2026), and adds 0.05 s after each cooldown, up to 3 s, in case its limit tightens.
 os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')
+if '--login' not in sys.argv:  # public mode by default, even when the screener login is in the environment (tools/tools.md)
+    for k in ('SCREENER_USERNAME', 'SCREENER_PASSWORD'):
+        os.environ.pop(k, None)
 import screener_mcp.client as sc
 from screener_mcp.client import get_client
 from screener_mcp.core.company_page import fetch_company_page

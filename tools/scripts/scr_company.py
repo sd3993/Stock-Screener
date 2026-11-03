@@ -10,6 +10,9 @@ import asyncio, datetime as dt, json, os, re, sys
 # (item names that match a file: overview, documents, peers, shareholding, quarterly, insider, announcements, credit_ratings).
 # Writes {fetched_at (IST), via: "screener-public", tool, args, warnings, data} per item, the same envelope as scr_save.py.
 os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')  # fewer 429 cooldowns at the same throughput (tools/tools.md)
+if '--login' not in sys.argv:  # public mode by default, even when the screener login is in the environment (tools/tools.md)
+    for k in ('SCREENER_USERNAME', 'SCREENER_PASSWORD'):
+        os.environ.pop(k, None)
 from screener_mcp.core.company_page import fetch_company_page
 from screener_mcp.parsers.company import parse_quarterly_results
 from screener_mcp.tools import company_tools as ct
