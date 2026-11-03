@@ -4,7 +4,6 @@
   },
   "permissions": {
     "allow": [
-      "Workflow",
       "PowerShell(python tools/scripts/*)",
       "PowerShell(python -I tools/scripts/*)",
       "PowerShell(curl.exe -s -m 60 -o *)"
