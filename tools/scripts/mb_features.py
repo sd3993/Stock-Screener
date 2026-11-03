@@ -14,7 +14,9 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 #     COVID extensions: periods ending Mar 2020 + 120, Jun 2020 + 75, Mar 2021 + 90 (SEBI relaxations; conservative);
 #   - annual cash flow: + 60 for years ending from Sep 2019 (SEBI made the cash-flow statement part of the half-year
 #     results from H1 FY20); earlier years only in the annual report: + 180;
-#   - shareholding: the NSE filing date where saved (shp_history, shareholding_nse), else quarter end + 21 (Reg 31);
+#   - shareholding: the NSE filing date where saved (shp_history, shareholding_nse), else quarter end + 21 (Reg 31;
+#     Clause 35 before Dec 2015); quarters older than screener's and NSE's come from BSE's old patterns
+#     (bse/shp/history.json, bse_shp.py), which also fill fields those sources lack; src_shp_via names the sources used;
 #   - chart TTM EPS and sales (history.json): screener moves them on the results date in most years, but in some years
 #     (e.g. 2006-10, 2014-16 for many companies) the change is stamped on the quarter end itself, before any filing. A change
 #     stamped within 6 days of a quarter end counts from that quarter end + 45 (+ 60 for the fiscal year's last quarter);
@@ -229,6 +231,23 @@ class Company:
             if fnum(r.get('promoter_pct')) is not None and e.get('prom') is None:
                 e['prom'] = fnum(r['promoter_pct'])
             e['pledge'] = fnum(r.get('pledged_pct_of_promoter'))
+        # BSE's old patterns (bse_shp.py; Mar 2001 - Jun 2022): fill quarters and fields the sources above lack
+        bse = (load(os.path.join(os.path.dirname(d), 'bse', 'shp', 'history.json')) or {}).get('quarters') or {}
+        for k, r in bse.items():
+            if r.get('status') != 'ok':
+                continue
+            end = dt.date.fromisoformat(k)
+            v = {'prom': fnum(r.get('prom_pct')), 'inst': fnum(r.get('inst_pct')),
+                 'pledge': fnum(r.get('pledged_pct_of_promoter'))}
+            if end not in q:
+                q[end] = dict(v, filed=end + dt.timedelta(days=LAG_SHP), src='bse')
+                continue
+            e = q[end]
+            add = [x for x in v if e.get(x) is None and v[x] is not None]
+            for x in add:
+                e[x] = v[x]
+            if add:
+                e['src'] = (e.get('src') or '') + '+bse'
         return q
 
     # ---------- point-in-time helpers ----------
@@ -500,6 +519,8 @@ def features(c, as_of, chart_only=False):
     f['inst_pct'] = rnd(S(s0q, 'inst'), 2) if S(s0q, 'inst') is not None else None
     a, p = S(s0q, 'inst'), S(sb(4), 'inst')
     f['inst_chg_1y'] = rnd(a - p, 2) if a is not None and p is not None else None
+    used = [x for x in (s0q, sb(1), sb(2), sb(3), sb(4), sb(12)) if x]
+    src['shp_via'] = '+'.join(sorted({p for x in used for p in (c.shp[x].get('src') or '').split('+') if p}))
     return f, src
 
 
