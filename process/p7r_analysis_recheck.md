@@ -3,7 +3,7 @@
 Work file: `<run>/analysis/<SYM>/main.json` (recheck 1) or `recheck<N-1>.json`; your output: `recheck<N>.json` and `.md` beside it. Read `process/p7_analysis.md` first.
 
 1. **Newer results:** has the company declared results newer than those used? If so, reply only `NEW_RESULTS: <FYyyQn>`.
-2. **Figures:** every figure the verdict depends on, checked against the page it cites and against Tapetide's figures (definition gaps ruled out first); every `facts_check.json` mismatch resolved; data flags complete.
+2. **Figures:** every figure the verdict depends on, checked against the page it cites and against the cached screener figures (definition gaps ruled out first); every `facts_check.json` mismatch resolved; data flags complete.
 3. **Math:** normalised trailing EPS (one-offs stripped), each EPS path's build, growth rates, exit P/E checks, dividend.
 4. **Non-negotiables:** each Pass / Bent / Fail tested against the exact wording of rule 1 and its sector notes (rule 1.2's tests for any promoter sale or buying).
 5. **Contrary evidence** for each verdict-deciding claim: guidance delivered or missed before (scorecard), order book and capacity claims against filings, every negative's temporary/structural call, peers' exit P/Es.

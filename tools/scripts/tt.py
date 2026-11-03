@@ -7,7 +7,6 @@ from config import CALL_LOG, api_path, run_dir
 # CLI:
 #   python tools/scripts/tt.py usage
 #   python tools/scripts/tt.py get /v1/stocks/TCS/shareholding [key=value ...] [--save PATH] [--all-pages]
-#   python tools/scripts/tt.py log-mcp <route> <symbol>     (log an MCP call made by a helper)
 #   python tools/scripts/tt.py calls [days]                 (calls per day from the log)
 BASE = 'https://api.tapetide.com'
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -34,7 +33,7 @@ def log_call(via, route, symbol, params, status):
 def token():
     t = os.environ.get('TAPETIDE_TOKEN')
     if not t:
-        raise SystemExit('TAPETIDE_TOKEN is not set: use the MCP tools instead (tools/tools.md, "Tapetide")')
+        raise SystemExit('TAPETIDE_TOKEN is not set: Tapetide is unreachable in this session; tell the user (CLAUDE.md, "Sources that block")')
     return t
 
 def request(path, params=None, log=True, symbol=''):
@@ -145,8 +144,6 @@ if __name__ == '__main__':
             print('saved', out)
         else:
             print(json.dumps(data, ensure_ascii=False, indent=1)[:20000])
-    elif a[0] == 'log-mcp':
-        log_call('mcp', a[1], a[2] if len(a) > 2 else '', None, 200)
     elif a[0] == 'calls':
         days = int(a[1]) if len(a) > 1 else 14
         from collections import Counter

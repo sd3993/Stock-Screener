@@ -1,28 +1,80 @@
 {
- "_about": "P2 input. screens: the user's idea screens; every hit joins the universe. dumps: the whole market (market cap > 250 cr, P/E > 0), two fields per query because the screener adds only two fields beyond its default columns; 'fields' lists them in query order, which is the order the extra columns come back in. Review, don't rebuild, each quarter.",
+ "_about": "P2 input. screens: the user's idea screens; every hit joins the universe. base: the whole-market sweep (market cap > 250 cr, P/E > 0), run in market-cap bands. columns: the screener account's column set (free accounts allow 15), so every sweep row carries these fields, empty or not; Current Price and the fields in base come back anyway. query_fields: the other fields P3 needs; each is fetched in extra sweeps that name it in the query, grouped by identical coverage (a named field drops the companies where it is empty, which only means that field is empty for them). Keep columns in step with the account (tools/tools.md, 'screener.in MCP'). Review, don't rebuild, each quarter.",
  "screens": {
-  "T1": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Price to Earning > 3 AND Price to Earning < 45 AND YOY Quarterly sales growth > 15 AND YOY Quarterly profit growth > 20 AND Return on capital employed > 12 AND Debt to equity < 2 AND Pledged percentage < 20"},
-  "T2": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Return on capital employed > 18 AND Average return on capital employed 5Years > 18 AND Price to Earning > 3 AND Price to Earning < Historical PE 5Years * 0.75 AND Sales growth 3Years > 8 AND Debt to equity < 1 AND Pledged percentage < 20"},
-  "T3": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Average return on capital employed 5Years > 18 AND Down from 52w high > 30 AND Price to Earning > 3 AND Price to Earning < 35 AND Sales growth 3Years > 10 AND Debt to equity < 1 AND Pledged percentage < 20"},
-  "T4": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Market Capitalization < 25000 AND Sales growth 3Years > 18 AND Profit growth 3Years > 20 AND Return on capital employed > 18 AND Price to Earning > 3 AND Price to Earning < 45 AND Debt to equity < 1 AND Pledged percentage < 20"},
-  "T5": {"query": "Historical PE 5Years > 0 AND Piotroski score > 6 AND Market Capitalization > 300 AND Price to Earning > 3 AND Price to Earning < 20 AND Return on capital employed > 12 AND Profit growth > 10 AND Pledged percentage < 20"},
-  "T6": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Average return on capital employed 5Years > 15 AND Return on capital employed < Average return on capital employed 5Years AND YOY Quarterly profit growth > 25 AND YOY Quarterly sales growth > 10 AND Debt to equity < 1.5 AND Pledged percentage < 20"},
-  "T7": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Price to Earning > 0 AND YOY Quarterly profit growth > 40 AND YOY Quarterly sales growth > 15 AND Profit growth 3Years < 10 AND Return on capital employed > 8 AND Debt to equity < 1.5 AND Pledged percentage < 20"},
-  "T8": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Dividend yield > 3 AND Price to Earning > 3 AND Price to Earning < 15 AND Return on capital employed > 15 AND Profit growth 3Years > 5 AND Debt to equity < 1 AND Pledged percentage < 20"},
-  "T9": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 250 AND Market Capitalization < 3000 AND Sales growth 5Years > 15 AND Profit growth 3Years > 20 AND Return on capital employed > 15 AND OPM > 10 AND Price to Earning > 3 AND Price to Earning < 40 AND Debt to equity < 1 AND Promoter holding > 45 AND Pledged percentage < 10"},
-  "T10": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Price to Earning >= 45 AND Price to Earning < 70 AND YOY Quarterly profit growth > 40 AND YOY Quarterly sales growth > 30 AND Profit growth 3Years > 30 AND Return on capital employed > 20 AND Debt to equity < 0.8 AND Pledged percentage < 20"},
-  "T11": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Profit growth 3Years > 15 AND Sales growth 3Years > 10 AND Return over 1year < -10 AND Price to Earning > 3 AND Price to Earning < 20 AND Return on capital employed > 12 AND Debt to equity < 1 AND Pledged percentage < 20"},
-  "T12": {"query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Return on capital employed > 15 AND Return on capital employed > Return on capital employed preceding year AND Return on capital employed > Average return on capital employed 5Years AND YOY Quarterly profit growth > 15 AND Price to Earning > 3 AND Price to Earning < 30 AND Debt to equity < 1 AND Pledged percentage < 20"}
+  "T1": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Price to Earning > 3 AND Price to Earning < 45 AND YOY Quarterly sales growth > 15 AND YOY Quarterly profit growth > 20 AND Return on capital employed > 12 AND Debt to equity < 2 AND Pledged percentage < 20"
+  },
+  "T2": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Return on capital employed > 18 AND Average return on capital employed 5Years > 18 AND Price to Earning > 3 AND Price to Earning < Historical PE 5Years * 0.75 AND Sales growth 3Years > 8 AND Debt to equity < 1 AND Pledged percentage < 20"
+  },
+  "T3": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Average return on capital employed 5Years > 18 AND Down from 52w high > 30 AND Price to Earning > 3 AND Price to Earning < 35 AND Sales growth 3Years > 10 AND Debt to equity < 1 AND Pledged percentage < 20"
+  },
+  "T4": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Market Capitalization < 25000 AND Sales growth 3Years > 18 AND Profit growth 3Years > 20 AND Return on capital employed > 18 AND Price to Earning > 3 AND Price to Earning < 45 AND Debt to equity < 1 AND Pledged percentage < 20"
+  },
+  "T5": {
+   "query": "Historical PE 5Years > 0 AND Piotroski score > 6 AND Market Capitalization > 300 AND Price to Earning > 3 AND Price to Earning < 20 AND Return on capital employed > 12 AND Profit growth > 10 AND Pledged percentage < 20"
+  },
+  "T6": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Average return on capital employed 5Years > 15 AND Return on capital employed < Average return on capital employed 5Years AND YOY Quarterly profit growth > 25 AND YOY Quarterly sales growth > 10 AND Debt to equity < 1.5 AND Pledged percentage < 20"
+  },
+  "T7": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Price to Earning > 0 AND YOY Quarterly profit growth > 40 AND YOY Quarterly sales growth > 15 AND Profit growth 3Years < 10 AND Return on capital employed > 8 AND Debt to equity < 1.5 AND Pledged percentage < 20"
+  },
+  "T8": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Dividend yield > 3 AND Price to Earning > 3 AND Price to Earning < 15 AND Return on capital employed > 15 AND Profit growth 3Years > 5 AND Debt to equity < 1 AND Pledged percentage < 20"
+  },
+  "T9": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 250 AND Market Capitalization < 3000 AND Sales growth 5Years > 15 AND Profit growth 3Years > 20 AND Return on capital employed > 15 AND OPM > 10 AND Price to Earning > 3 AND Price to Earning < 40 AND Debt to equity < 1 AND Promoter holding > 45 AND Pledged percentage < 10"
+  },
+  "T10": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Price to Earning >= 45 AND Price to Earning < 70 AND YOY Quarterly profit growth > 40 AND YOY Quarterly sales growth > 30 AND Profit growth 3Years > 30 AND Return on capital employed > 20 AND Debt to equity < 0.8 AND Pledged percentage < 20"
+  },
+  "T11": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Profit growth 3Years > 15 AND Sales growth 3Years > 10 AND Return over 1year < -10 AND Price to Earning > 3 AND Price to Earning < 20 AND Return on capital employed > 12 AND Debt to equity < 1 AND Pledged percentage < 20"
+  },
+  "T12": {
+   "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Return on capital employed > 15 AND Return on capital employed > Return on capital employed preceding year AND Return on capital employed > Average return on capital employed 5Years AND YOY Quarterly profit growth > 15 AND Price to Earning > 3 AND Price to Earning < 30 AND Debt to equity < 1 AND Pledged percentage < 20"
+  }
  },
- "dumps": {
-  "D1": {"fields": ["Historical PE 5Years", "Sales growth 3Years"]},
-  "D2": {"fields": ["Profit growth 3Years", "Sales growth"]},
-  "D3": {"fields": ["Profit growth", "Debt to equity"]},
-  "D4": {"fields": ["Promoter holding", "Pledged percentage"]},
-  "D5": {"fields": ["Change in promoter holding", "Change in promoter holding 3Years"]},
-  "D6": {"fields": ["Operating cash flow 5years", "Average Earnings 5Year"]},
-  "D7": {"fields": ["Cash from operations last year", "Net Profit last year"]},
-  "D8": {"fields": ["Cash from operations preceding year", "Net Profit preceding year"]}
- },
- "dump_base": "Market Capitalization > 250 AND Price to Earning > 0"
+ "base": "Market Capitalization > 250 AND Price to Earning > 0",
+ "bands": [
+  250,
+  400,
+  600,
+  900,
+  1300,
+  2000,
+  3000,
+  5000,
+  8000,
+  15000,
+  35000,
+  100000
+ ],
+ "columns": [
+  "YOY Quarterly profit growth",
+  "YOY Quarterly sales growth",
+  "Historical PE 5Years",
+  "Sales growth",
+  "Sales growth 3Years",
+  "Profit growth",
+  "Profit growth 3Years",
+  "Promoter holding",
+  "Change in promoter holding",
+  "Change in promoter holding 3Years",
+  "Pledged percentage",
+  "Operating cash flow 5years",
+  "Average Earnings 5Year",
+  "Cash from operations preceding year",
+  "Net Profit preceding year"
+ ],
+ "query_fields": [
+  "Dividend yield",
+  "Net Profit last year",
+  "Cash from operations last year",
+  "Debt to equity",
+  "Return on capital employed"
+ ]
 }

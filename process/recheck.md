@@ -16,9 +16,9 @@ Do not call any mcp__hearthbot__ tools. Working directory: the project root (Pow
 ## How to check
 1. Read the phase file the work was done under (and everything it says to read), your checklist file, then the work file.
 2. **Recheck 2 or later:** start with what the previous recheck changed (its `recheck_log`) and anything it left `unresolved`, then go through the full checklist on the corrected work.
-3. **Contrary evidence is the core of every recheck.** For each claim the verdict rests on, actively search for evidence against it (filings, transcripts, announcements, Tapetide's figures, peers). Log every search: what you looked for, where, and what you found. A search that finds nothing contrary is recorded as confirmation; a claim nobody searched against is not confirmed. Read `data/companies/<SYM>/search_log.json` first, so you don't repeat a search already done this quarter on the same documents.
+3. **Contrary evidence is the core of every recheck.** For each claim the verdict rests on, actively search for evidence against it (filings, transcripts, announcements, screener's and Tapetide's figures, peers). Log every search: what you looked for, where, and what you found. A search that finds nothing contrary is recorded as confirmation; a claim nobody searched against is not confirmed. Read `data/companies/<SYM>/search_log.json` first, so you don't repeat a search already done this quarter on the same documents.
 4. Fix what is wrong. Where a conflict needs real judgement that you can't settle from the evidence, mark it `unresolved` with both sides and their sources: the orchestrator sends it to an Opus high helper.
-5. Tapetide (and BSE/NSE for what it lacks) is required. If it fails, retry twice; if it's still unreachable or out of quota, stop and reply saying so. Never pass work on missing evidence.
+5. screener.in (and Tapetide and BSE/NSE for what it lacks) is required. If a source fails, retry twice; if it's still unreachable or out of quota, stop and reply saying so. Never pass work on missing evidence.
 
 ## Output
 Write the corrected work as your output file, in the same format as the work file (and, where the work has a plain-English `.md` summary, a corrected one beside it), with these added:

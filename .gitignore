@@ -1,14 +1,25 @@
-# Commit only the process: CLAUDE.md, process/, tools/ and this file.
+# Commit only the process and its tools: CLAUDE.md, process/, tools/, study plans and findings, and this file.
+# Everything fetched or produced at runtime stays out.
 
-# Run outputs and research data
+# Run outputs and fetched data (documents, screener and Tapetide answers, call log)
 runs/
 data/
 acknowledgements.md
 
+# Studies: keep each study's plan and written findings; ignore fetched pages and generated tables
+studies/*/universe/
+studies/*/universe.csv
+studies/*/outcomes.csv
+studies/*/features.csv
+studies/*/sample.csv
+studies/*/*.json
+studies/*/stages/*.json
+
 # Retired files (the user may move this folder out)
 archive/
 
-# Local settings and Python caches
+# Local settings, caches and scratch
 .claude/settings.local.json
 __pycache__/
 *.pyc
+*.log

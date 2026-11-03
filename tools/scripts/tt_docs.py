@@ -50,6 +50,11 @@ def f_url(x):
     return (x.get('url') or x.get('document_url') or x.get('attachment_url') or x.get('pdf_url') or links.get('pdf_url')
             or x.get('source_url'))
 
+def url_id(url):
+    """Short file id from an exchange or document link, without its extension."""
+    name = url.split('Pname=')[-1] if 'Pname=' in url else url.rsplit('/', 1)[-1]
+    return re.sub(r'\W', '', re.sub(r'\.pdf$', '', name, flags=re.I))[:40]
+
 def ar_quarter(doc, d):
     """Annual reports carry period "FY2026" and a placeholder date (2026-01-01): file them under FY26Q4."""
     m = re.search(r'(?:FY|Year |Report )(\d{4})', f"{doc.get('period') or ''} {doc.get('title') or ''}")
