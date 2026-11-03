@@ -29,7 +29,7 @@ screener.in (through its MCP for screens, and `scr_company.py` for company data)
 | P4R | Gate recheck | helper | Opus medium | `p4r_gate_recheck.md` | `gate/bNN_rc1.json` (rc2 if needed) | per `recheck.md` |
 | P5 | Sector map and company list | helper (map), orchestrator (list) | Opus medium | `p5_sector_map.md` | `sector_map.md`, `sector_of.tsv`, `company_list.csv` | every listed company has a sector and tier |
 | P5R | Sector map recheck | helper | Opus medium | `p5r_sector_recheck.md` | `sector_map_rc1.md` (rc2 if needed) | per `recheck.md` |
-| P6 | Fetch one company | scripts + helper | Sonnet medium | `p6_fetch.md` | `data/companies/<SYM>/` (documents, `scr/`, `api/`, `facts.json`) | reply `CHANGED: yes/no` |
+| P6 | Fetch one company | scripts + helper | Sonnet medium | `p6_fetch.md` | `data/companies/<SYM>/` (documents, `scr/`, `bse/`, `facts.json`) | reply `CHANGED: yes/no` |
 | P7 | Deep analysis, one company | helper | Opus high | `p7_analysis.md` | `analysis/<SYM>/main.json`, `.md` | reply with buckets and EPS paths, or `NEW_RESULTS` |
 | P7R | Analysis rechecks 1 and 2 | helper each | Opus medium (Opus high for an `unresolved` judgement call) | `p7r_analysis_recheck.md` | `analysis/<SYM>/recheck1.json`, `recheck2.json` (+ `.md`) | per `recheck.md` |
 | P8 | Sheet listing, batch of agreed analyses | helper | Sonnet low | `p8_listing.md` | Data, Data Flags, pending tabs; `runs/verdict_history.csv` | every agreed analysis since the last listing is in the sheet |

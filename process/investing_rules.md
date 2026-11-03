@@ -150,7 +150,7 @@ A stock may bend up to 2-3 rules (never an integrity flag; non-negotiables only 
 Counts only when confirmed in writing by the official source: exchange filings for companies; PIB, gazette, ministry or regulator for government. Firm orders and notified policies only, not MoUs, LoIs or L1 positions. Size the event against revenue; note when it reaches the P&L. Be sceptical of good news near promoter selling, a preferential issue or a QIP. Check whether the price already moved. Guidance and news come only from exchange disclosures (transcripts, presentations, results releases, AGM proceedings, annual reports, announcements), never from news sites. [Yours, Oct 2026; 23 Oct 2026]
 
 ## 17. Data verification
-Filings are ground truth; Tapetide's figures are checked against them. The full rule (sources, exchange choice, document ranking, mismatch handling) is in `process/data_rules.md`. [Yours, 20 Oct 2026; revised 23 Oct 2026]
+Filings are ground truth; data providers' figures (screener and any other) are checked against them. The full rule (sources, exchange choice, document ranking, mismatch handling) is in `process/data_rules.md`. [Yours, 20 Oct 2026; revised 23 Oct 2026]
 
 ## 18. Allocation and rebalancing [Yours, 23 Oct 2026]
 - **Position size follows the stock's total potential and conviction,** not the number of buckets it is in. Potential going up or down is what drives buy, add, trim and sell.
