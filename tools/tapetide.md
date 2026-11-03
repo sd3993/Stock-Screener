@@ -12,7 +12,7 @@ screener.in and NSE/BSE cover everything the process needs (3 Nov 2026). Use Tap
 - Filings lists are short (from Dec 2025 for the trial companies).
 - `/financials` mixes bases across companies.
 - Only 136 delisted companies.
-- Data starts around 2015.
+- Data starts around 2015: `/fundamentals` from=2000 gives only FY2015 for listed companies (INFY, HAWKINCOOK, AXISBANK) and the same 12 years as screener for merged ones (RANBAXY 2005-14); shareholding is the latest quarter only, pledge from Mar 2026 (checked 4 Nov 2026, 6 calls). Nothing pre-2015 that screener lacks.
 - Free plan, 50 calls a day; the user won't pay.
 
 ## How-to
