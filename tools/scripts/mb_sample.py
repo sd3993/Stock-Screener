@@ -4,8 +4,9 @@ import csv, os, random, sys
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
 # of the same type), counts the peers flags and runs the checks; outputs and rules in p1_sample.md, "Script".
-# Candidates come from the winner's basic industry (screener's NSE label), then its sector; --coverage reports how many
-# winners get the full count with the labels saved so far.
+# Candidates come from the winner's basic industry (screener's NSE label), then its sector, by size step (start mc 0.5-2x the
+# winner's, then 0.33-3x, 0.25-4x, 0.1-10x; column size_step); --repair --candidates-only appends the next ones for winners
+# whose candidates are all tagged with no usable control. --coverage reports how many winners get the full count.
 #   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv> [--candidates-only]] | --coverage
 #     | --finalize  [--companies <dir>] [--dir DIR: read and write there, not the run folder]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -13,7 +14,7 @@ from config import hist_dir
 a = sys.argv[1:]
 if any(x.startswith('-') and x not in ('--seed', '--repair', '--candidates-only', '--coverage', '--finalize', '--companies', '--dir')
        for x in a):  # -h, --help or a typo must not fall through to the default run, which rewrites sample_candidates.csv
-    sys.exit(''.join(l[2:] for l in open(__file__, encoding='utf-8').readlines()[1:10]))
+    sys.exit(''.join(l[2:] for l in open(__file__, encoding='utf-8').readlines()[1:11]))
 SEED = int(a[a.index('--seed') + 1]) if '--seed' in a else 1
 D = a[a.index('--dir') + 1] if '--dir' in a else hist_dir()
 # horizon: (multiple columns tried in order, threshold, last window start, winners to pick)
@@ -22,6 +23,18 @@ H = {'short': (['px_2y'], 2, '2023-12-31', 70), 'medium': (['px_5y'], 3, '2021-1
 FALLEN = 50  # per horizon short and medium
 N_CAND = 5
 MIN_MC = 50
+# Size steps for control candidates (start mc ratio to the winner's), tightest first; a step is used only once the tighter
+# ones have no candidate left (user, 4 Nov 2026). Industry and business type are never relaxed.
+STEPS = [(0.5, 2, '0.5-2x'), (1 / 3, 3, '0.33-3x'), (0.25, 4, '0.25-4x'), (0.1, 10, '0.1-10x')]
+
+def size_step(ratio):
+    """Index of the tightest size step that holds this start mc ratio, else None."""
+    return next((i for i, (lo, hi, _) in enumerate(STEPS) if lo - 1e-9 <= ratio <= hi + 1e-9), None)
+
+def step_of(c, w_mc0):
+    """A candidate row's size step index: its size_step column, else from its mc0 ratio (rows written before the column)."""
+    lab = c.get('size_step')
+    return next(i for i, s in enumerate(STEPS) if s[2] == lab) if lab else size_step(f(c['mc0']) / f(w_mc0))
 
 def f(x):
     try:
@@ -126,6 +139,11 @@ def add_years(d, n):
         return d.replace(year=d.year + n)
     except ValueError:
         return d.replace(year=d.year + n, day=28)
+
+def win_years(hz, o):
+    """Years of the window behind a row's multiple (long: whichever of 7 and 10 years gave the multiple)."""
+    return 2 if hz == 'short' else 5 if hz == 'medium' else \
+        max((7, 10), key=lambda y: o.get(f'px_{y}y') if o.get(f'px_{y}y') is not None else -1)
 
 def artefacts(sym, start, n, mc0, o, group):
     """(fails, warnings) for one window. Screener's prices are adjusted for splits and bonuses, so a fail needs evidence:
@@ -259,9 +277,7 @@ def finalize():
         k = (r['sym'], r['start'], r['horizon'], group)
         if k not in art:
             o = {c: f(v) for c, v in out_rows.get((r['sym'], r['start']), {}).items()}
-            n = 2 if r['horizon'] == 'short' else 5 if r['horizon'] == 'medium' else \
-                max((7, 10), key=lambda y: o.get(f'px_{y}y') if o.get(f'px_{y}y') is not None else -1)  # the window behind the multiple
-            art[k] = artefacts(r['sym'], r['start'], n, r['mc0'], o, group)
+            art[k] = artefacts(r['sym'], r['start'], win_years(r['horizon'], o), r['mc0'], o, group)
         return art[k]
     def need(sym, as_of, group, why, w):
         e = needs.setdefault((sym, as_of), {'groups': set(), 'for': set(), 'status': set()})
@@ -288,6 +304,9 @@ def finalize():
                 sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], checks='; '.join(warns)))
             continue
         cs = [c for c in cand if c['group'] == 'control_candidate' and c['matched_to'] == w['sym'] and c['horizon'] == w['horizon']]
+        for c in cs:
+            c['_step'] = step_of(c, w['mc0'])
+        cs.sort(key=lambda c: len(STEPS) if c['_step'] is None else c['_step'])  # stable: tightest step first, drawn order within
         if not cs:
             status[wk] = 'no candidates'
             continue
@@ -312,23 +331,26 @@ def finalize():
             pick = (c, ct, cw)
             break
         else:
-            status[wk] = f'no same-type candidate among {len(cs)}'
+            status[wk] = f'no same-type candidate among {len(cs)} (up to size {STEPS[max(c["_step"] or 0 for c in cs)][2]})'
         if not pick:
             status[wk] += f"; skipped {', '.join(skipped)}" if skipped else ''
             continue
         c, ct, cw = pick
         ratio = c['mc0'] / w['mc0']
-        ok = c['start'] == w['start'] and 0.5 <= ratio <= 2 and c['multiple'] < H[w['horizon']][1] and c['sym'] != w['sym']
+        ok = c['start'] == w['start'] and c['_step'] is not None and c['multiple'] < H[w['horizon']][1] and c['sym'] != w['sym']
         if not ok:
             limits.append(f"- {c['sym']} for {w['sym']} {w['horizon']}: start {c['start']} vs {w['start']}, mc0 ratio {ratio:.2f}, "
                           f"multiple {c['multiple']}")
-        status[wk] = f"control {c['sym']} (candidate {cs.index(c) + 1})" + (f"; skipped {', '.join(skipped)}" if skipped else '')
+        st = 'outside' if c['_step'] is None else STEPS[c['_step']][2]
+        status[wk] = f"control {c['sym']} (candidate {cs.index(c) + 1}, size {st})" + (f"; skipped {', '.join(skipped)}" if skipped else '')
         if not (tag['flag'] or fails or not ok):
-            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], control=c['sym'], checks='; '.join(warns)))
-            sample.append(dict(c, group='control', business_type=ct['business_type'], sub_type=ct['sub_type'], checks='; '.join(cw)))
+            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], control=c['sym'], size_step=st,
+                               checks='; '.join(warns)))
+            sample.append(dict(c, group='control', business_type=ct['business_type'], sub_type=ct['sub_type'], size_step=st,
+                               checks='; '.join(cw)))
     # 5. outputs
-    keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'control', 'business_type', 'sub_type',
-            'reason', 'checks']
+    keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'control', 'size_step', 'business_type',
+            'sub_type', 'reason', 'checks']
     with open(os.path.join(D, 'sample.csv'), 'w', newline='', encoding='utf-8') as fh:
         wr = csv.DictWriter(fh, fieldnames=keys, extrasaction='ignore')
         wr.writeheader()
@@ -349,6 +371,9 @@ def finalize():
            f'{cnt("control")}; needing a next candidate {cnt("needs")}; no same-type candidate left {cnt("no same")}; '
            f'untagged {cnt("untagged")}; no candidates {cnt("no candidates")}; flagged {cnt("flagged")}; '
            f'artefact {cnt("artefact")}; type not in list {cnt("type not")}.',
+           '- Controls by size step: ' + ', '.join(f'{s[2]} {sum(1 for r in sample if r["group"] == "control" and r["size_step"] == s[2])}'
+                                                   for s in STEPS) + '. Winners with no same-type candidate left get the next '
+           'ones (same step, then the next) from `--repair <run>/sample_candidates.csv --candidates-only`.',
            f'- Fallen winners {len(fallen)}: tagged {sum(1 for r in fallen if (r["sym"], r["start"]) in tags)}.',
            f'- sample.csv: {len(sample)} rows, ' + ', '.join(f'{g} {sum(1 for r in sample if r["group"] == g)}'
                                                          for g in ('winner', 'control', 'fallen_winner')) + '.',
@@ -382,7 +407,7 @@ def finalize():
     rep += ['', '## Same company and date typed differently by two batches', ''] + ([f'- {c}' for c in conflicts] or ['- none'])
     rep += ['', '## Control per winner', ''] + [f'- {k[0]} {k[1]}: {v}' for k, v in sorted(status.items()) if k[2] == 'winner']
     open(os.path.join(D, 'sample_checks.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
-    print('\n'.join(rep[4:9]))
+    print('\n'.join(rep[4:10]))
     print(f'flagged {len(flagged)} | artefacts {len(arts)} | warnings {len(warns)} | outside limits {len(limits)} | '
           f'types not in list {len(unknown)} | conflicts {len(conflicts)} | malformed {len(malformed)}')
     print('wrote business_types.csv, business_types_list.md, sample.csv, needs_next.csv, sample_checks.md in', D)
@@ -451,29 +476,33 @@ def label(sym):
     return _lab[sym]
 
 def load_tags():
-    """{(sym, as_of): business_type} from business_types.csv, and {type: basic industries of the labelled companies so tagged}."""
+    """{(sym, as_of): business_type} and {(sym, as_of): flag} from business_types.csv, and {type: basic industries of the
+    labelled companies so tagged}."""
     fn = os.path.join(D, 'business_types.csv')
-    tags = {(r['sym'], r['as_of']): r['business_type'] for r in csv.DictReader(open(fn, encoding='utf-8'))} if os.path.exists(fn) else {}
+    bt = list(csv.DictReader(open(fn, encoding='utf-8'))) if os.path.exists(fn) else []
+    tags = {(r['sym'], r['as_of']): r['business_type'] for r in bt}
+    flags = {(r['sym'], r['as_of']): r.get('flag') or '' for r in bt}
     ind = {}
     for (sym, _), t in tags.items():
         if label(sym):
             ind.setdefault(t, set()).add(label(sym)[1])
-    return tags, ind
-TAGS, TYPE_IND = load_tags()
+    return tags, flags, ind
+TAGS, FLAGS, TYPE_IND = load_tags()
 LEVEL = {'industry': 'same basic industry', 'type': 'no industry label; same business type tag',
          'sector-level': 'sector-level: same sector, other basic industry',
          'type-industry': "winner has no industry label; a basic industry of its business type's tagged companies"}
 
-def ranked(w, hz):
-    """Every company within the matching limits (same start, mc0 0.5-2x, below the threshold), with its distance and
-    industry level: tier 1 'industry' (same basic industry) or 'type' (no label, same business type tag as the winner);
-    tier 2 'sector-level' (same sector) or, for a winner with no label, 'type-industry'; None when neither."""
+def ranked(w, hz, k=0):
+    """Every company within the matching limits of size step k (same start, mc0 ratio in STEPS[k] and in no tighter step,
+    below the threshold), with its distance and industry level: tier 1 'industry' (same basic industry) or 'type' (no label,
+    same business type tag as the winner); tier 2 'sector-level' (same sector) or, for a winner with no label,
+    'type-industry'; None when neither."""
     cols, thr = H[hz][0], H[hz][1]
     wl, wt = label(w['sym']), TAGS.get((w['sym'], w['start']))
     out = []
     for c in by_start[w['start']]:
         cm = mult(c, cols)
-        if c['sym'] == w['sym'] or cm is None or cm >= thr or not (0.5 <= c['mc0'] / w['mc0'] <= 2):
+        if c['sym'] == w['sym'] or cm is None or cm >= thr or size_step(c['mc0'] / w['mc0']) != k:
             continue
         dist = abs((c['sales_g3'] or 0) - (w['sales_g3'] or 0)) / 20 + abs((c['eps_g3'] or 0) - (w['eps_g3'] or 0)) / 40 \
             + abs((c['pe0'] or 0) - (w['pe0'] or 0)) / 20 + abs(c['mc0'] / w['mc0'] - 1)
@@ -486,16 +515,52 @@ def ranked(w, hz):
         out.append((dist, c, cm, lv))
     return sorted(out, key=lambda x: x[0])
 
-def candidates(w, hz):
-    """Control candidates: the N_CAND nearest (growth and valuation) of the winner's basic industry within the matching
-    limits; when fewer, the nearest of its sector fill up ('sector-level'); still fewer are kept as they are."""
-    rk = [x for x in ranked(w, hz) if x[3]]
-    pick = [x for x in rk if x[3] in ('industry', 'type')][:N_CAND]
-    pick += [x for x in rk if x[3] in ('sector-level', 'type-industry')][:N_CAND - len(pick)]
-    return [{'group': 'control_candidate', 'sym': c['sym'], 'horizon': hz, 'start': c['start'], 'mc0': c['mc0'],
-             'multiple': cm, 'strong': '', 'matched_to': w['sym'], 'match': lv,
-             'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}; {LEVEL[lv]}); reached {cm:.1f}x'}
-            for dist, c, cm, lv in pick]
+_fails = {}
+def fails(sym, start, hz, mc0, group):
+    """True when the artefact checks fail for this window (as in --finalize)."""
+    k = (sym, start, hz, group)
+    if k not in _fails:
+        o = outc.get((sym, start)) or {}
+        _fails[k] = bool(artefacts(sym, start, win_years(hz, o), mc0, o, group)[0])
+    return _fails[k]
+
+TYPE_NAMES = {t[0] for t in type_list()}
+def winner_open(w, hz):
+    """The winner can take a control: tagged with a listed type, not flagged, no artefact."""
+    wt = TAGS.get((w['sym'], w['start']))
+    return bool(wt) and wt in TYPE_NAMES and not FLAGS.get((w['sym'], w['start'])) and not fails(w['sym'], w['start'], hz, w['mc0'], 'winner')
+
+def usable(c, w, hz):
+    """A tagged candidate --finalize would take as control: the winner's type, not flagged, no artefact."""
+    k = (c['sym'], c['start'])
+    return TAGS.get(k) == TAGS.get((w['sym'], w['start'])) and not FLAGS.get(k) and not fails(c['sym'], c['start'], hz, f(c['mc0']), 'control')
+
+def candidates(w, hz, have=()):
+    """Control candidates, size step by step (STEPS), never another industry tier: within a step, the N_CAND nearest
+    (growth and valuation) of the winner's basic industry, then the nearest of its sector ('sector-level') fill up. An
+    untagged winner gets the first non-empty chunk of N_CAND. A tagged one (or one with `have`, its rows so far, kept as they
+    are; only new rows are returned) gets rows only when it can take a control and every row it has is tagged and none is
+    usable: the next N_CAND of the same step not yet drawn, else of the next step, going on while every new row is tagged
+    and not usable (so no tagging round is spent on them)."""
+    if (have or (w['sym'], w['start']) in TAGS) and not (winner_open(w, hz) and all((c['sym'], c['start']) in TAGS and not usable(c, w, hz) for c in have)):
+        return []
+    drawn, out = {c['sym'] for c in have}, []
+    for k in range(len(STEPS)):
+        while True:
+            rk = [x for x in ranked(w, hz, k) if x[3] and x[1]['sym'] not in drawn]
+            pick = ([x for x in rk if x[3] in ('industry', 'type')] + [x for x in rk if x[3] in ('sector-level', 'type-industry')])[:N_CAND]
+            if not pick:
+                break
+            rows = [{'group': 'control_candidate', 'sym': c['sym'], 'horizon': hz, 'start': c['start'], 'mc0': c['mc0'],
+                     'multiple': cm, 'strong': '', 'matched_to': w['sym'], 'match': lv, 'size_step': STEPS[k][2],
+                     'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}; {LEVEL[lv]}; size '
+                               f'{c["mc0"] / w["mc0"]:.2f}x, step {STEPS[k][2]}); reached {cm:.1f}x'}
+                    for dist, c, cm, lv in pick]
+            out += rows
+            drawn |= {r['sym'] for r in rows}
+            if not winner_open(w, hz) or any((r['sym'], r['start']) not in TAGS or usable(r, w, hz) for r in rows):
+                return out
+    return out
 
 if '--coverage' in a:
     # How many winners in sample_candidates.csv can get N_CAND candidates with the labels present so far (writes nothing).
@@ -576,7 +641,7 @@ if '--repair' in a:
     for r in old:
         if r['group'] == 'control_candidate':
             old_c.setdefault((r['matched_to'], r['horizon']), []).append(r['sym'])
-    changed, nearest = [], []
+    changed, nearest, appended, left = [], [], [], []
     for r in picks:  # in the old order, each replacement in its predecessor's place
         k = (r['group'], r['sym'], r['horizon'])
         if k in keep:
@@ -588,7 +653,21 @@ if '--repair' in a:
             continue
         out.append(row)
         if row['group'] == 'winner':
-            cs = candidates(outc[(row['sym'], row['start'])], row['horizon'])
+            ow = outc[(row['sym'], row['start'])]
+            if '--candidates-only' in a:  # old rows kept as they are (size_step filled from mc0 if missing); new ones appended
+                have = [dict(c, size_step=c.get('size_step') or STEPS[size_step(f(c['mc0']) / ow['mc0'])][2])
+                        for c in old if c['group'] == 'control_candidate' and c['matched_to'] == r['sym'] and c['horizon'] == r['horizon']]
+                new_c = candidates(ow, row['horizon'], have)
+                if new_c:
+                    appended.append(f"- {r['sym']} {r['horizon']} {r['start']}: {len(new_c)} (" + ', '.join(
+                        f"{c['sym']} {c['size_step']} {c['match']}{' tagged ' + TAGS[(c['sym'], c['start'])] if (c['sym'], c['start']) in TAGS else ''}"
+                        for c in new_c) + ')')
+                if winner_open(ow, row['horizon']) and all((c['sym'], c['start']) in TAGS and not usable(c, ow, row['horizon'])
+                                                           for c in have + new_c):
+                    left.append(f"{r['sym']} {r['horizon']}")
+                cs = have + new_c
+            else:
+                cs = candidates(ow, row['horizon'])
             out += cs
             if k in keep:
                 was, now = old_c.get((r['sym'], r['horizon']), []), [c['sym'] for c in cs]
@@ -608,15 +687,22 @@ if '--repair' in a:
     rep = ['# P1.2 sample repair', '', f'Written by `mb_sample.py --repair` (seed {SEED}) from `{src}` and the current '
            '`outcomes.csv`. ' + ('Every pick kept as it was (--candidates-only)' if '--candidates-only' in a else
            'A pick is kept when its first qualifying window and size band are unchanged') + '; candidate lists are '
-           'recomputed for every winner (same basic industry first, then sector-level).', '',
+           'recomputed for every winner (same basic industry first, then sector-level, by size step)' +
+           (' except with --candidates-only, which keeps every old candidate row and appends the next ones' if '--candidates-only' in a else '')
+           + '.', '',
            f'- Winners and fallen winners: {len(picks)}; kept {len(kept)} (winners {sum(1 for r in kept if r["group"] == "winner")}, '
            f'fallen {sum(1 for r in kept if r["group"] == "fallen_winner")}); replaced {len(repl)}; unfilled {len(short)}.',
            f'- Kept winners whose candidate list changed: {len(changed)}; nearest candidate changed: {len(nearest)}.',
-           f'- Winners with sector-level candidates: {len(sec)}; with fewer than {N_CAND} candidates: {len(few)}.', '',
+           f'- Winners with sector-level candidates: {len(sec)}; with fewer than {N_CAND} candidates: {len(few)}.' +
+           (f' Candidates appended for {len(appended)} winners; no candidate left even at {STEPS[-1][2]}: {len(left)}.'
+            if '--candidates-only' in a else ''), '',
            '## Replaced (old pick: why -> new pick)', ''] + \
           [f"- {r['group']} {r['sym']} {r['horizon']} {r['start']} ({period(r['start'])} {band(f(r['mc0']))}): {why} -> "
            + (f"{repl[(r['group'], r['sym'], r['horizon'])]['sym']} {repl[(r['group'], r['sym'], r['horizon'])]['start']}"
               if (r['group'], r['sym'], r['horizon']) in repl else 'unfilled') for r, why in dropped] + \
+          (['', '## Candidates appended (--candidates-only; sym, size step, match, tag if any)', ''] + (appended or ['- none']) +
+           ['', f'## No candidate left even at {STEPS[-1][2]} ({len(left)})', ''] + ([f'- {x}' for x in left] or ['- none'])
+           if '--candidates-only' in a else []) + \
           ['', '## Unfilled', ''] + ([f'- {s}' for s in short] or ['- none']) + \
           ['', f'## Fewer than {N_CAND} candidates (count; industry label; business type tag)', ''] + (few or ['- none']) + \
           ['', '## Nearest candidate changed', ''] + ([f'- {s}' for s in nearest] or ['- none']) + \
@@ -631,7 +717,7 @@ else:
                 out.append(fallen_row(r, hz))
         print(f'{hz}: pool {len(P[("winner", hz)])} winners')
 
-keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'match', 'reason']
+keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'match', 'size_step', 'reason']
 with open(os.path.join(D, 'sample_candidates.csv'), 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=keys, extrasaction='ignore')
     w.writeheader()
@@ -661,7 +747,7 @@ if rep:
     print('\n'.join(rep[4:8]))
 cnt = {}
 for r in out:
-    k = (r['group'], r['horizon'], period(r['start']), band(r['mc0']))
+    k = (r['group'], r['horizon'], period(r['start']), band(f(r['mc0'])))
     cnt[k] = cnt.get(k, 0) + 1
 for k in sorted(cnt):
     print(*k, cnt[k])
