@@ -1,6 +1,6 @@
-# F7R: analysis recheck checklist (Opus medium, with `process/future/recheck.md`)
+# F8R: analysis recheck checklist (Opus medium, with `process/future/recheck.md`)
 
-Work file: `<run>/analysis/<SYM>/main.json` (recheck 1) or `recheck<N-1>.json`; your output: `recheck<N>.json` and `.md` beside it. Read `process/future/f7_analysis.md` first.
+Work file: `<run>/analysis/<SYM>/main.json` (recheck 1) or `recheck<N-1>.json`; your output: `recheck<N>.json` and `.md` beside it. Read `process/future/f8_analysis.md` first.
 
 1. **Newer results:** has the company declared results newer than those used? If so, reply only `NEW_RESULTS: <FYyyQn>`.
 2. **Figures:** every figure the verdict depends on, checked against the page it cites and against the cached screener figures (definition gaps ruled out first); every `facts_check.json` mismatch resolved; data flags complete.

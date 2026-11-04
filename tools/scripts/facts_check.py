@@ -1,7 +1,7 @@
 import datetime as dt, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import COMPANIES_DIR as FILINGS_DIR, api_path
-# F6 check: compares a company's facts.json (figures read from its filings) with every cached data source:
+# F7 check: compares a company's facts.json (figures read from its filings) with every cached data source:
 # screener.in answers in data/companies/<SYM>/scr/ (basis as requested in the call) and Tapetide answers in api/
 # (fundamentals, else financials). Writes facts_check.json beside facts.json. Read-only on everything else.
 # usage: python tools/scripts/facts_check.py SYM

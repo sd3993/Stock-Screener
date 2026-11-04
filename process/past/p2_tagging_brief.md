@@ -1,6 +1,6 @@
-# Business-type tagging brief (one helper per batch <N>)
+# P2: business-type tagging brief (one helper per batch <N>)
 
-Read first: `CLAUDE.md` (project rules), `process/historical/s2_sample.md` (the "Business type" paragraph is the task definition: type list, columns, peers handling, shell flags), `process/future/f5_sector_map.md` step 1 (classify by what the business actually does), and `business_types/new_types.md` plus any `business_types/new_types_batch*.md` (types added by earlier batches: reuse them with the same names, no near-duplicates). Look at a few rows of earlier `batch_*.csv` files to match their style and detail.
+Read first: `CLAUDE.md` (project rules), `process/past/p1_sample.md` (the "Business type" paragraph is the task definition: type list, columns, peers handling, shell flags), `process/future/f5_sector_map.md` step 1 (classify by what the business actually does), and `business_types/new_types.md` plus any `business_types/new_types_batch*.md` (types added by earlier batches: reuse them with the same names, no near-duplicates). Look at a few rows of earlier `batch_*.csv` files to match their style and detail.
 
 Input: `business_types/batch_<N>_input.csv` (sym, as_of = window start date, groups); some companies have several window starts.
 

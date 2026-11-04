@@ -1,9 +1,9 @@
 import csv, os, random, sys
-# Multibagger study, step 2 (process/historical/s2_sample.md): picks winners, fallen winners and ~5 control candidates per
-# winner from outcomes.csv (S1), seeded so the picks repeat. Writes runs/historical/<date>/sample_candidates.csv (group, sym,
+# Multibagger study, P1.2 (process/past/p1_sample.md): picks winners, fallen winners and ~5 control candidates per
+# winner from outcomes.csv (P1.1), seeded so the picks repeat. Writes runs/past/<date>/sample_candidates.csv (group, sym,
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
-# of the same type), counts the peers flags and runs the checks; outputs and rules in s2_sample.md, "Script".
+# of the same type), counts the peers flags and runs the checks; outputs and rules in p1_sample.md, "Script".
 # Candidates come from the winner's basic industry (screener's NSE label), then its sector; --coverage reports how many
 # winners get the full count with the labels saved so far.
 #   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv> [--candidates-only]] | --coverage
@@ -60,7 +60,7 @@ def pick_strat(pool, n, rng):
                 out.append(cells[k].pop())
     return out
 
-# --- --finalize: once business types are tagged (s2_sample.md, "Checks") ---
+# --- --finalize: once business types are tagged (p1_sample.md, "Checks") ---
 COMPANIES = a[a.index('--companies') + 1] if '--companies' in a else os.path.join('data', 'companies')  # tests point it at a copy
 # Artefact limits: a start mc under FLOOR_NEAR cr is near the floor, and thin if the median weekly traded value in the 13
 # weeks before the start is under THIN_VALUE lakh or THIN_ZERO+ of those weeks had no volume (the chart's volume points are
@@ -73,8 +73,8 @@ BT_COLS = ['sym', 'as_of', 'business_type', 'sub_type', 'revenue_drivers', 'cycl
 import bisect, datetime as dt, glob, json, re
 
 def type_list():
-    """Types from s2_sample.md's "Business type" list plus business_types/new_types*.md: [(name, definition, source)]."""
-    txt = open(os.path.join('process', 'historical', 's2_sample.md'), encoding='utf-8').read()
+    """Types from p1_sample.md's "Business type" list plus business_types/new_types*.md: [(name, definition, source)]."""
+    txt = open(os.path.join('process', 'past', 'p1_sample.md'), encoding='utf-8').read()
     m = re.search(r'Keep the type list short and economic, e\.g\. (.*?); add a type', txt)
     out, depth, cur = [], 0, ''
     for ch in (m.group(1) if m else '') + ',':
@@ -82,7 +82,7 @@ def type_list():
         if ch == ',' and depth == 0:
             nm = cur.strip()
             base = nm.split(' (')[0] if nm.startswith('specialty manufacturer') else nm  # the bracket is its definition
-            out.append((base, nm[len(base):].strip(' ()'), 's2_sample.md'))
+            out.append((base, nm[len(base):].strip(' ()'), 'p1_sample.md'))
             cur = ''
         else:
             cur += ch
@@ -240,7 +240,7 @@ def finalize():
         w.writeheader()
         w.writerows(merged)
     with open(os.path.join(D, 'business_types_list.md'), 'w', encoding='utf-8') as fh:
-        fh.write('# Business types\n\nWritten by `mb_sample.py --finalize` from `s2_sample.md` and `business_types/new_types*.md`.\n\n')
+        fh.write('# Business types\n\nWritten by `mb_sample.py --finalize` from `p1_sample.md` and `business_types/new_types*.md`.\n\n')
         fh.writelines(f'- **{name}**{": " + defn if defn else ""} ({src})\n' for name, defn, src in types)
     # 3. peers flags, overall and per batch
     peers = {}
@@ -343,7 +343,7 @@ def finalize():
     cnt = lambda pre: sum(1 for k, v in status.items() if k[2] == 'winner' and v.startswith(pre))
     arts = [(k, v[0]) for k, v in art.items() if v[0]]
     warns = [(k, v[1]) for k, v in art.items() if v[1]]
-    rep = ['# S2 checks', '', f'Written by `mb_sample.py --finalize`. Batches merged: {len(batches)} '
+    rep = ['# P1.2 checks', '', f'Written by `mb_sample.py --finalize`. Batches merged: {len(batches)} '
            f'({", ".join(str(b) for b, _ in batches)}); tagged rows {len(merged)}; {len(types)} types in `business_types_list.md`.', '',
            f'- Winners {len(winners)}: tagged {sum(1 for w in winners if (w["sym"], w["start"]) in tags)}; with a same-type control '
            f'{cnt("control")}; needing a next candidate {cnt("needs")}; no same-type candidate left {cnt("no same")}; '
@@ -605,7 +605,7 @@ if '--repair' in a:
            f"(label {' / '.join(label(x['sym']) or ['none'])}; tag {TAGS.get((x['sym'], x['start'])) or 'none'})"
            for x in wins if len(nc.get((x['sym'], x['horizon']), [])) < N_CAND]
     sec = [x for x in wins if any(m in ('sector-level', 'type-industry') for m in nc.get((x['sym'], x['horizon']), []))]
-    rep = ['# S2 sample repair', '', f'Written by `mb_sample.py --repair` (seed {SEED}) from `{src}` and the current '
+    rep = ['# P1.2 sample repair', '', f'Written by `mb_sample.py --repair` (seed {SEED}) from `{src}` and the current '
            '`outcomes.csv`. ' + ('Every pick kept as it was (--candidates-only)' if '--candidates-only' in a else
            'A pick is kept when its first qualifying window and size band are unchanged') + '; candidate lists are '
            'recomputed for every winner (same basic industry first, then sector-level).', '',
@@ -637,7 +637,7 @@ with open(os.path.join(D, 'sample_candidates.csv'), 'w', newline='', encoding='u
     w.writeheader()
     w.writerows(out)
 if rep:
-    # fetch_order.txt: companies without the S2/S3 fetch (no scr/documents.json; the label-only fetch writes just
+    # fetch_order.txt: companies without the P1.2/P3.1 fetch (no scr/documents.json; the label-only fetch writes just
     # overview.json): new winners and fallen winners first, then
     # the other winners and fallen winners, then candidates by rank (every winner's nearest, then each one's second, ...)
     new = {(r['group'], r['sym'], r['horizon']) for r in repl.values()}
@@ -655,7 +655,7 @@ if rep:
             order.append(r['sym'])
     open(os.path.join(D, 'fetch_order.txt'), 'w', encoding='utf-8').write(''.join(s + '\n' for s in order))
     psyms = {r['sym'] for r in picked}
-    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without the S2/S3 fetch (`scr/documents.json`) '
+    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without the P1.2/P3.1 fetch (`scr/documents.json`) '
                 f'({sum(1 for s in order if s in psyms)} of them winners or fallen winners).']
     open(os.path.join(D, 'sample_repair.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
     print('\n'.join(rep[4:8]))

@@ -1,7 +1,7 @@
 import datetime as dt, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tt_docs
-# F6 downloads from the company's saved screener answers (run scr_company.py first): results filings (last 8),
+# F6.2 downloads from the company's saved screener answers (run scr_company.py first): results filings (last 8),
 # investor presentations and call transcripts (last 6 quarters), governance and business filings (3 years) from the
 # NSE announcements; annual reports (last 3) and exchange-hosted transcripts from the document list. PDFs with text,
 # into data/companies/<SYM>/<FYyyQn>/, recorded in index.json; nothing indexed is downloaded again.

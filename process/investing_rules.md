@@ -14,7 +14,7 @@ The only copy of the investing rules; other files point here. Who may change wha
 
 - No fixed return target per bucket. A stock is eligible for a bucket when the evidence for that horizon holds (rule 7). Eligibility is nested: a long-term stock is also in medium and short, and a medium-term stock is also in short (near-term visibility can't be missing when longer-term visibility exists); its CAGR in the shorter buckets may be lower, and flagged red.
 - **Holdings are always listed** (Shouvik, 23 Oct 2026): every stock held, even a full exit, appears in the bucket(s) it belongs to, or, if eligible for none, in the closest one; every reason (non-negotiable fail, not eligible, below hurdle) shows in red, so a temporary or marginal miss can be judged before selling.
-- **Hurdle (all buckets):** base-case expected return of at least **25% a year (CAGR)** to the bucket's horizon end, and the bear case no worse than ~0.8x. A stock that falls below the hurdle or any other price-based rule (forward P/E, PEG) stays listed, flagged in red with every reason shown, so short-lived price moves don't make it vanish; buy/sell decisions weigh the flag. Only a new F7 analysis (eligibility, non-negotiables) can remove it from a bucket.
+- **Hurdle (all buckets):** base-case expected return of at least **25% a year (CAGR)** to the bucket's horizon end, and the bear case no worse than ~0.8x. A stock that falls below the hurdle or any other price-based rule (forward P/E, PEG) stays listed, flagged in red with every reason shown, so short-lived price moves don't make it vanish; buy/sell decisions weigh the flag. Only a new F8 analysis (eligibility, non-negotiables) can remove it from a bucket.
 - **Ranking:** within each bucket, by base-case expected CAGR (highest return in the least time), with evidence quality shown alongside. How long a stock is held is decided by later quarterly runs (upgraded, downgraded or dropped from buckets), not fixed upfront.
 - "100x" is a tag inside the medium- and long-term buckets.
 
@@ -28,7 +28,7 @@ Judged on today's level AND the direction over the last 2-3 quarters (other fact
    - **Selling fails** when the promoter group ends below 50% after the sales, or when results worsen for 2-3 consecutive quarters during or around the sales (a one-off dip doesn't count). "Results" means profit and operating cash flow together: profit growth with weak cash conversion around the sales counts as worsening.
    - **Selling also fails** when it comes shortly before an adverse event the company later discloses (a lost order or customer, regulatory action, a downgrade), or when it funds a stressed group company (seen as group pledges or group debt).
    - **Selling passes** otherwise, including sales followed by good results.
-   - **Buying passes** at a promoter-group holding of 40% or more, whatever the recent results, when it is real cash buying (open market, or a preferential issue or warrants paid in cash, not ESOPs) and there is no pledge; any weakness is left to the full analysis (F7).
+   - **Buying passes** at a promoter-group holding of 40% or more, whatever the recent results, when it is real cash buying (open market, or a preferential issue or warrants paid in cash, not ESOPs) and there is no pledge; any weakness is left to the full analysis (F8).
    - A co-promoter family's or PE promoter's exit is judged on the same tests and logged.
    - All sectors: weigh a small promoter-group sale against promoter buying or preferential subscription in the prior 12 months (the net flow), not on its own. [Learned: SEJALLTD, allotment 17 Dec 2025 vs sale 16 Sep 2026]
    - All sectors: sales by promoter-group family members count, even when the CMD is buying; check the promoter-group pages of the SHP each quarter. [Learned: MOLDTECH, BSE SHP Jun/Sep 2026]
@@ -85,7 +85,7 @@ Judged by outcomes: debtor days above ~120 or cash conversion below 0.65 fails. 
 - **CPaaS / messaging:** SMS pricing erosion is structural; growth must come from WhatsApp/RCS mix. [Learned: TANLA dossier]
 - **Commodity-linked specialities (gelatin, masterbatches):** volume growth with falling realisations is not earnings growth; check realisation per unit. [Learned: NITTAGELA, AR FY26 MD&A; PLASTIBLEN]
 
-## 7. Visibility (bucket eligibility, decided in F7)
+## 7. Visibility (bucket eligibility, decided in F8)
 - **Short term:** already contracted or in the numbers: executable orders at least equal to next year's revenue, capacity already running, price increases passed through.
 - **Medium term:** order book 1.5-2.5x revenue, or funded capacity commissioning within 1-2 years.
 - **Long term:** market at least 10x current revenue; growth that can last 10-15 years; funded plans for 3-4x capacity.
@@ -101,7 +101,7 @@ Measured on forward earnings: base and bear EPS paths to each eligible bucket's 
 
 [Yours, revised 20 Oct 2026; Expert: Lynch (PEG; cyclicals on mid-cycle earnings); Benjamin Graham & David Dodd, *Security Analysis* (average earnings over a cycle); Agrawal/MOSL Wealth Creation Studies (reasonable price non-negotiable; PEG; re-rating on recovering RoE)]
 
-**Exit P/E sanity checks (F7)** [Yours, 23 Oct 2026]:
+**Exit P/E sanity checks (F8)** [Yours, 23 Oct 2026]:
 - **Hand-picked peers:** name 3-6 genuinely comparable listed companies (from the annual report's competitor mentions and the business mix, not the data provider's sector label) and compare the exit P/E with their 5-year median P/Es and the stock's own history; explain any gap.
 - **Growth at exit:** the exit P/E should be no more than about 2x the EPS growth rate (%) expected at the horizon's end (an exit PEG of ~2 at most); e.g. growth slowing to 12% supports an exit P/E of about 24 at most.
 - Both sit under the cap of 30.

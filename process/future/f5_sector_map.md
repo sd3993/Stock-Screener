@@ -1,4 +1,4 @@
-# F5: sector map (Opus medium helper) and company list (orchestrator)
+# F5: sector map (Opus medium helper)
 
 ## Sector map (helper)
 Build the sector map that decides which companies are analysed first. Write only the files named below. Working directory: the project root (PowerShell). The run folder and the list of gate survivors and holdings are in your brief. If the previous quarter's run folder has a `sector_map.md`, review and update it rather than rebuild it.
@@ -15,6 +15,3 @@ Inputs: the company list in your brief; `process/investing_rules.md` rule 21 (th
 3. Fill the tier column, and end `sector_map.md` with companies per tier and open questions.
 
 Reply with: each sector and its tier on one line, companies per tier, and anything you couldn't source.
-
-## Company list (orchestrator, after the last F5R)
-Write `<run>/company_list.csv` (sym, name, held, sector, tier, order): every holding (from `holdings.csv`) plus every gate survivor (NEXT in `<run>/gate/decisions.csv`). Order: holdings first, then tier-1 sectors, then tier 2; tier-3 companies only if exceptional (say why in `progress.md`). Add every company to `status.csv` at F6, state queued.
