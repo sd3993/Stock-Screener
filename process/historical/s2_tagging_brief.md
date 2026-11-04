@@ -10,6 +10,6 @@ Write `business_types/batch_<N>.csv`, one row per input row, columns:
 sym, as_of, business_type, sub_type, revenue_drivers, cyclicality (low/medium/high), capital_intensity (low/medium/high), pricing_power (low/medium/high), customers (B2C/B2B/government, may combine with "/"), evidence (short: source, key facts), peers (helped/misled/neutral), flag (blank, or "shell" / "no real operations" / "unclear" with a reason).
 Add a type only when a company truly doesn't fit; other helpers tag in parallel, so never edit new_types.md: write a new type (name, one-line definition) to `business_types/new_types_batch<N>.md`.
 
-Rules: no scripts beyond reading files and downloads; edit no project file other than those two; don't fetch from screener; don't invent facts (thin evidence: say so and flag "unclear").
+Rules: no scripts beyond reading files and downloads; edit no project file other than those two; don't fetch from screener; don't invent facts or use general knowledge, only the files and reports (thin evidence: say so and flag "unclear").
 
 Return under 150 words: rows written, type counts, peers helped/misled/neutral (which companies misled), flags, new types, documents used and whether links worked.
