@@ -1,4 +1,4 @@
-# P7: in-depth analysis (Opus high, one company per helper)
+# F7: in-depth analysis (Opus high, one company per helper)
 
 You analyse one company in depth and write one analysis file (`main`); two rechecks then correct it (`process/future/recheck.md`). Never read an earlier quarter's analysis of this company unless your brief says this is a re-research, and then only after your own analysis is finished, to write the "what changed" note. Do not edit `process/investing_rules.md`, the sheet or any file outside your output. Working directory: the project root (PowerShell). Your brief gives the company, the run folder (`runs/future/<FYyyQn>/`), whether the company is a holding, and whether this is a re-research.
 
@@ -13,7 +13,7 @@ Refresh the company's announcements (`uvx --from screener-mcp==0.5.0 python tool
 
 ## The analysis
 Apply `process/investing_rules.md` throughout, weighing what the company passes against what it fails. Your results must not depend on today's share price: give EPS paths, exit P/Es and judgements only; the sheet computes P/E, PEG, multiples and CAGR from live prices.
-1. **Figures:** resolve every `facts_check.json` mismatch against the filing (rule out definition gaps first); list each genuine source-vs-filing mismatch (screener or Tapetide) as a data flag. Fetch anything missing yourself (per `process/data_rules.md`), say what you fetched, and add a line to `process/fetch_learnings.md` (re-read it just before writing; no duplicates) so P6 fetches it next time.
+1. **Figures:** resolve every `facts_check.json` mismatch against the filing (rule out definition gaps first); list each genuine source-vs-filing mismatch (screener or Tapetide) as a data flag. Fetch anything missing yourself (per `process/data_rules.md`), say what you fetched, and add a line to `process/fetch_learnings.md` (re-read it just before writing; no duplicates) so F6 fetches it next time.
 2. **Normalised trailing EPS:** strip one-offs (rule 6).
 3. **Non-negotiables** (rule 1): Pass / Bent / Fail for each of the four, with the evidence and its source; name any that fail.
 4. **Every negative** (rule 2): the cause with its source, temporary or structural, management's record on it, whether it is improving now. Keep a guidance-vs-delivery scorecard for the last 4-8 quarters.

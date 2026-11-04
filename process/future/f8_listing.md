@@ -1,4 +1,4 @@
-# P8: sheet listing, a batch of agreed analyses (Sonnet low)
+# F8: sheet listing, a batch of agreed analyses (Sonnet low)
 
 You copy each agreed analysis in your batch into the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`), through the `gws` CLI (`tools/tools.md`, "Google Sheets (`gws` CLI)"), and the verdict history. No analysis; copy values exactly. Never write into formula columns. Your brief gives the run folder and, per company, the agreed analysis file (`<run>/analysis/<SYM>/recheck2.json`, or a later recheck).
 

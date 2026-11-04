@@ -1,6 +1,6 @@
 # S1: universe, history and outcomes (scripts, run by the orchestrator)
 
-1. **Universe screens** (`scr_tool.py screen_stocks '<args>' <file> --login`, `limit` 200; each page saved to a file and never read into context; paging as in `process/future/p2_screens.md`). One band per market-cap range, IDs `U00`-`U08`:
+1. **Universe screens** (`scr_tool.py screen_stocks '<args>' <file> --login`, `limit` 200; each page saved to a file and never read into context; paging as in `process/future/f2_screens.md`). One band per market-cap range, IDs `U00`-`U08`:
    `Market Capitalization > 0 AND Market Capitalization <= 20`, then >20 ≤50, >50 ≤100, >100 ≤200, >200 ≤500, >500 ≤1500, >1500 ≤5000, >5000 ≤20000, >20000.
    Save as `runs/historical/<date>/universe/U<band>_<desc|asc>_p<n>.json`. Paging: desc pages 1…floor(total/200), then asc page 1.
 2. **Delisted candidates:** `data/market/reference_stocks_delisted.json` (Tapetide's master list, 136 names in Nov 2026). On a re-run, also check NSE's and BSE's delisted/merged lists for names since, and add their screener pages where they exist.

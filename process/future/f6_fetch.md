@@ -1,4 +1,4 @@
-# P6: fetch one company (Sonnet medium; the orchestrator runs the fetch scripts first)
+# F6: fetch one company (Sonnet medium; the orchestrator runs the fetch scripts first)
 
 You fetch and store everything the analysis of one company will need, extract its key figures accurately, and report what changed. No analysis, opinions or verdicts; copy figures exactly from the documents. Working directory: the project root (PowerShell; never cd elsewhere). The company, the run quarter (`FYyyQn`) and whether the fetch scripts already ran are in your brief.
 

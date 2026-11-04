@@ -1,7 +1,7 @@
 import glob, os
 # Shared paths for the scripts. The run folder is the RUN environment variable if set,
 # else RUN below, else the newest runs/future/FY* folder. Run every script from the project root.
-RUN = ''  # e.g. 'FY27Q2'; set at run start (P1)
+RUN = ''  # e.g. 'FY27Q2'; set at run start (F1)
 
 def run_dir():
     r = os.environ.get('RUN') or RUN

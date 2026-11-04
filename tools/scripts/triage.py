@@ -1,8 +1,8 @@
 import csv, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
-# P3: scores every company in <run>/universe.csv (and every holding) and writes <run>/triage.csv and
-# <run>/gate_batches.json. See process/future/p3_triage.md for what it decides.
+# F3: scores every company in <run>/universe.csv (and every holding) and writes <run>/triage.csv and
+# <run>/gate_batches.json. See process/future/f3_triage.md for what it decides.
 #  (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per bucket (short 2y, medium 5y, long 7y) at
 #      exit P/E = min(own 5y median P/E, 30), with dividends, vs growth VISIBLE in trailing data (conservative, optimistic);
 #  (b) earnings evidence (rule 6): E1 acceleration, E2 stalwart rebound, E3 sustained growth, E4 turnaround;
@@ -76,7 +76,7 @@ for s in sorted(set(U) | holds):
     r['flags'] = '; '.join(flags)
     nm = (r['name'] or '').lower()
     if r['held']:
-        r['triage'], r['reason'] = 'holding', 'held: goes straight to P6'
+        r['triage'], r['reason'] = 'holding', 'held: goes straight to F6'
     elif 'reit' in nm or 'invit' in nm or ' trust' in nm:
         r['triage'], r['reason'] = 'reject', 'REIT/InvIT'
     elif pledge is not None and pledge > 25:

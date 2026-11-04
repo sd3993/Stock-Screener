@@ -1,8 +1,8 @@
-# P4R: gate recheck checklist (Opus medium, with `process/future/recheck.md`)
+# F4R: gate recheck checklist (Opus medium, with `process/future/recheck.md`)
 
-Work file: `<run>/gate/bNN.json` (recheck 1) or `bNN_rc1.json`; your output: `bNN_rc<N>.json` as {"entries": [the corrected list, same format], plus the fields `process/future/recheck.md` adds}. Read `process/future/p4_gate.md` first, and each company's `<run>/gate/<SYM>.json`.
+Work file: `<run>/gate/bNN.json` (recheck 1) or `bNN_rc1.json`; your output: `bNN_rc<N>.json` as {"entries": [the corrected list, same format], plus the fields `process/future/recheck.md` adds}. Read `process/future/f4_gate.md` first, and each company's `<run>/gate/<SYM>.json`.
 
-A wrong REJECT is never seen again, while every NEXT gets the full analysis and two rechecks in P7. So the weight of this recheck is on rejects:
+A wrong REJECT is never seen again, while every NEXT gets the full analysis and two rechecks in F7. So the weight of this recheck is on rejects:
 - **Every REJECT** that isn't clearly dead on return math, **every borderline case** (best-bucket CAGR within ~5 points of the line) and **every floor call**: the full checklist below.
 - **Clear REJECTs on return math:** check only that the math and its inputs are right.
 - **Every NEXT:** check only the floors and integrity items (3 below) and that nothing in the filings was missed (5).

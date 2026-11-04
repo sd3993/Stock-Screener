@@ -1,7 +1,7 @@
 import csv, glob, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
-# P2: builds <run>/universe.csv from every saved screener page in <run>/screens/ (<ID>_p<NN>.json, saved by scr_tool.py, or scr_save.py before 3 Nov 2026):
+# F2: builds <run>/universe.csv from every saved screener page in <run>/screens/ (<ID>_p<NN>.json, saved by scr_tool.py, or scr_save.py before 3 Nov 2026):
 # screen pages T*, whole-market band pages B* (<ID>_<desc|asc>_p<NN>.json). One row per symbol: hits (screens that matched), in_sweep, and every field
 # found, under screener's field names. Checks that each band's rows add up to its total and that every column in
 # process/future/screens.json came back.

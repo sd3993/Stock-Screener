@@ -1,7 +1,7 @@
 # Pulls holdings through the official Kite CLI (read-only) and writes the same data to two copies:
 #   - data/kite/: holdings_<YYYY-MM-DD_HHMM>.json (the CLI's answer as is) and holdings.csv (the latest, one row per stock);
 #   - the sheet's Holdings tab (sheetId 104) through the gws CLI: only the data columns (layout: tools/tools.md, "Holdings tab").
-#     Status (F) and the Notes cells (M2 down) are P9's decisions and are never written; only the header M1 gets the fetch time.
+#     Status (F) and the Notes cells (M2 down) are F9's decisions and are never written; only the header M1 gets the fetch time.
 #     Rows are never deleted (sold => Qty 0).
 # Kite unavailable: changes nothing except the sheet's Kite-stale column (Q = TRUE on every holding row), prints when each
 #   copy was last fetched and which is newer, exits 3.
@@ -147,7 +147,7 @@ def latest(path):
 
 # ---------- names and codes ----------
 def data_tab():
-    """Data tab's ticker -> (google code, screener url, name), as P8 wrote them."""
+    """Data tab's ticker -> (google code, screener url, name), as F8 wrote them."""
     v, = sheet_get(['Data!A2:D300'])
     return {r[0]: (r[1] if len(r) > 1 else '', r[2] if len(r) > 2 else '', r[3] if len(r) > 3 else '')
             for r in v if r and r[0]}
@@ -215,7 +215,7 @@ def sync_sheet(rows, stamp):
                 notes.append(f'NO FREE ROW for {row["sym"]} (rows {FIRST}-{LAST} full); not written')
                 continue
             r = free.pop(0)
-            notes.append(f'new holding {row["sym"]} added at row {r} (status/notes for P9)')
+            notes.append(f'new holding {row["sym"]} added at row {r} (status/notes for F9)')
         elif sheet[r]['Z'] != row['sym']:
             notes.append(f'row {r}: ticker {sheet[r]["Z"]} -> {row["sym"]} (same ISIN {row["isin"]})')
         used.add(r)
@@ -226,7 +226,7 @@ def sync_sheet(rows, stamp):
     for n, s in sheet.items():
         if s['Z'] and n not in used:
             if s['C'] not in (0, '0'):
-                notes.append(f'sold: {s["Z"]} (row {n}) Qty set to 0; P9 removes the row')
+                notes.append(f'sold: {s["Z"]} (row {n}) Qty set to 0; F9 removes the row')
             writes += [(f'C{n}', [[0]]), (f'Q{n}', [[False]])]
     writes += [(HDR, [[HDR_TEXT + stamp]])]
     try:

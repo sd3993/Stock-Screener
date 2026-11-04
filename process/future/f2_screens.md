@@ -1,11 +1,11 @@
-# P2: market screens and the whole-market sweep (helper, Sonnet low)
+# F2: market screens and the whole-market sweep (helper, Sonnet low)
 
 Runs every screen in `process/future/screens.json` and the whole-market sweep on screener.in through `scr_tool.py` (logged in), saves every page, and builds the universe. No analysis. Working directory: the project root; run `scr_tool.py` from the Bash tool (`tools/tools.md`). The run folder (`runs/future/<FYyyQn>/`) is in your brief.
 
 - **screens** are the user's idea screens (T1…): every company that hits one joins the universe.
-- **The sweep** covers the whole market (`base`: market cap above ₹250 cr, positive P/E) and gives P3 the figures it needs for every company, so names outside the screens can still qualify.
+- **The sweep** covers the whole market (`base`: market cap above ₹250 cr, positive P/E) and gives F3 the figures it needs for every company, so names outside the screens can still qualify.
   - Each row carries the screener account's column set (`columns`; free accounts allow 15), so those fields come back for every company, empty or not, without being named in the query. A field named in a query drops the companies where it is empty.
-  - The other fields P3 needs (`query_fields`) come from extra sweeps that name them in the query, so a company missing from one just has that field empty.
+  - The other fields F3 needs (`query_fields`) come from extra sweeps that name them in the query, so a company missing from one just has that field empty.
   - It runs in market-cap bands (`bands`, ₹ cr), each paged with full 200-row pages only.
 
 1. Read the "screener.in" section of `tools/tools.md`. Every call below is `uvx --from screener-mcp==0.5.0 python tools/scripts/scr_tool.py screen_stocks '<args as JSON>' <out> --login`.
