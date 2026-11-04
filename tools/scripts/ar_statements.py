@@ -1,9 +1,11 @@
 import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, subprocess, sys, tempfile, time, zipfile
-# Multibagger study (process/historical/s3_statements.md, s4_backtest.md): annual statements for the years before screener's
+# Multibagger study (process/past/p3_statements.md, p3_backtest.md): annual statements for the years before screener's
 # statements (screener has ~12 years), read from the annual reports. Plain curl with its default identity; no model tokens.
 #   python -I tools/scripts/ar_statements.py plan  [--rows FILE] [--groups winner,fallen_winner]   -> <run>/ar_plan.csv
 #   python -I tools/scripts/ar_statements.py fetch [--gap 1.5] [--syms A,B] [--tmp DIR]   download, extract, parse (resumable)
 #   python -I tools/scripts/ar_statements.py reparse [--syms A,B]   re-parse the saved page text (after a parser fix)
+#   python -I tools/scripts/ar_statements.py refetch [--syms A,B] [--dry] [--gap 1.5]   download again (recorded url) the reports
+#     whose saved pages lack a balance sheet / P&L / cash flow for some basis (or any statement), with the current page selection
 #   python -I tools/scripts/ar_statements.py queue [--per 25]   -> <run>/ar_missing.csv, ar_helper_queue.csv, ar_summary.md
 #   python -I tools/scripts/ar_statements.py parse REPORT.pdf|PAGES.txt [--fy 2008]   one report, printed (debugging)
 # plan: for each (sym, as_of) row, the fiscal years the features need (mb_features.py: the latest FY filed by as_of and 4
@@ -23,7 +25,7 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #   ar_FY<yy>_pages.txt  the statement pages, '=== page N ===' markers (N = page in the PDF)
 #   ar_FY<yy>.json       url, pages, unit, per basis per year (year-end date): fields in Rs crore (EPS in Rs) with per-field
 #                        confidence and source page, checks, notes, and 'helper' = fields a helper must read
-#   ar_FY<yy>_helper.json  written by a fallback helper (process/historical/s4_ar_helper_brief.md); overrides parsed fields
+#   ar_FY<yy>_helper.json  written by a fallback helper (process/past/p4_ar_helper_brief.md); overrides parsed fields
 # Fields (screener's definitions): sales (net of excise; banks: interest earned), other_income (incl. exceptional items),
 #   interest, dep, pbt, tax, pat (before minority interest), eps (basic, as reported), dividend (proposed/paid on equity,
 #   excl. tax), op (= pbt + interest + dep - other_income), equity_cap, reserves (incl. share warrants), borrowings (all
@@ -54,10 +56,44 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #     only the part after a ' / ').
 #   - Units: ' ‘000’ with typographic quotes, '(Rs. ‘000)', '` ’ 000' are thousands. A headingless/unit-less page still
 #     takes the unit of the basis's other statement pages.
-#   - Still for helpers: dividend (new-format P&L has none, it is in the notes), bank pbt/tax (inside provisions), single-
-#     column consolidated first years (no previous year), previous-year-on-the-left layouts (BANARISUG), scanned PDFs, reports
-#     where the statements carry no heading, several-statements-in-one-page spreads, and whatever the chart / cross-report
-#     checks flag (about 100 basis-years of sales that disagree with the chart, ~70 with a power-of-ten cross-report gap).
+# Second pass (4 Nov 2026; every change below was tested by 'reparse' against the first pass: trusted fields identical except
+# where the old value was wrong, e.g. a subsidiary's page or a wrong unit):
+#   - Ligatures (fi, fl ...) are expanded; 'T O T A L' spaced letters are joined; blank lines no longer reset a wrapped label
+#     (a label wrapped over two lines is read as one when neither half matches; a bare 'Dividend' heading + 'Interim' / 'Final'
+#     lines); section captions ('INCOME', 'APPROPRIATIONS', 'LOAN FUNDS' ...) in the label column are stripped.
+#   - Wrong company's pages: the page's company name (entity(), cut at ' - CONSOLIDATED ...', '(Formerly ...)' skipped) is
+#     compared with today's screener / BSE names (company_names()); with a page at >= 0.95, pages under 0.85 (subsidiaries'
+#     statements printed in the same report) are dropped. Fixed ~25 reports read from a subsidiary's page.
+#   - A two-up spread is cut only when both halves carry figures (a P&L with labels left and figures right under a centred
+#     heading is one page); saved L/R pages are put back together by respread() on reparse.
+#   - Previous-year column LEFT of the labels (BANARISUG): left_layout() rewrites the lines as 'label current previous' when
+#     the header dates confirm the order (unlabeled subtotal lines too).
+#   - Headings: a second pass with looser headings ('Consolidated Balance Sheet' with the date on the next line, 'Profit and
+#     Loss Statement') only for a basis the strict headings found nothing for, then a third pass by content (content_pages()).
+#     keep_pages() saves the pages by all three plus every cash flow page, so a 'refetch' of the 123 reports with a missing
+#     statement (done 4 Nov 2026, 850 s, default gap) recovered the consolidated P&L / balance sheets that headings had missed.
+#   - Dividend: 'Total dividend', 'first/second interim dividend', 'provision for proposed dividend'; a consolidated year takes
+#     the standalone year's dividend of the same report (the company's); 'no dividend recommended' in the directors' report = 0
+#     for the current year (not when an interim dividend is mentioned); an appropriation section without a dividend line is a
+#     nil only when the page does not mention dividend at all (it used to be assumed nil).
+#   - Banks: PBT = 'Net profit before taxes' from the cash flow statement, tax = PBT - net profit (0 <= tax <= 60% of PBT).
+#   - Absent items: a complete P&L (PBT and PAT read, >= 12 lines) with no mention of interest / depreciation / per-share on the
+#     page leaves that field out of the helper list (checks the page, y['absent']): a helper could only answer 'not on the page'.
+#   - Units: whole-rupee units are dropped when most figures are small numbers with decimals (INFY consolidated, APOLLOTYRE);
+#     statements with no unit word at all take the standard unit whose ratio to the chart's TTM sales fits every year (crore
+#     itself included), or the unit of the same year in another report (cross_check). A cash flow in another unit than the
+#     balance sheet is kept (it is legitimate); only a magnitude failure of cfo alone goes to a helper, not the whole year.
+#   - Sales vs chart: the chart (TTM sales of the quarterly results, standalone before FY20 for many companies) was wrong in
+#     the 1.3-2x cases where the P&L's total income line equals sales + other income (y['sales_ok']); those are no longer sent.
+#     Unit-like ratios (10^n) still send every field of the basis-year.
+#   - Cross-report check: two or more fields (of sales, PAT, total assets, reserves, equity capital) off by the same power of
+#     ten = unit error (whole basis-year); one field off while others agree = that field only (same year), or ignored
+#     (consecutive years, real growth) unless a 100x change in sales / total assets. 87 -> ~48 basis-years.
+#   - First year of a company: a report with one value column gives one year (no empty previous-year column).
+#   - Still for helpers: bank pbt/tax where the cash flow starts elsewhere, dividends only in the directors' report tables,
+#     scanned PDFs (18), reports whose statements are not in the text layer, garbled/OCR text (jittered columns), statements of
+#     several entities on one page, sales with no 'sales' label (contract income ...), and whatever the chart / cross-report
+#     checks flag. Counts after the second pass: see the helper queue ('queue' prints them).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import hist_dir
 
@@ -80,6 +116,9 @@ HEAD = {'bs': r'BALANCE\s*SHEET\s*AS\s*(A[TS]|ON)',
         'pl': r'PROFIT\s*(AND|&)\s*LOSS\s*(ACCOUNT|STATEMENT)?\s*FOR|STATEMENT\s*OF\s*PROFIT\s*(AND|&)\s*LOSS|'
               r'PROFIT\s*(AND|&)\s*LOSS\s*ACCOUNT',
         'cf': r'CASH\s*-?\s*FLOW\s*STATEMENT|STATEMENT\s*OF\s*CASH\s*-?\s*FLOWS?'}
+HEAD_LOOSE = {'bs': r'BALANCE\s*SHEET\b(?!\s*ABSTRACT)',  # second pass, for a basis the strict headings found no page for
+              'pl': r'PROFIT\s*(AND|&)\s*LOSS\s*(ACCOUNT|STATEMENT)?\s*FOR|STATEMENT\s*OF\s*PROFIT\s*(AND|&)\s*LOSS|'
+                    r'PROFIT\s*(AND|&)\s*LOSS\s*(ACCOUNT|STATEMENT)'}
 F = {  # field: label regexes (lower-case label, schedule refs removed); first matching line wins unless noted
     'bs': [('share_capital', r'^(equity )?share capital|^capital$'),
            ('warrants', r'share warrants|money received against share warrants'),
@@ -112,6 +151,7 @@ F = {  # field: label regexes (lower-case label, schedule refs removed); first m
            ('tax', r'^(provision for )?(tax|taxes|taxation|income tax)(?!.*dividend)'),
            ('pat', r'^net profit|profit (for the (year|period)|after ?tax(ation)?)\b|loss after tax|profit/?\s*\(?(-\)\s*)?loss\)? (for the (year|period)|after ?tax)'),
            ('eps', r'earnings?\s*per\s*(equity\s*)?share|^basic\b|^eps\b'),
+           ('div_total', r'^total dividends?(?!.*(tax|preference))'),
            ('div_interim', r'^((first|second|third|fourth) )?interim dividend(?!.*(tax|preference))'),
            ('div_final', r'^(proposed|final)( final)? dividend(?!.*(tax|preference))|^proposed dividend on equity|'
                          r'^provision for (proposed )?(equity )?dividend(?!.*(tax|preference))'),
@@ -328,8 +368,9 @@ def left_layout(lines):
     # the header: the earlier year left of the later one
     yrs = []
     for l in lines[:20]:
-        for m in re.finditer(r'(?<!\d)((?:19|20)\d\d)(?!\d)|[./-](\d\d)(?!\d)', l):
-            yrs.append((int(m.group(1) or m.group(2)) % 100, m.start()))
+        for m in re.finditer(r'\b\d{1,2}[./-]\d{1,2}[./-]((?:19|20)?\d\d)\b|(?<![\d.,])((?:19|20)\d\d)(?![\d.,])', l):
+            y_ = int(m.group(1) or m.group(2))
+            yrs.append((y_ % 100, m.start()))
     both = [r for r in rows if r and r[0] and r[3]]
     if len(both) < 8 or len({y for y, _ in yrs}) < 2:
         return None
@@ -408,6 +449,8 @@ def parse_page(text, stmt):
             label = pending
         elif pending and label and not any(re.search(rx, label) for _, rx in F[stmt]):
             comb = clean_label(pending + ' ' + label)  # a label wrapped over two lines, the figures on the second
+            if re.fullmatch(r'dividends?( paid| declared| proposed| for the year)?', pending) and                     re.fullmatch(r'(interim|final|special|one time special)', label):
+                comb = clean_label(label + ' dividend')  # 'Dividend' heading, then 'Interim 343' / 'Final 415'
             if any(re.search(rx, comb) for _, rx in F[stmt]):
                 label = comb
         pending = ''
@@ -467,7 +510,14 @@ def parse_page(text, stmt):
                         multi[fld] = (cur, prv)
                 break
         seq.append((label, cur, prv, hit))
-    if stmt == 'pl' and not any(k in out for k in ('div_interim', 'div_final', 'div_plain')) and             re.search(r'(?i)dividend(?!\s*(income|received|from|on (investment|mutual)))', text):
+    if stmt == 'pl' and 'pbt' in out and 'pat' in out and len(seq) >= 12:
+        # a complete P&L with no mention of interest / depreciation / per-share figures anywhere on the page: the company
+        # does not report that item separately (nothing for a helper to find)
+        for fld_, rx_ in (('interest', r'interest|financ\w* (cost|charge|expense)|borrowing cost|bank (charge|commission)'),
+                          ('dep', r'deprec|amorti[sz]'), ('eps', r'per\s+(equity\s+)?share|\beps\b|earnings?\s+per')):
+            if fld_ not in out and not re.search(rx_, text, re.I):
+                out['abs_' + fld_] = [1.0, 1.0]
+    if stmt == 'pl' and not any(k in out for k in ('div_interim', 'div_final', 'div_plain', 'div_total')) and             re.search(r'(?i)dividend(?!\s*(income|received|from|on (investment|mutual)))', text):
         out['div_seen'] = [1.0, 1.0]  # a dividend is mentioned but no line was read: not the same as none
     if stmt == 'bs' and 'total' not in out:
         rep_ = [p for p, n in collections.Counter(unl).items() if n >= 2 and p[0] is not None]
@@ -560,7 +610,46 @@ def parse_page(text, stmt):
             if tx and p1 != p2:
                 out['pbt'], out['pat'] = p1, p2
                 out['tax_total'] = [p1[0] - p2[0], p1[1] - p2[1]]
+    flags['_ncols'] = len(cols)
     return out, notes, mid, flags
+
+
+def content_pages(pgs, stmt):
+    """Indexes of pages that look like the statement by content, whatever their heading (or lack of one): a balance sheet
+    has share capital, reserves, fixed assets and current assets / liabilities with many figures (and is not a schedule
+    'as per last balance sheet'); a P&L has income, depreciation and profit lines with many figures."""
+    out = []
+    for i, (_, t) in enumerate(pgs):
+        tl = t.lower()
+        n = sum(1 for l in t.splitlines() for x in tokens(l) if ',' in x[0] or '.' in x[0])
+        if stmt == 'bs' and n >= 15 and re.search(r'share capital|^\s*capital', tl, re.M) and 'reserves' in tl and 'total' in tl \
+                and re.search(r'assets|debtors|receivables', tl) and 'as per last balance sheet' not in tl:
+            out.append(i)
+        elif stmt == 'pl' and n >= 20 and re.search(r'other income|total income|total revenue|revenue from operations|\bsales\b', tl) \
+                and 'depreciation' in tl and re.search(r'before (tax|taxation)', tl) and 'as per last balance sheet' not in tl:
+            out.append(i)
+    return out
+
+
+def keep_pages(pgs):
+    """The pages to save for one report: every page that opens with a statement heading (strict, then loose when a
+    statement has none), pages that look like a statement by content, cash flow pages (operating + investing activities),
+    each with the page after it; notes holding the proposed dividend; the whole text when nothing is recognised."""
+    hit = stmt_pages(pgs)
+    keep = set()
+    for i in hit:
+        keep |= {i, i + 1} if i + 1 < len(pgs) else {i}
+    for stmt in ('bs', 'pl'):
+        for i in content_pages(pgs, stmt):
+            keep |= {i, i + 1} if i + 1 < len(pgs) else {i}
+    for i, (_, t) in enumerate(pgs):
+        if re.search(r'operating\s+activit', t, re.I) and re.search(r'investing\s+activit', t, re.I):
+            keep |= {i, i + 1} if i + 1 < len(pgs) else {i}
+    if not keep:  # no statement heading recognised: keep the whole text so a helper can find the statements
+        keep = set(range(len(pgs)))
+    dpg = [i for i, (_, t) in enumerate(pgs) if re.search(r'(?im)^\s*(proposed|final|interim)\s+(final\s+)?(equity\s+)?'
+                                                       r'dividends?\b(?!.*(tax|per share|preference)).*\d', t)]
+    return keep | set(dpg[:8])  # notes holding the proposed dividend (new format)
 
 
 def stmt_pages(pgs):
@@ -608,6 +697,23 @@ def same_entity(a, b):
 
 
 def find(pgs, stmt, anchors=None, cname=None):
+    """find_one() with the strict headings; for a basis it found nothing for, the looser headings ('Consolidated Balance
+    Sheet' with the date on the next line, 'Profit and Loss Statement')."""
+    best = find_one(pgs, stmt, anchors, cname)
+    if stmt in HEAD_LOOSE:
+        strict = HEAD[stmt]
+        HEAD[stmt] = HEAD_LOOSE[stmt]
+        try:
+            for b_, v in find_one(pgs, stmt, anchors, cname).items():
+                best.setdefault(b_, v)
+        finally:
+            HEAD[stmt] = strict
+        for b_, v in find_one(pgs, stmt, anchors, cname, True).items():  # by content, for a basis still without a page
+            best.setdefault(b_, v)
+    return best
+
+
+def find_one(pgs, stmt, anchors=None, cname=None, content=False):
     """Statement pages by heading, best-scoring page per basis -> {basis: (score, page id, fields, notes, mid, flags)}.
     pgs = [(id, text)]; pages that open with the heading are preferred over pages that merely name it. anchors =
     {basis: (PDF page number, company name) of that basis's P&L / balance sheet}: a cash flow page more than 150 pages
@@ -616,6 +722,8 @@ def find(pgs, stmt, anchors=None, cname=None):
     idx = [i for i, (_, t) in enumerate(pgs) if stmt_head(t, stmt)]
     if not idx:
         idx = [i for i, (_, t) in enumerate(pgs) if re.search(HEAD[stmt], ' '.join(t[:2500].split()).upper())]
+    if content:
+        idx = content_pages(pgs, stmt)
     if stmt == 'cf':
         # a cash flow page is one with operating and investing activities on it; the heading is often missing (title on the
         # page before) and a heading hit may be the auditors' report that names the statement
@@ -630,7 +738,9 @@ def find(pgs, stmt, anchors=None, cname=None):
         pid, p = pgs[i]
         head = ' '.join(p[:2500].split()).upper()
         m = re.search(HEAD[stmt], head)
-        if m:
+        if content and not m:
+            basis = 'consolidated' if 'CONSOLIDATED' in head[:600] else 'standalone'
+        elif m:
             basis = 'consolidated' if 'CONSOLIDATED' in head[max(0, m.start() - 200):m.end() + 100] or                 'CONSOLIDATED' in head[:300] else 'standalone'
         else:
             # no heading on the page: the basis of the statement page just before it (the page before, or two before, by
@@ -653,7 +763,7 @@ def find(pgs, stmt, anchors=None, cname=None):
             fl = {**fl2, **fl}
         if stmt == 'cf' and 'cfo' not in o:
             continue
-        score = len([k for k in o if k not in ('foot', 'sum_income', 'total_exp', 'div_seen')]) + (3 if mid else 0) +             (5 if stmt == 'cf' and 'cfo' in o else 0) + (2 if stmt == 'cf' and re.search(r'investing\s+activit', p, re.I) else 0)
+        score = len([k for k in o if k not in ('foot', 'sum_income', 'total_exp', 'div_seen') and not k.startswith('abs_')]) + (3 if mid else 0) +             (5 if stmt == 'cf' and 'cfo' in o else 0) + (2 if stmt == 'cf' and re.search(r'investing\s+activit', p, re.I) else 0)
         if stmt == 'cf' and anchors is not None:
             pn = re.match(r'\d+', pid)
             a_ = anchors.get(basis)
@@ -690,6 +800,14 @@ def report_year(texts):
     return dt.date(y, mo, 28), months
 
 
+def paise_like(text):
+    """True when most of a page's figures are small numbers with decimals (1,234.56): they cannot be whole rupees."""
+    big = [t for l in text.splitlines() for t in tokens(l) if re.search(r'\.\d\d$', t[0].rstrip(')'))]
+    ints = [t for l in text.splitlines() for t in tokens(l) if '.' not in t[0] and len(re.sub(r'\D', '', t[0])) >= 5]
+    small = [t for t in big if float(re.sub(r'[^\d.]', '', t[0]) or 0) < 1e5]
+    return len(small) >= 8 and len(small) > 2 * len(ints)
+
+
 def derive(bs, pl, cf, unit, flags, pages):
     """Rs crore figures in screener's terms for current (0) and previous (1) year: {field: [value, confidence, page]}."""
     g = lambda d, k, j: None if d.get(k) is None or d[k][j] is None else d[k][j] * unit
@@ -716,7 +834,9 @@ def derive(bs, pl, cf, unit, flags, pages):
         if 'pbt' not in r and g(pl, 'pbt_pre_exc', j) is not None and not g(pl, 'exceptional', j):
             put('pbt', g(pl, 'pbt_pre_exc', j), 'pl')  # 'Profit before tax and exceptional items' with no exceptional item
         dv = [g(pl, k, j) for k in ('div_interim', 'div_final')]
-        if any(x is not None for x in dv):
+        if g(pl, 'div_total', j) is not None:
+            put('dividend', abs(g(pl, 'div_total', j)), 'pl')  # a 'Total dividend' line (interim + final + special)
+        elif any(x is not None for x in dv):
             put('dividend', abs(sum(x for x in dv if x is not None)), 'pl')
             if pages.get('div_page'):
                 r['dividend'][1:] = ['medium', pages['div_page']]
@@ -736,6 +856,9 @@ def derive(bs, pl, cf, unit, flags, pages):
             put('other_income', oi, 'pl')
         if pl.get('foot'):
             r['_foot'] = [1.0, 'high', None]
+        for f_ in ('interest', 'dep', 'eps'):
+            if pl.get('abs_' + f_) and f_ not in r:
+                r['_abs_' + f_] = [1.0, 'high', None]
         ti_ = g(pl, 'total_income', j)  # sales + other income = the total income line: the sales line is the right one
         if not bank and ti_ and s is not None and abs(s + (oi or 0) - ti_) <= 0.015 * abs(ti_):
             r['_sales_ok'] = [1.0, 'high', None]
@@ -856,6 +979,8 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
                 units[s] = unit_of(text_of[pick[s][1]][:1500])
                 if units[s][0] is None:
                     units[s] = unit_of(text_of[pick[s][1]])
+                if units[s][0] == 1e-7 and paise_like(text_of[pick[s][1]]):
+                    units[s] = (None, '')  # 'Rupees' heading over figures with decimals: not whole rupees
         known = [u for u in units.values() if u[0] is not None]
         for s in units:
             if units[s][0] is None and known:  # a page without a unit word: the basis's other pages' unit
@@ -872,7 +997,7 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
             bt = text_of[pages['bs']].lower()
             pages['bs_noloans'] = not re.search(r'borrowing|secured|loan funds|\bloans?\b(?! and advances| & advances)|'
                                                 r'debenture|deposits', bt)
-        if pages['pl'] and not any(k in d['pl'] for k in ('div_interim', 'div_final', 'div_plain', 'approp')):
+        if pages['pl'] and not any(k in d['pl'] for k in ('div_interim', 'div_final', 'div_plain', 'div_total', 'approp')):
             # dividend from the notes that follow this basis's P&L (new format: proposed dividend in the reserves note)
             a_ = order[pages['pl']]
             b_ = min([x for x in starts if x > a_ + 1] + [len(pgs)])
@@ -888,6 +1013,8 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
                     pages['div_page'] = pid
                     break
         yrs, bank = derive(d['bs'], d['pl'], d['cf'], 1, flags, pages)  # already in crore
+        if len(yrs) == 2 and not yrs[1] and all((pick[x][5] or {}).get('_ncols', 2) <= 1 for x in ('bs', 'pl') if pick[x]):
+            yrs = yrs[:1]  # the company's first year: one value column, no previous year in this report
         if sum(len(y) for y in yrs) < 6:  # a heading match on a notes page, not a statement
             out.setdefault('notes', []).append(f'{basis}: heading found on pages {pages} but under 3 fields a year read; '
                                                'treated as not a statement')
@@ -903,11 +1030,24 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
         for j, y in enumerate(yrs):
             foot = y.pop('_foot', None) is not None
             sok = y.pop('_sales_ok', None) is not None
-            ck, helper = finish_year(y, bank, foot, bool(out.get('note_year')))
+            absent = {k_[5:] for k_ in list(y) if k_.startswith('_abs_')}
+            for k_ in absent:
+                y.pop('_abs_' + k_)
+            ck, helper = finish_year(y, bank, foot, bool(out.get('note_year')), absent)
             key = f'{(yend.year - j) if yend else "?"}-{yend.month:02d}' if yend else f'cur-{j}'
             B['years'][key] = {'fields': {k: [round(x[0], 4), x[1], x[2]] for k, x in y.items()}, 'checks': ck,
-                               'helper': helper, 'foot': foot, 'sales_ok': sok}
+                               'helper': helper, 'foot': foot, 'sales_ok': sok, 'absent': sorted(absent)}
         out['bases'][basis] = B
+    # the directors' report says no dividend was recommended (current year only; not when an interim dividend is mentioned)
+    alltext = ' '.join(' '.join(t.split()) for _, t in pgs)
+    if re.search(r"(?i)(do not|does not|did not|have not|has not|are unable to|is unable to|unable to|not)\s+(recommend|recommended|declare|declared|propose|proposed)\s+(to\s+)?(any\s+|a\s+)?(final\s+)?dividend|no\s+dividend\s+(is|was|has been|have been)\s+(recommended|proposed|declared)", alltext) \
+            and not re.search(r'(?i)interim dividend', alltext):
+        for B_ in out['bases'].values():
+            k_ = next(iter(B_['years']), None)
+            y_ = B_['years'].get(k_) if k_ else None
+            if y_ and 'dividend' not in y_['fields'] or (y_ and y_['fields']['dividend'][1] == 'low'):
+                y_['fields']['dividend'] = [0.0, 'medium', 'directors report: no dividend recommended']
+                y_['helper'] = [f for f in y_['helper'] if f != 'dividend']
     # the dividend is the company's (the parent's), the same on either basis: a consolidated year without a dividend line
     # takes the standalone year's from the same report
     sa, co = out['bases'].get('standalone'), out['bases'].get('consolidated')
@@ -921,11 +1061,11 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
     return out
 
 
-def finish_year(y, bank, foot, note_year):
+def finish_year(y, bank, foot, note_year, absent=()):
     """(checks, helper fields) of one year's {field: [value, confidence, page]}."""
     ck = checks(y, foot)
     need = NEED_BANK if bank else NEED
-    helper = {f for f in need if f not in y or y[f][1] == 'low'} | \
+    helper = ({f for f in need if f not in y or y[f][1] == 'low'} - set(absent)) | \
         {f for k, ok in ck.items() if ok is False for f in CHECK_FIELDS[k] if f in need}
     if isinstance(ck.get('magnitude'), list):
         helper |= {f for f in ck['magnitude'] if f in need}
@@ -1045,7 +1185,7 @@ def rescale_basis(res, b, fac):
         if y.get('chart_sales_ratio'):
             y['chart_sales_ratio'] = round(y['chart_sales_ratio'] / fac, 3)
         yy = {f: list(v) for f, v in y['fields'].items()}
-        y['checks'], y['helper'] = finish_year(yy, B['bank'], y.get('foot'), bool(res.get('note_year')))
+        y['checks'], y['helper'] = finish_year(yy, B['bank'], y.get('foot'), bool(res.get('note_year')), y.get('absent') or ())
     B['unit_missing'] = False
     B['unit_from_chart'] = fac
     B['notes'] = [n for n in B['notes'] if n != 'unit not found'] + [f'no unit on the statements: figures are in 1/{fac:g} crore (sales within 33% of the chart)']
@@ -1078,7 +1218,7 @@ def chart_check(sym, res, cache={}):
     for b, B in list(res['bases'].items()):
         if B.get('unit_missing'):
             xs = [y['chart_sales_ratio'] for y in B['years'].values() if y.get('chart_sales_ratio')]
-            fits = [fac for fac in (1e7, 1e2, 10, 1e4) if xs and all(0.75 * fac <= x <= 1.33 * fac for x in xs)]
+            fits = [fac for fac in (1.0, 1e7, 1e2, 10, 1e4) if xs and all(0.75 * fac <= x <= 1.33 * fac for x in xs)]
             if len(fits) == 1:
                 rescale_basis(res, b, fits[0])
     for k in sorted(keys):
@@ -1310,15 +1450,7 @@ def get_report(sym, ry, fym, code, docs, gap, tmp, D, want):
                           open(jf, 'w', encoding='utf-8'), indent=1)
                 row.update(json_file=jf.replace('\\', '/'))
                 return row
-            hit = stmt_pages(pgs)
-            keep = set()
-            for i in hit:
-                keep |= {i, i + 1} if i + 1 < len(pgs) else {i}
-            if not keep:  # no statement heading recognised: keep the whole text so a helper can find the statements
-                keep = set(range(len(pgs)))
-            dpg = [i for i, (_, t) in enumerate(pgs) if re.search(r'(?im)^\s*(proposed|final|interim)\s+(final\s+)?(equity\s+)?'
-                                                               r'dividends?\b(?!.*(tax|per share|preference)).*\d', t)]
-            keep |= set(dpg[:8])  # notes holding the proposed dividend (new format)
+            keep = keep_pages(pgs)
             res, jf, pf = save_report(sym, pgs, keep, url, src, ry, fym)
             result, note = result_of(res)
             row.update(result=result, years=' '.join(sorted({k for b in res['bases'].values() for k in b['years']})),
@@ -1407,6 +1539,65 @@ def reparse(a):
         w.writeheader()
         w.writerows(out)
     print('reparsed', sum(1 for r in out if r['pages_file']), collections.Counter(r['result'] for r in out))
+
+
+def refetch(a):
+    """Download again (recorded url, default gap) the reports whose saved pages lack a balance sheet, P&L or cash flow
+    for some basis (or any statement), and save the pages with the current page selection (keep_pages)."""
+    D = hist_dir()
+    rows = read_status(D)
+    only = set(a.syms.split(',')) if a.syms else None
+    plan_need = collections.defaultdict(set)
+    for r in csv.DictReader(open(os.path.join(D, 'ar_plan.csv'), encoding='utf-8')):
+        plan_need[r['sym']].add(int(r['fy']))
+    todo = []
+    for r in rows:
+        if r['result'] != 'needs-helper' or not r['url'] or not r['json_file'] or (only and r['sym'] not in only):
+            continue
+        res = load(r['json_file']) or {}
+        if res.get('refetched'):
+            continue
+        if not res.get('bases') or any(not B['pages'].get(x) for B in res['bases'].values() for x in ('bs', 'pl', 'cf')):
+            todo.append(r)
+    print('reports to download again:', len(todo))
+    if a.dry:
+        for r in todo:
+            print(r['sym'], r['report_fy'], r['url'])
+        return
+    tmp = a.tmp or tempfile.gettempdir()
+    os.makedirs(tmp, exist_ok=True)
+    t0 = time.time()
+    for k, r in enumerate(todo):
+        d = tempfile.mkdtemp(prefix=f'ar_{r["sym"]}_re_', dir=tmp)
+        try:
+            f = curl_get(r['url'], os.path.join(d, 'r.bin'))
+            time.sleep(a.gap)
+            if not f:
+                r['note'] = (r['note'] + '; ' if r['note'] else '') + 'refetch: download failed'
+                continue
+            pgs = pdf_pages(f)
+            keep = keep_pages(pgs)
+            ry = int(r['report_fy'])
+            res, jf, pf = save_report(r['sym'], pgs, keep, r['url'], r['src'], ry, int(r['fym'] or 3))
+            res['refetched'] = dt.date.today().isoformat()
+            json.dump(res, open(jf, 'w', encoding='utf-8'), indent=1)
+            for old, new in ((r['json_file'], jf), (r['pages_file'], pf)):
+                if old and old.replace(chr(92), '/') != new.replace(chr(92), '/') and os.path.exists(old):
+                    os.remove(old)
+            result, note = result_of(res)
+            r.update(result=result, years=' '.join(sorted({y for b in res['bases'].values() for y in b['years']})),
+                     bases=' '.join(res['bases']), helper_fields=helper_summary(res, plan_need[r['sym']]),
+                     pages_file=pf.replace(chr(92), '/'), json_file=jf.replace(chr(92), '/'), mb=round(os.path.getsize(f) / 1e6, 1),
+                     note='; '.join(x for x in (note, res.get('note_link_year', ''), res.get('note_year', '')) if x))
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+        if k % 10 == 0:
+            print(f'{k + 1}/{len(todo)} reports, {time.time() - t0:.0f}s', flush=True)
+    with open(os.path.join(D, 'ar_status.csv'), 'w', newline='', encoding='utf-8') as fh:
+        w = csv.DictWriter(fh, fieldnames=STATUS_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    print('done', len(todo), 'reports', f'{time.time() - t0:.0f}s')
 
 
 # ------------------------------------------------------------------ queue ---------------------------------------------------
@@ -1565,7 +1756,7 @@ def queue(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['plan', 'fetch', 'reparse', 'queue', 'parse'])
+    ap.add_argument('cmd', choices=['plan', 'fetch', 'reparse', 'refetch', 'queue', 'parse'])
     ap.add_argument('file', nargs='?')
     ap.add_argument('--rows')
     ap.add_argument('--groups', default='winner,fallen_winner')
@@ -1575,6 +1766,7 @@ def main():
     ap.add_argument('--per', type=int, default=25)
     ap.add_argument('--fy', type=int)
     ap.add_argument('--keep-pdf')
+    ap.add_argument('--dry', action='store_true')
     a = ap.parse_args()
     global KEEP_PDF
     KEEP_PDF = a.keep_pdf
@@ -1584,6 +1776,8 @@ def main():
         fetch(a)
     elif a.cmd == 'reparse':
         reparse(a)
+    elif a.cmd == 'refetch':
+        refetch(a)
     elif a.cmd == 'queue':
         queue(a)
     else:
