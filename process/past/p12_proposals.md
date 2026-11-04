@@ -1,4 +1,4 @@
-# P8: proposals (Opus high helper), then P8R: a reasoning recheck (Opus medium helper) and P9: a figure check (script)
+# P12: proposals (Opus high helper), then P12R: a reasoning recheck (Opus medium helper) and P13: a figure check (script)
 
 Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`.
 
@@ -10,6 +10,6 @@ Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`
 - **Citation corrections** from `experts.md`.
 - **Not adopted:** patterns that looked good but failed a test, and why (so a re-run doesn't chase them again).
 
-**Checks:** P8R is a helper (`process/future/recheck.md`) and checks only the reasoning: mechanisms, hindsight, over-fitting, and whether the wording would let a future analyst apply it at the time. P9 is a script, run on the file P8R leaves: every figure in `proposals.md` cites its pattern id, and the script compares it with the P3.4 output files and confirms the pattern passed every test there. Disagreements are settled per `recheck.md`.
+**Checks:** P12R is a helper (`process/future/recheck.md`) and checks only the reasoning: mechanisms, hindsight, over-fitting, and whether the wording would let a future analyst apply it at the time. P13 is a script, run on the file P12R leaves: every figure in `proposals.md` cites its pattern id, and the script compares it with the P8 output files and confirms the pattern passed every test there. Disagreements are settled per `recheck.md`.
 
 **Then:** send the user the proposals (general-rule changes need their approval; `CLAUDE.md`, "Rules file"). The orchestrator makes approved general-rule changes and its own sector-note changes in `process/investing_rules.md`, and records the study run in `status.md`.

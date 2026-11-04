@@ -1,6 +1,6 @@
-# P4 brief: reading annual-report statements the script couldn't (fallback helper)
+# P7.0 brief: reading annual-report statements the script couldn't (fallback helper)
 
-You read the fields that `tools/scripts/ar_statements.py` could not parse with confidence from old annual reports, for the multibagger study's years before screener's statements (`p3_statements.md`, `p3_backtest.md`). Model work only where the script failed; nothing else.
+You read the fields that `tools/scripts/ar_statements.py` could not parse with confidence from old annual reports, for the multibagger study's years before screener's statements (`p4_statements.md`, `p8_features.md`). Model work only where the script failed; nothing else.
 
 **Input:** your rows of `runs/past/<date>/ar_helper_queue.csv` (one group, about 25 reports): `sym`, `fy`, `fields` (`<basis initial>:<year end YYYY-MM>:<field|field…>`, `s` = standalone, `c` = consolidated), `page_text` (the statement pages, `=== page N ===` markers; `N` is the PDF page, `28L`/`28R` the left/right half of a two-up spread), `json` (the script's parse: per basis and year, `fields` = `[value in Rs crore, confidence, page]`, `checks`, `helper`), `url` (the report), `helper_file` (what you write).
 

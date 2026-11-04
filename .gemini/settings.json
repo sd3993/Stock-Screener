@@ -1,0 +1,12 @@
+{
+  "env": {
+    "MAX_MCP_OUTPUT_TOKENS": "3000"
+  },
+  "permissions": {
+    "allow": [
+      "PowerShell(python tools/scripts/*)",
+      "PowerShell(python -I tools/scripts/*)",
+      "PowerShell(curl.exe -s -m 60 -o *)"
+    ]
+  }
+}

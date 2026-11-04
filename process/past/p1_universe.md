@@ -1,4 +1,4 @@
-# P1.1: universe, history and outcomes (scripts, run by the orchestrator)
+# P1: universe, history and outcomes (scripts, run by the orchestrator)
 
 1. **Universe screens** (`scr_tool.py screen_stocks '<args>' <file> --login`, `limit` 200; each page saved to a file and never read into context; paging as in `process/future/f2_screens.md`). One band per market-cap range, IDs `U00`-`U08`:
    `Market Capitalization > 0 AND Market Capitalization <= 20`, then >20 ≤50, >50 ≤100, >100 ≤200, >200 ≤500, >500 ≤1500, >1500 ≤5000, >5000 ≤20000, >20000.
