@@ -22,11 +22,11 @@ def api_path(sym, name):
 
 
 def hist_dir():
-    # The multibagger study's run folder: HIST_RUN (a date, e.g. 2026-11-03) if set, else the newest runs/historical/*.
+    # The multibagger study's run folder: HIST_RUN (a date, e.g. 2026-11-03) if set, else the newest runs/past/*.
     h = os.environ.get('HIST_RUN')
     if h:
-        return os.path.join('runs', 'historical', h)
-    hs = sorted(d for d in glob.glob(os.path.join('runs', 'historical', '*')) if os.path.isdir(d))
+        return os.path.join('runs', 'past', h)
+    hs = sorted(d for d in glob.glob(os.path.join('runs', 'past', '*')) if os.path.isdir(d))
     if not hs:
-        raise SystemExit('no study run folder: create runs/historical/<YYYY-MM-DD>/')
+        raise SystemExit('no study run folder: create runs/past/<YYYY-MM-DD>/')
     return hs[-1]
