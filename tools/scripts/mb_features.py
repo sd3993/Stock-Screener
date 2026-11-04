@@ -32,6 +32,18 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 # Basis: annual and quarterly statements use consolidated when it has the latest period filed by as_of, else standalone,
 #   and all multi-year figures for that row use the same basis (missing if that basis lacks the years). Chart series are
 #   consolidated where screener has them, else standalone (mb_history.py). Missing stays empty, never 0.
+# Annual reports (ar_statements.py, s3_statements.md): fiscal years before screener's statements come from the parsed
+#   reports in data/companies/<SYM>/FY<yy>Q4/ar_FY<yy>.json (helper answers in ar_FY<yy>_helper.json override; fields flagged
+#   for a helper and not yet answered stay empty). They fill only years screener lacks, each basis from the same basis of the
+#   report; a year whose report has no consolidated statements fills the consolidated table from its standalone figures
+#   (the company had no subsidiaries to consolidate). Columns built in screener's terms: Sales/Revenue, Operating Profit,
+#   OPM %, Other Income, Interest, Depreciation, Profit before tax, Tax %, Net Profit, EPS in Rs, Dividend Payout %, Equity
+#   Capital, Reserves, Borrowings, Total Assets, Cash from Operating Activity, ROCE % (EBIT / average of equity + reserves +
+#   borrowings, as screener's own figures reproduce) and Debtor Days (365 x debtors / sales). src_ar lists the report years
+#   used (c = consolidated, s = standalone, s>c = standalone in the consolidated chain). Other income and operating profit
+#   are classified differently in the reports than in screener's old data, so opm_chg3 and opm_vs_avg3 stay empty when
+#   their years mix report and screener figures. Balance sheets for years ending before Sep 2009 count only from the annual
+#   report (+ 180 days): the statement of assets and liabilities joined the results from H1 FY10 (Clause 41, SEBI, Apr 2009).
 # Restatement: statements are today's restated figures. stmt_gap_fy lists the fiscal years used whose statement sales
 #   differ by more than 10% from the chart's TTM sales after that year's results (restated, merged, or a basis gap: before
 #   FY20 many companies filed only standalone quarterly results, which the chart's TTM then follows).
@@ -41,6 +53,7 @@ from config import hist_dir
 LAG_Q, LAG_Q4, LAG_SHP, LAG_CF_AR = 45, 60, 21, 180
 OVERRIDE = {(2020, 3): 120, (2020, 6): 75, (2021, 3): 90}
 CF_WITH_RESULTS = dt.date(2019, 9, 30)
+BS_WITH_RESULTS = dt.date(2009, 9, 30)
 MON = {m: i for i, m in enumerate(calendar.month_abbr) if m}
 
 
@@ -145,7 +158,7 @@ class Table:
     """One statement (annual or quarterly), chosen basis: {period_end: {label: value}}, months per period."""
 
     def __init__(self, data):
-        self.cols, self.months = {}, {}
+        self.cols, self.months, self.src = {}, {}, {}  # src: 'scr', or the annual report it came from ('ar ...')
         if not data or not data.get('rows'):
             return
         labels = data.get('years') or data.get('quarters') or []
@@ -159,7 +172,7 @@ class Table:
                 vals = r.get('values') or []
                 if j < len(vals) and r['label'] not in col:  # first row wins (ratios repeat 'ROE %')
                     col[r['label']] = fnum(vals[j])
-            self.cols[end], self.months[end] = col, m
+            self.cols[end], self.months[end], self.src[end] = col, m, 'scr'
 
     def get(self, end, *labels):
         c = self.cols.get(end) or {}
@@ -185,6 +198,8 @@ class Company:
         for st in (('profit_loss',) if chart_only else ('profit_loss', 'balance_sheet', 'cash_flow', 'ratios', 'quarterly')):
             self.st[st] = {'consolidated': Table(load(os.path.join(d, st + '.json'))),
                            'standalone': Table(load(os.path.join(d, st + '_standalone.json')))}
+        if not chart_only:
+            self.add_ar(root)
         pl = self.st.get('profit_loss', {})
         months = [e.month for b in ('consolidated', 'standalone') for e, m in (pl[b].months.items() if pl else []) if m == 12]
         self.fy_month = max(set(months), key=months.count) if months else 3
@@ -196,6 +211,56 @@ class Company:
             e = self.eps.lookup(t)
             self.pe_w.append(p / e if e and e > 0 and p > 0 else None)
         self.shp = {} if chart_only else self.shareholding(d)
+
+    def add_ar(self, root):
+        """Fiscal years screener lacks, from the parsed annual reports (header: 'Annual reports')."""
+        try:
+            from ar_statements import load_ar
+        except ImportError:
+            return
+        ar = load_ar(self.sym, root)
+        has = lambda t, e: e in t.cols and any(v is not None for v in t.cols[e].values())
+        for basis in ('consolidated', 'standalone'):
+            yrs = {k: (y, basis[0]) for k, y in ar[basis].items()}
+            if basis == 'consolidated':
+                for k, y in ar['standalone'].items():
+                    if k not in yrs and not y['has_consolidated']:
+                        yrs[k] = (y, 's>c')
+            T = {st: self.st[st][basis] for st in ('profit_loss', 'balance_sheet', 'cash_flow', 'ratios')}
+            added = []
+            for k, (y, tag) in sorted(yrs.items()):
+                e = month_end(int(k[:4]), int(k[5:]))
+                if has(T['profit_loss'], e) or has(T['balance_sheet'], e):
+                    continue  # screener has the year
+                g = {n: v[0] for n, v in y['fields'].items()}.get
+                pct = lambda a, b: a / b * 100 if a is not None and b not in (None, 0) else None
+                bank = y.get('bank')
+                div, pat = g('dividend'), g('pat')
+                payout = None if div is None else 0.0 if div == 0 else rnd(pct(div, pat), 1) if pat and pat > 0 else None
+                pl = {'Revenue' if bank else 'Sales': g('sales'), 'Operating Profit': None if bank else g('op'),
+                      'OPM %': None if bank else rnd(pct(g('op'), g('sales')), 1), 'Other Income': g('other_income'),
+                      'Interest': g('interest'), 'Depreciation': g('dep'), 'Profit before tax': g('pbt'),
+                      'Tax %': rnd(pct(g('tax'), g('pbt')), 1), 'Net Profit': pat, 'EPS in Rs': g('eps'),
+                      'Dividend Payout %': payout}
+                if bank:
+                    pl.update({'Financing Profit': None, 'Financing Margin %': None})
+                src = f'ar FY{int(k[:4]) % 100:02d}{tag}'
+                dd = rnd(365 * g('debtors') / g('sales'), 0) if g('debtors') is not None and g('sales') else None
+                for st, col in (('profit_loss', pl),
+                                ('balance_sheet', {'Equity Capital': g('equity_cap'), 'Reserves': g('reserves'),
+                                                   'Borrowings': g('borrowings'), 'Total Assets': g('total_assets')}),
+                                ('cash_flow', {'Cash from Operating Activity': g('cfo')}),
+                                ('ratios', {'Debtor Days': dd})):
+                    T[st].cols[e], T[st].months[e], T[st].src[e] = col, y.get('months') or 12, src
+                added.append(e)
+            pl, bs, rt = T['profit_loss'], T['balance_sheet'], T['ratios']
+            ce = lambda e: None if None in (bs.get(e, 'Equity Capital'), bs.get(e, 'Reserves'), bs.get(e, 'Borrowings')) \
+                else bs.get(e, 'Equity Capital') + bs.get(e, 'Reserves') + bs.get(e, 'Borrowings')
+            for e in added:  # ROCE needs the opening balance (the year before, from any source)
+                o = next((x for x in bs.cols if 330 <= (e - x).days <= 400), None)
+                pbt, it = pl.get(e, 'Profit before tax'), pl.get(e, 'Interest')
+                if 'Revenue' not in pl.cols[e] and o and None not in (pbt, it, ce(e), ce(o)) and ce(e) + ce(o) > 0:
+                    rt.cols[e]['ROCE %'] = rnd((pbt + it) / ((ce(e) + ce(o)) / 2) * 100, 1)
 
     def shareholding(self, d):
         """{quarter_end: {filed, prom, pledge, inst}}: NSE filings (with filing dates) over screener's 12 quarters."""
@@ -297,6 +362,8 @@ class Company:
             return lag(end, end.month == self.fy_month)
         if st == 'cash_flow' and end < CF_WITH_RESULTS:
             return max(LAG_CF_AR, lag(end, True))
+        if st == 'balance_sheet' and end < BS_WITH_RESULTS:
+            return max(LAG_CF_AR, lag(end, True))  # only in the annual report then
         if st == 'balance_sheet' and end.month != self.fy_month:
             return lag(end, False)  # half-year balance sheet, filed with Q2 results
         return lag(end, True)
@@ -386,8 +453,11 @@ def features(c, as_of, chart_only=False):
         f[f'fy_{nm}_g3'] = rnd(cagr(fn(0), fn(3), 3), 1)
     f['opm'] = P(0, 'OPM %', 'Financing Margin %')
     o3 = [P(i, 'OPM %', 'Financing Margin %') for i in range(1, 4)]
-    f['opm_chg3'] = rnd(f['opm'] - o3[2], 1) if f['opm'] is not None and o3[2] is not None else None
-    f['opm_vs_avg3'] = rnd(f['opm'] - sum(o3) / 3, 1) if f['opm'] is not None and None not in o3 else None
+    kind = lambda i: pl.src.get(ys[i], 'scr')[:2] if pl and i < len(ys) else None  # 'sc' screener, 'ar' report
+    same = all(kind(i) == kind(0) for i in range(4))  # margin trends from one source only
+    f['opm_chg3'] = rnd(f['opm'] - o3[2], 1) if f['opm'] is not None and o3[2] is not None and same else None
+    f['opm_vs_avg3'] = rnd(f['opm'] - sum(o3) / 3, 1) if f['opm'] is not None and None not in o3 and same else None
+    src['ar'] = ' '.join(pl.src[e][3:] for e in ys if pl.src.get(e, 'scr').startswith('ar')) if pl else ''
     f['payout'] = P(0, 'Dividend Payout %')
     pbt, intr, oi = P(0, 'Profit before tax'), P(0, 'Interest'), P(0, 'Other Income')
     f['oi_share_pbt'] = rnd(ratio(oi, pbt), 2) if pbt and pbt > 0 else None
