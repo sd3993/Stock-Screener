@@ -90,11 +90,20 @@ def parse(page, code, end):
     if (m and m.group(1) != str(code)) or (MON.get(qe.group(1)), int(qe.group(2))) != (end.month, end.year):
         return {'status': 'mismatch', 'page': f'{m and m.group(1)} {qe.group(1)} {qe.group(2)}'}
     idx = lambda pat, start=0: next((i for i in range(start, len(rows)) if re.match(pat, lab(rows[i]), re.I)), None)
-    if idx(r'Total shareholding of Promoter') is not None:
+    ia, ihead = idx(r'Total shareholding of Promoter'), idx(r'\(A\) Shareholding of Promoter')
+    if ia is not None or ihead is not None:
         rec['format'] = 'clause35'
-        A = rows[idx(r'Total shareholding of Promoter')]
         T = rows[idx(r'Total \(A\)\s*\+\s*\(B\)\s*\+\s*\(C\)')]
-        total, prom = num(T[2]), num(A[2])
+        if ia is not None:
+            A = rows[ia]
+            total, prom = num(T[2]), num(A[2])
+        else:  # promoter section header with no rows under it (up to (B)): no promoter
+            ibh = idx(r'\(B\)', ihead)
+            if ibh is None or any(len(r) > 1 or not re.match(r'\(\d\)', lab(r)) for r in rows[ihead + 1:ibh]):
+                return {'status': 'blank', 'warnings': ['promoter section without a total row']}
+            A = ['', '', '0', '', '', '0']
+            total, prom = num(T[2]), 0.0
+            rec['warnings'].append('no promoter section (promoter 0)')
         ic = idx(r'\(C\)')
         c1 = idx(r'\(1\) Promoter', ic) if ic is not None else None
         if c1 is not None and num(rows[c1][2]):
@@ -118,17 +127,24 @@ def parse(page, code, end):
     else:
         rec['format'] = 'pre2006'
         ip, inp, ig = idx(r"Promoter'?s'? Holding"), idx(r"Non[- ]?Promoter"), idx(r'Grand Total')
-        if None in (ip, inp, ig):
+        if ig is None or (inp is None and ip is None):
             return {'status': 'blank', 'warnings': ['unrecognised layout']}
-        subs = [i for i in range(ip, inp) if lab(rows[i]).lower().startswith('sub total')]
+        if inp is None:  # promoter section only: no non-promoter holders on the page
+            inp = ig
+            rec['warnings'].append('no non-promoter section (public 0)')
+        if ip is None:  # no promoter section at all: a company with no promoter
+            subs, prom = [], 0.0
+            rec['warnings'].append('no promoter section (promoter 0)')
+        else:
+            subs = [i for i in range(ip, inp) if lab(rows[i]).lower().startswith('sub total')]
+            prom = num(rows[subs[-1]][1]) if subs else None
         total = num(rows[ig][1])
-        prom = num(rows[subs[-1]][1]) if subs else None
         ii = idx(r'Institutional Investors', inp)
         isub = idx(r'Sub Total', ii) if ii is not None else None
         inst_rows = rows[ii + 1:isub] if isub is not None else []
         pick = lambda pat: sum(num(r[1]) or 0 for r in inst_rows if re.search(pat, lab(r), re.I))
-        rec.update(total_shares=total, prom_shares=prom, prom_pct_page=num(rows[subs[-1]][2]) if subs else None,
-                   inst_shares=num(rows[isub][1]) if isub is not None else None,
+        rec.update(total_shares=total, prom_shares=prom, prom_pct_page=num(rows[subs[-1]][2]) if subs else (0.0 if ip is None else None),
+                   inst_shares=num(rows[isub][1]) if isub is not None else (0.0 if 'no non-promoter section (public 0)' in rec['warnings'] else None),
                    fii_shares=pick(r'FII|Foreign Institutional'), mf_shares=pick(r'Mutual'))
         rec['public_pct'] = round(100 - 100 * prom / total, 2) if prom is not None and total else None
     total = rec['total_shares']
