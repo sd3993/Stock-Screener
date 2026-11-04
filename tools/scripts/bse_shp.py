@@ -156,12 +156,28 @@ def load(p):
         return None
 
 
+_CODES = {}
+
+
+def csv_code(sym):
+    if not _CODES:
+        try:
+            _CODES.update({r['nse_symbol']: r['bse_code'] for r in csv.DictReader(
+                open(os.path.join('data', 'market', 'bse_codes.csv'), encoding='utf-8'))})
+        except OSError:
+            _CODES['-'] = ''
+    return _CODES.get(sym) or None
+
+
 def bse_code(sym, root, given=None):
     if given:
         return str(given)
     ov = ((load(os.path.join(root, sym, 'scr', 'overview.json')) or {}).get('data') or {})
-    if ov.get('bse_code'):
-        return str(ov['bse_code'])
+    if str(ov.get('bse_code') or '').strip().isdigit():  # screener sometimes stores junk there ("data", "All")
+        return str(ov['bse_code']).strip()
+    c = csv_code(sym)  # data/market/bse_codes.csv (bse_codes.py): NSE-ISIN join, name-match rows are for review
+    if c:
+        return c
     if sym.isdigit():
         return sym
     p = os.path.join(root, sym, 'scr', 'documents.json')
