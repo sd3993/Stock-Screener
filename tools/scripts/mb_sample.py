@@ -4,7 +4,10 @@ import csv, os, random, sys
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
 # of the same type), counts the peers flags and runs the checks; outputs and rules in s2_sample.md, "Script".
-#   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv>] | --finalize [--companies <dir>]  [--dir DIR: read and write there, not the run folder]
+# Candidates come from the winner's basic industry (screener's NSE label), then its sector; --coverage reports how many
+# winners get the full count with the labels saved so far.
+#   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv> [--candidates-only]] | --coverage
+#     | --finalize  [--companies <dir>] [--dir DIR: read and write there, not the run folder]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import hist_dir
 a = sys.argv[1:]
@@ -429,21 +432,96 @@ def fallen_row(r, hz):
             'multiple': r[f'px_{yrs}y'], 'strong': '', 'matched_to': '',
             'reason': f'{hz}: peaked at {r[f"pxpeak_{yrs}y"]:.1f}x within {yrs} years from {r["start"]}, ended at {r[f"px_{yrs}y"]:.1f}x'}
 
-def candidates(w, hz):
-    """Control candidates: same start, mc0 within 0.5-2x, did not reach the threshold; nearest on growth and valuation."""
+# Industry labels: screener's copy of NSE's classification in scr/overview.json `sectors`, [sector, basic industry] (a lone
+# ['Diversified'] counts as both). None when the page has no label (merged/delisted) or isn't fetched yet.
+_lab = {}
+def label(sym):
+    if sym not in _lab:
+        fn = os.path.join(COMPANIES, sym, 'scr', 'overview.json')
+        s = None
+        if os.path.exists(fn):
+            try:
+                s = [x for x in json.load(open(fn, encoding='utf-8'))['data'].get('sectors') or [] if x]
+            except (ValueError, KeyError, AttributeError):
+                s = None
+        _lab[sym] = (s[0], s[-1]) if s else None
+    return _lab[sym]
+
+def load_tags():
+    """{(sym, as_of): business_type} from business_types.csv, and {type: basic industries of the labelled companies so tagged}."""
+    fn = os.path.join(D, 'business_types.csv')
+    tags = {(r['sym'], r['as_of']): r['business_type'] for r in csv.DictReader(open(fn, encoding='utf-8'))} if os.path.exists(fn) else {}
+    ind = {}
+    for (sym, _), t in tags.items():
+        if label(sym):
+            ind.setdefault(t, set()).add(label(sym)[1])
+    return tags, ind
+TAGS, TYPE_IND = load_tags()
+LEVEL = {'industry': 'same basic industry', 'type': 'no industry label; same business type tag',
+         'sector-level': 'sector-level: same sector, other basic industry',
+         'type-industry': "winner has no industry label; a basic industry of its business type's tagged companies"}
+
+def ranked(w, hz):
+    """Every company within the matching limits (same start, mc0 0.5-2x, below the threshold), with its distance and
+    industry level: tier 1 'industry' (same basic industry) or 'type' (no label, same business type tag as the winner);
+    tier 2 'sector-level' (same sector) or, for a winner with no label, 'type-industry'; None when neither."""
     cols, thr = H[hz][0], H[hz][1]
-    cands = []
+    wl, wt = label(w['sym']), TAGS.get((w['sym'], w['start']))
+    out = []
     for c in by_start[w['start']]:
         cm = mult(c, cols)
         if c['sym'] == w['sym'] or cm is None or cm >= thr or not (0.5 <= c['mc0'] / w['mc0'] <= 2):
             continue
         dist = abs((c['sales_g3'] or 0) - (w['sales_g3'] or 0)) / 20 + abs((c['eps_g3'] or 0) - (w['eps_g3'] or 0)) / 40 \
             + abs((c['pe0'] or 0) - (w['pe0'] or 0)) / 20 + abs(c['mc0'] / w['mc0'] - 1)
-        cands.append((dist, c, cm))
+        cl, ct = label(c['sym']), TAGS.get((c['sym'], c['start']))
+        if wl:
+            lv = ('industry' if cl == wl else 'sector-level' if cl[0] == wl[0] else None) if cl else \
+                 ('type' if wt and ct == wt else None)
+        else:
+            lv = None if not wt else 'type' if ct == wt else 'type-industry' if cl and cl[1] in TYPE_IND.get(wt, ()) else None
+        out.append((dist, c, cm, lv))
+    return sorted(out, key=lambda x: x[0])
+
+def candidates(w, hz):
+    """Control candidates: the N_CAND nearest (growth and valuation) of the winner's basic industry within the matching
+    limits; when fewer, the nearest of its sector fill up ('sector-level'); still fewer are kept as they are."""
+    rk = [x for x in ranked(w, hz) if x[3]]
+    pick = [x for x in rk if x[3] in ('industry', 'type')][:N_CAND]
+    pick += [x for x in rk if x[3] in ('sector-level', 'type-industry')][:N_CAND - len(pick)]
     return [{'group': 'control_candidate', 'sym': c['sym'], 'horizon': hz, 'start': c['start'], 'mc0': c['mc0'],
-             'multiple': cm, 'strong': '', 'matched_to': w['sym'],
-             'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}); reached {cm:.1f}x'}
-            for dist, c, cm in sorted(cands, key=lambda x: x[0])[:N_CAND]]
+             'multiple': cm, 'strong': '', 'matched_to': w['sym'], 'match': lv,
+             'reason': f'looked like {w["sym"]} at {c["start"]} (distance {dist:.2f}; {LEVEL[lv]}); reached {cm:.1f}x'}
+            for dist, c, cm, lv in pick]
+
+if '--coverage' in a:
+    # How many winners in sample_candidates.csv can get N_CAND candidates with the labels present so far (writes nothing).
+    src = os.path.join(D, 'sample_candidates.csv')
+    ws = [r for r in csv.DictReader(open(src, encoding='utf-8')) if r['group'] == 'winner']
+    full_ind, full_sec, short, none, nolab, pending = 0, 0, [], [], [], set()
+    for r in ws:
+        w = outc[(r['sym'], r['start'])]
+        rk = ranked(w, r['horizon'])
+        pending |= {c['sym'] for _, c, _, _ in rk if not os.path.exists(os.path.join(COMPANIES, c['sym'], 'scr', 'overview.json'))}
+        t1 = sum(1 for x in rk if x[3] in ('industry', 'type'))
+        n = len(candidates(w, r['horizon']))
+        if not label(r['sym']):
+            nolab.append(f"{r['sym']} {r['horizon']} (tag: {TAGS.get((r['sym'], r['start'])) or 'none'})")
+        if t1 >= N_CAND:
+            full_ind += 1
+        elif n >= N_CAND:
+            full_sec += 1
+        elif n:
+            short.append(f"{r['sym']} {r['horizon']} {n}")
+        else:
+            none.append(f"{r['sym']} {r['horizon']}")
+    print(f'winners {len(ws)}: {N_CAND} same-industry candidates {full_ind}; {N_CAND} with sector-level fill {full_sec}; '
+          f'fewer {len(short)}; none {len(none)}; winners without a label {len(nolab)}')
+    print(f'companies within the matching limits still without overview.json: {len(pending)}')
+    print('fewer:', ', '.join(short) or '-')
+    print('none:', ', '.join(none) or '-')
+    print('no label:', ', '.join(nolab) or '-')
+    sys.exit()
 
 P = pools()
 rng = random.Random(SEED)
@@ -459,6 +537,9 @@ if '--repair' in a:
     for r in picks:
         n = P[(r['group'], r['horizon'])].get(r['sym'])
         o = outc.get((r['sym'], r['start'])) or {}
+        if '--candidates-only' in a:  # keep every pick exactly as it is; only the candidates are recomputed
+            kept.append(r)
+            continue
         if n and n['start'] == r['start'] and band(n['mc0']) == band(f(r['mc0'])):
             kept.append(r)
             continue
@@ -512,17 +593,29 @@ if '--repair' in a:
                     changed.append(f"- {r['sym']} {r['horizon']} {r['start']}: {', '.join(was)} -> {', '.join(now)}")
                     if was[:1] != now[:1]:
                         nearest.append(f"{r['sym']} {r['horizon']} ({(was or ['-'])[0]} -> {(now or ['-'])[0]})")
+    nc = {}
+    for x in out:
+        if x['group'] == 'control_candidate':
+            nc.setdefault((x['matched_to'], x['horizon']), []).append(x['match'])
+    wins = [x for x in out if x['group'] == 'winner']
+    few = [f"- {x['sym']} {x['horizon']} {x['start']}: {len(nc.get((x['sym'], x['horizon']), []))} "
+           f"(label {' / '.join(label(x['sym']) or ['none'])}; tag {TAGS.get((x['sym'], x['start'])) or 'none'})"
+           for x in wins if len(nc.get((x['sym'], x['horizon']), [])) < N_CAND]
+    sec = [x for x in wins if any(m in ('sector-level', 'type-industry') for m in nc.get((x['sym'], x['horizon']), []))]
     rep = ['# S2 sample repair', '', f'Written by `mb_sample.py --repair` (seed {SEED}) from `{src}` and the current '
-           '`outcomes.csv`. A pick is kept when its first qualifying window and size band are unchanged; candidate lists are '
-           'recomputed for every winner.', '',
+           '`outcomes.csv`. ' + ('Every pick kept as it was (--candidates-only)' if '--candidates-only' in a else
+           'A pick is kept when its first qualifying window and size band are unchanged') + '; candidate lists are '
+           'recomputed for every winner (same basic industry first, then sector-level).', '',
            f'- Winners and fallen winners: {len(picks)}; kept {len(kept)} (winners {sum(1 for r in kept if r["group"] == "winner")}, '
            f'fallen {sum(1 for r in kept if r["group"] == "fallen_winner")}); replaced {len(repl)}; unfilled {len(short)}.',
-           f'- Kept winners whose candidate list changed: {len(changed)}; nearest candidate changed: {len(nearest)}.', '',
+           f'- Kept winners whose candidate list changed: {len(changed)}; nearest candidate changed: {len(nearest)}.',
+           f'- Winners with sector-level candidates: {len(sec)}; with fewer than {N_CAND} candidates: {len(few)}.', '',
            '## Replaced (old pick: why -> new pick)', ''] + \
           [f"- {r['group']} {r['sym']} {r['horizon']} {r['start']} ({period(r['start'])} {band(f(r['mc0']))}): {why} -> "
            + (f"{repl[(r['group'], r['sym'], r['horizon'])]['sym']} {repl[(r['group'], r['sym'], r['horizon'])]['start']}"
               if (r['group'], r['sym'], r['horizon']) in repl else 'unfilled') for r, why in dropped] + \
           ['', '## Unfilled', ''] + ([f'- {s}' for s in short] or ['- none']) + \
+          ['', f'## Fewer than {N_CAND} candidates (count; industry label; business type tag)', ''] + (few or ['- none']) + \
           ['', '## Nearest candidate changed', ''] + ([f'- {s}' for s in nearest] or ['- none']) + \
           ['', '## Candidate lists changed (old -> new, nearest first)', ''] + (changed or ['- none'])
 else:
@@ -535,13 +628,14 @@ else:
                 out.append(fallen_row(r, hz))
         print(f'{hz}: pool {len(P[("winner", hz)])} winners')
 
-keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'reason']
+keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'match', 'reason']
 with open(os.path.join(D, 'sample_candidates.csv'), 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=keys, extrasaction='ignore')
     w.writeheader()
     w.writerows(out)
 if rep:
-    # fetch_order.txt: companies without the S2/S3 fetch (no scr/overview.json): new winners and fallen winners first, then
+    # fetch_order.txt: companies without the S2/S3 fetch (no scr/documents.json; the label-only fetch writes just
+    # overview.json): new winners and fallen winners first, then
     # the other winners and fallen winners, then candidates by rank (every winner's nearest, then each one's second, ...)
     new = {(r['group'], r['sym'], r['horizon']) for r in repl.values()}
     rank = {}
@@ -554,14 +648,14 @@ if rep:
           sorted((r for r in out if r['group'] == 'control_candidate'), key=lambda r: r['_rank'])
     order = []
     for r in seq:
-        if r['sym'] not in order and not os.path.exists(os.path.join(COMPANIES, r['sym'], 'scr', 'overview.json')):
+        if r['sym'] not in order and not os.path.exists(os.path.join(COMPANIES, r['sym'], 'scr', 'documents.json')):
             order.append(r['sym'])
     open(os.path.join(D, 'fetch_order.txt'), 'w', encoding='utf-8').write(''.join(s + '\n' for s in order))
     psyms = {r['sym'] for r in picked}
-    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without `scr/overview.json` '
+    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without the S2/S3 fetch (`scr/documents.json`) '
                 f'({sum(1 for s in order if s in psyms)} of them winners or fallen winners).']
     open(os.path.join(D, 'sample_repair.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
-    print('\n'.join(rep[4:7]))
+    print('\n'.join(rep[4:8]))
 cnt = {}
 for r in out:
     k = (r['group'], r['horizon'], period(r['start']), band(r['mc0']))

@@ -288,10 +288,13 @@ def main():
     if newlog:
         lw.writerow(['time', 'sym', 'code', 'qtrid', 'quarter', 'http', 'bytes', 'status'])
     t0, n, gap, fails, stats = time.time(), 0, a.gap, 0, {}
-    touched = set()
+    touched, prev = set(), None
     for sym, code, q, f in todo:
         if a.max and n >= a.max:
             break
+        if prev and sym != prev:  # each company's summary as soon as its last quarter is saved (todo runs company by company)
+            write_json(prev, root, codes[prev])
+        prev = sym
         os.makedirs(os.path.dirname(f), exist_ok=True)
         url = URL.format(code=code, q=q, flag='&Flag=New' if q >= NEW_FROM else '')
         for attempt in range(3):
