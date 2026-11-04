@@ -95,11 +95,11 @@ F = {  # field: label regexes (lower-case label, schedule refs removed); first m
     'pl': [('net_ops', r'^net income from operations|^revenue from operations \(net\)|^total revenue from operations'),
            ('net_sales', r'^net (sales|income from operations|revenue from operations|turnover)|^revenue from operations \(net\)|^sales \(net\)'),
            ('turnover', r'^turnover$'),
-           ('gross_sales', r'^(gross )?(sales|income from operations|revenue from operations|turnover)\b(?!\s*(tax|promotion|commission|expens|(and|&) (marketing|distribution|selling)))'),
+           ('gross_sales', r'^(gross )?(sales|income from operations?|revenue from operations?|turnover)\b(?!\s*(tax|promotion|commission|expens|(and|&) (marketing|distribution|selling)))'),
            ('excise', r'excise duty'),
            ('int_earned', r'interest ear[nh]ed'), ('int_expended', r'interest expended'),
            ('other_income', r'^other income'), ('int_income', r'^(add:? )?interest income'),
-           ('total_income', r'^total (income|revenue)$'),
+           ('total_income', r'^total (income|revenue)( \([^)]*\))?$'),
            ('total_exp', r'^total (expenses|expenditure|costs?)$'),
            ('pat_pre_mi', r'before minority interest|before share of (profit|loss)'),
            ('interest', r'^(less:? )?(interest|finance (costs?|charges|expenses)|financial (costs?|charges|expenses))(?!.*(income|received|earned))'),
@@ -110,15 +110,17 @@ F = {  # field: label regexes (lower-case label, schedule refs removed); first m
            ('pbt_pre_exc', r'before (tax|taxes|taxation) and (exceptional|extraordinary)|before (exceptional|extraordinary).*(tax|taxes|taxation)'),
            ('tax_total', r'^total tax(ation)?( expenses?)?$|^tax expenses?$|^total (provision for )?tax|^total income tax'),
            ('tax', r'^(provision for )?(tax|taxes|taxation|income tax)(?!.*dividend)'),
-           ('pat', r'^net profit|profit (for the year|after tax(ation)?)\b|loss after tax|profit/?\s*\(?(-\)\s*)?loss\)? (for the year|after tax)'),
+           ('pat', r'^net profit|profit (for the (year|period)|after ?tax(ation)?)\b|loss after tax|profit/?\s*\(?(-\)\s*)?loss\)? (for the (year|period)|after ?tax)'),
            ('eps', r'earnings?\s*per\s*(equity\s*)?share|^basic\b|^eps\b'),
-           ('div_interim', r'^interim dividend(?!.*(tax|preference))'),
-           ('div_final', r'^(proposed|final)( final)? dividend(?!.*(tax|preference))|^proposed dividend on equity'),
+           ('div_interim', r'^((first|second|third|fourth) )?interim dividend(?!.*(tax|preference))'),
+           ('div_final', r'^(proposed|final)( final)? dividend(?!.*(tax|preference))|^proposed dividend on equity|'
+                         r'^provision for (proposed )?(equity )?dividend(?!.*(tax|preference))'),
            ('div_plain', r'^dividends?\b(?!.*(tax|preference))'),
            ('approp', r'balance (carried|transferred) to (the )?balance sheet|^balance carried forward|^surplus carried')],
     'cf': [('cfo', r'net cash.*operating activit|cash (generated )?(flows? )?(from|used in|generated from) operating activit|'
                    r'cash flows? from/\(used in\) operating activit|^(used|generated|provided)\b.{0,30}operating activit|'
-                   r'net cash.*\(a\)$')],
+                   r'net cash.*\(a\)$'),
+           ('cf_pbt', r'^(net )?(profit|income|earnings)[^a-z]*(loss)?[^a-z]*(for the (year|period))? ?before (income )?tax(es|ation)?\b(?! paid)')],
 }
 
 
@@ -150,9 +152,30 @@ def split_spread(t):
                         break
                 left = '\n'.join(z[:best] for z in lines)
                 right = '\n'.join(z[best:] for z in lines)
-                if len(re.sub(r'\s', '', left)) > 200 and len(re.sub(r'\s', '', right)) > 200:
+                nums = lambda x: sum(1 for t in tokens(x) if (',' in t[0] or '.' in t[0]) and len(re.sub(r'\D', '', t[0])) >= 3)
+                # a real spread has figures on both sides; a page whose labels (left) and figures (right, under the
+                # heading) were cut apart is one statement
+                if len(re.sub(r'\s', '', left)) > 200 and len(re.sub(r'\s', '', right)) > 200 and nums(left) >= 6 and                         nums(right) >= 6:
                     return [left, right]
     return [t]
+
+
+def respread(pgs):
+    """Saved pages after a change to split_spread: put each 'nL' / 'nR' pair back together and split it again."""
+    out, i = [], 0
+    while i < len(pgs):
+        pid, t = pgs[i]
+        if pid.endswith('L') and i + 1 < len(pgs) and pgs[i + 1][0] == pid[:-1] + 'R':
+            L, R = t.split(chr(10)), pgs[i + 1][1].split(chr(10))
+            w = max(len(x) for x in L)
+            t = chr(10).join((L[k].ljust(w) if k < len(L) else ' ' * w) + (R[k] if k < len(R) else '') for k in range(max(len(L), len(R))))
+            parts = split_spread(t)
+            out += [(pid[:-1], t)] if len(parts) == 1 else [(pid, parts[0]), (pid[:-1] + 'R', parts[1])]
+            i += 2
+        else:
+            out.append((pid, t))
+            i += 1
+    return out
 
 
 def stmt_head(text, stmt):
@@ -250,8 +273,19 @@ def split_at(lines, cols):
     return best if score(best) > score(g0) else g0
 
 
+def strip_section(raw):
+    """'INCOME        Sales (Gross)': a section heading in capitals standing in the label column before the label."""
+    return re.sub(r"^\s*(INCOME|EXPENDITURE|EXPENSES|APPROPRIATIONS?|LIABILITIES|ASSETS|SOURCES OF FUNDS|APPLICATION OF FUNDS|"
+                  r"LOAN FUNDS|SHAREHOLDERS['’]? FUNDS|FIXED ASSETS|CURRENT ASSETS[A-Z ,&]*|INVESTMENTS|PROFIT|"
+                  r"CAPITAL AND LIABILITIES)\s{4,}(?=[A-Za-z(])", '', raw)
+
+
+LIG = str.maketrans({'ﬀ': 'ff', 'ﬁ': 'fi', 'ﬂ': 'fl', 'ﬃ': 'ffi', 'ﬄ': 'ffl', 'ﬅ': 'st', 'ﬆ': 'st'})
+
+
 def clean_label(label):
-    label = re.sub(r'\s+', ' ', label).strip().lower()
+    label = re.sub(r'\s+', ' ', label.translate(LIG)).strip().lower()
+    label = re.sub(r'(?<![a-z])(?:[a-z] ){2,}[a-z](?![a-z])', lambda m: m.group(0).replace(' ', ''), label)  # 'T O T A L'
     if '/' in label:
         a_, b_ = label.rsplit('/', 1)
         if (re.search(r'[^\x20-\x7e]|[\^<>{}~|*?]', a_) or label.count(' / ') == 1 and 'profit' not in a_) and \
@@ -266,11 +300,75 @@ def clean_label(label):
     return re.sub(r'\s+(\d{1,2}(\.\d+)?|[a-z]|\d+\s?[a-z])$', '', label).strip(' :.-')  # schedule / note refs
 
 
+def left_layout(lines):
+    """Pages that print the previous year's figures in a column LEFT of the labels (BANARISUG: '90,224.86  Sales  13  84,287.37'),
+    when the column headings confirm it (the earlier year sits left of the later one). Returns (lines rewritten as
+    'label  current...  previous', x that splits current from previous), else None."""
+    VAL = re.compile(r'\(?-?\d[\d,]*(?:\.\d+)?\)?|--+|[—–]')
+    DASH = re.compile(r'--+|[—–]')
+    isval = lambda t: DASH.fullmatch(t) or ',' in t or '.' in t or len(re.sub(r'\D', '', t)) >= 3
+    rows, rmax, lend = [], 0, 0
+    for l in lines:
+        fa = re.search(r'[A-Za-z]', l)
+        la = max((m.start() for m in re.finditer(r'[A-Za-z]', l)), default=-1)
+        if not fa:
+            rows.append(None)
+            continue
+        chunk = l[:fa.start()]
+        if re.search(r'\d{1,2}[./-]\d{1,2}[./-](19|20)\d\d|(?<![\d.,])(19|20)\d\d(?![\d.,])', chunk):
+            rows.append(None)
+            continue
+        ms = [m for m in VAL.finditer(chunk) if isval(m.group(0))]
+        rt = tokens(l[la + 1:])
+        rows.append(([m.group(0) for m in ms], la, fa.start(), rt) if ms else None)
+        if ms:
+            lend = max(lend, ms[-1].end())
+            for t, s_, e_ in rt:
+                rmax = max(rmax, la + 1 + e_)
+    # the header: the earlier year left of the later one
+    yrs = []
+    for l in lines[:20]:
+        for m in re.finditer(r'(?<!\d)((?:19|20)\d\d)(?!\d)|[./-](\d\d)(?!\d)', l):
+            yrs.append((int(m.group(1) or m.group(2)) % 100, m.start()))
+    both = [r for r in rows if r and r[0] and r[3]]
+    if len(both) < 8 or len({y for y, _ in yrs}) < 2:
+        return None
+    lo, hi = min(yrs), max(yrs)
+    first_lo = min(x for y, x in yrs if y == lo[0])
+    last_hi = max(x for y, x in yrs if y == hi[0])
+    if not first_lo < last_hi or hi[0] - lo[0] > 1:
+        return None
+    P = rmax + 22
+    out = []
+    for l, r in zip(lines, rows):
+        if r is None and not re.search(r'[A-Za-z]', l):  # unlabeled subtotal: figure(s) in the left column, then the rest
+            tk = tokens(l)
+            lt_ = [t for t in tk if t[2] <= lend + 3]
+            rt_ = [t for t in tk if t[2] > lend + 3]
+            if lt_ and rt_ and isval(lt_[-1][0]):
+                prev = '-' if DASH.fullmatch(lt_[-1][0]) else lt_[-1][0]
+                new = (' ' * rt_[0][1] + l[rt_[0][1]:]).rstrip()
+                out.append(new.ljust(P - len(prev)) + prev)
+                continue
+        if not r:
+            out.append(l)
+            continue
+        lt, la, fa, rt = r
+        label = l[fa:la + 1].strip()
+        new = label.ljust(la + 1) + l[la + 1:]
+        prev = '-' if DASH.fullmatch(lt[-1]) else lt[-1]
+        out.append(new.rstrip().ljust(P - len(prev)) + prev)
+    return out, rmax + 11
+
+
 def parse_page(text, stmt):
     """{field: [current, previous]} in the page's own unit, notes, the year split x, and {field: 'several'} flags."""
     lines = text.splitlines()
+    ll = left_layout(lines)
+    if ll:
+        lines = ll[0]
     cols = columns(lines)
-    mid = split_at(lines, cols)
+    mid = ll[1] if ll else split_at(lines, cols)
     out, notes, pending, flags, unl = {}, [], '', {}, []
     after_less = False
     # two currencies side by side (Rs and USD per year): the Rs column is the one wanted (the first when Rs is named first)
@@ -282,24 +380,36 @@ def parse_page(text, stmt):
             usd = m1.start() < m2.start()  # Rs named first: the first number of each year is the Rs one
             break
     seq, multi, pat_c = [], {}, []
+    gap = False
     for l in lines:
+        if not l.strip():
+            gap = True  # a blank line: a wrapped label may continue, but figures without a label do not belong to it
+            continue
         tk = value_tokens(l, cols)
         if tk and re.search(r'(19|20)\d\d\s*[-–/]\s*(\d\d|(19|20)\d\d)\b', l) and not any(',' in t[0] or '.' in t[0] for t in tk):
             tk = []  # a '2008-09' column heading, not numbers
         elif tk and re.search(r'\b\d{1,2}[./-]\d{1,2}[./-](19|20)\d\d\b', l) and not any(',' in t[0] for t in tk):
             tk = []  # a '31.03.2007' column heading
-        label = clean_label(l[:tk[0][1]] if tk else l)
+        label = clean_label(strip_section(l[:tk[0][1]] if tk else l))
         if 'current liabilities' in label and ('less' in label or 'provisions' in label):
             after_less = True
         if not tk:
             pending = label if label and len(label) < 90 else ''
+            gap = False
             continue
-        if not label and not pending:  # unlabeled subtotal: the funds-employed total repeats (sources = application)
+        if gap and not label:
+            pending = ''
+        gap = False
+        if not label and (not pending or not any(re.search(rx, pending) for _, rx in F[stmt])):  # unlabeled subtotal: the funds-employed total repeats (sources = application)
             pair = [cur_ for cur_ in ([val(t) for t, s, e in tk if mid is None or e <= mid][-1:] or [None])] + \
                    ([val(t) for t, s, e in tk if mid is not None and e > mid][-1:] or [None])
             unl.append(tuple(pair))
         if not label and pending:  # value line under its label
             label = pending
+        elif pending and label and not any(re.search(rx, label) for _, rx in F[stmt]):
+            comb = clean_label(pending + ' ' + label)  # a label wrapped over two lines, the figures on the second
+            if any(re.search(rx, comb) for _, rx in F[stmt]):
+                label = comb
         pending = ''
         tk_all = tk
         if mid is not None:  # a note / schedule number (1-2 digits) first on a side that has a real figure too is not a value
@@ -357,6 +467,8 @@ def parse_page(text, stmt):
                         multi[fld] = (cur, prv)
                 break
         seq.append((label, cur, prv, hit))
+    if stmt == 'pl' and not any(k in out for k in ('div_interim', 'div_final', 'div_plain')) and             re.search(r'(?i)dividend(?!\s*(income|received|from|on (investment|mutual)))', text):
+        out['div_seen'] = [1.0, 1.0]  # a dividend is mentioned but no line was read: not the same as none
     if stmt == 'bs' and 'total' not in out:
         rep_ = [p for p, n in collections.Counter(unl).items() if n >= 2 and p[0] is not None]
         if rep_:
@@ -467,10 +579,27 @@ def entity(t):
     """The company name at the top of a statement page (a short line with Limited / Ltd / FZE ... that is not a heading),
     lower-cased without the legal suffix; None when the page names none."""
     for l in [x.strip() for x in t.splitlines() if x.strip()][:6]:
-        if len(l) < 70 and re.search(r'(?i)\b(limited|ltd\.?|fze|inc\.?|llc|pte|plc|corporation|corp\.?|gmbh)\b', l) and                 not re.search(r'(?i)statement|balance|profit|cash ?flow|schedule|notes|auditor|report|annexure', l):
-            n = re.sub(r'\b(limited|ltd|private|pvt|the|company|co|corporation|corp)\b', ' ', re.sub(r'[^a-z ]', ' ', l.lower()))
-            return re.sub(r'\s+', ' ', n).strip() or None
+        if re.search(r'(?i)formerly|erstwhile|known as|previously|now called', l):
+            continue
+        l = re.split(r'(?i)[-–—]\s*(?=consolidated|standalone|financial|annual|statement)', l)[0].strip()  # 'X LTD.- CONSOLIDATED ...'
+        if len(l) < 70 and re.search(r'(?i)\b(limited|ltd\.?|fze|inc\.?|llc|pte|plc|corporation|corp\.?|gmbh)\b', l) and \
+                not re.search(r'(?i)statement|balance|profit|cash ?flow|schedule|notes|auditor|report|annexure', l):
+            return norm_name(l)
     return None
+
+
+def norm_name(l):
+    n = re.sub(r'\b(limited|ltd|private|pvt|the|company|co|corporation|corp|and|its|subsidiar(y|ies)|group|consolidated)\b', ' ',
+               re.sub(r'[^a-z ]', ' ', l.lower().replace('&', ' and ')))
+    return re.sub(r'\s+', ' ', n).strip() or None
+
+
+def name_ratio(ent, cname):
+    """How well a page's entity matches the company's names (None when either is unknown)."""
+    import difflib
+    if not ent or not cname:
+        return None
+    return max(difflib.SequenceMatcher(None, ent, c).ratio() for c in cname if c)
 
 
 def same_entity(a, b):
@@ -478,7 +607,7 @@ def same_entity(a, b):
     return not a or not b or difflib.SequenceMatcher(None, a, b).ratio() >= 0.6
 
 
-def find(pgs, stmt, anchors=None):
+def find(pgs, stmt, anchors=None, cname=None):
     """Statement pages by heading, best-scoring page per basis -> {basis: (score, page id, fields, notes, mid, flags)}.
     pgs = [(id, text)]; pages that open with the heading are preferred over pages that merely name it. anchors =
     {basis: (PDF page number, company name) of that basis's P&L / balance sheet}: a cash flow page more than 150 pages
@@ -492,6 +621,11 @@ def find(pgs, stmt, anchors=None):
         # page before) and a heading hit may be the auditors' report that names the statement
         body = lambda t: re.search(r'operating\s+activit', t, re.I) and re.search(r'investing\s+activit', t, re.I)
         idx = sorted(set(idx) | {i for i, (_, t) in enumerate(pgs) if body(t)})
+    if cname and idx:  # a subsidiary's statements printed in the same report: keep the pages of the company itself
+        rat = {i: name_ratio(entity(pgs[i][1]), cname) for i in idx}
+        mx = max([r_ for r_ in rat.values() if r_ is not None] or [0])
+        if mx >= 0.95:  # a subsidiary's name is mostly well under 0.85 of the company's (a garbled own name stays)
+            idx = [i for i in idx if rat[i] is None or rat[i] >= 0.85]
     for i in idx:
         pid, p = pgs[i]
         head = ' '.join(p[:2500].split()).upper()
@@ -519,7 +653,7 @@ def find(pgs, stmt, anchors=None):
             fl = {**fl2, **fl}
         if stmt == 'cf' and 'cfo' not in o:
             continue
-        score = len([k for k in o if k not in ('foot', 'sum_income', 'total_exp')]) + (3 if mid else 0) +             (5 if stmt == 'cf' and 'cfo' in o else 0) + (2 if stmt == 'cf' and re.search(r'investing\s+activit', p, re.I) else 0)
+        score = len([k for k in o if k not in ('foot', 'sum_income', 'total_exp', 'div_seen')]) + (3 if mid else 0) +             (5 if stmt == 'cf' and 'cfo' in o else 0) + (2 if stmt == 'cf' and re.search(r'investing\s+activit', p, re.I) else 0)
         if stmt == 'cf' and anchors is not None:
             pn = re.match(r'\d+', pid)
             a_ = anchors.get(basis)
@@ -588,7 +722,7 @@ def derive(bs, pl, cf, unit, flags, pages):
                 r['dividend'][1:] = ['medium', pages['div_page']]
         elif g(pl, 'div_plain', j) is not None:
             put('dividend', abs(g(pl, 'div_plain', j)), 'pl')
-        elif pl.get('approp') is not None:
+        elif pl.get('approp') is not None and pl.get('div_seen') is None:
             put('dividend', 0.0, 'pl', 'arith')  # appropriation section on the page, no dividend line in it
         if bank:
             put('interest', g(pl, 'int_expended', j), 'pl')
@@ -602,6 +736,9 @@ def derive(bs, pl, cf, unit, flags, pages):
             put('other_income', oi, 'pl')
         if pl.get('foot'):
             r['_foot'] = [1.0, 'high', None]
+        ti_ = g(pl, 'total_income', j)  # sales + other income = the total income line: the sales line is the right one
+        if not bank and ti_ and s is not None and abs(s + (oi or 0) - ti_) <= 0.015 * abs(ti_):
+            r['_sales_ok'] = [1.0, 'high', None]
         if g(pl, 'pat_pre_mi', j) is not None:
             put('pat', g(pl, 'pat_pre_mi', j), 'pl')
         # tax: the total tax line; else PBT - PAT (the lines between them are taxes), confirmed when one tax line equals it
@@ -615,6 +752,14 @@ def derive(bs, pl, cf, unit, flags, pages):
             put('tax', d_, 'pl', None if one else 'arith')
         elif 'tax' in r:
             r['tax'][1] = 'low'  # one tax line (often current tax only) with nothing to confirm it against
+        if bank and ('pbt' not in r or r['pbt'][1] == 'low') and g(cf, 'cf_pbt', j) is not None and 'pat' in r and                 r['pat'][1] != 'low':
+            # banks print the tax inside 'Provisions and contingencies'; the cash flow statement starts from 'Net profit
+            # before taxes', so tax = that - net profit (taken when it is a plausible share of it)
+            pb = g(cf, 'cf_pbt', j)
+            tx = pb - r['pat'][0]
+            if pb > 0 and 0 <= tx <= 0.6 * pb:
+                put('pbt', pb, 'cf', 'medium')
+                put('tax', tx, 'cf', 'medium')
         if pl.get('eps') is not None and pl['eps'][j] is not None:
             put('eps', pl['eps'][j], 'pl')
         ex = g(pl, 'exceptional', j)
@@ -678,15 +823,17 @@ CHECK_FIELDS = {'pbt-tax=pat': ['pbt', 'tax', 'pat'], 'opm_plausible': ['sales',
                 'eps_sign': ['eps', 'pat'], 'magnitude': []}
 
 
-def parse_pages(pgs, fy_hint=None, fym=3):
-    """pgs: list of (page_no, text). -> result dict (bases with years, fields, checks, helper lists)."""
-    found = {s: find(pgs, s) for s in ('bs', 'pl')}
+def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
+    """pgs: list of (page_no, text). -> result dict (bases with years, fields, checks, helper lists). cname: the company's
+    names (list), to tell its statements from a subsidiary's printed in the same report."""
+    pgs = [(i, t.translate(LIG)) for i, t in pgs]
+    found = {s: find(pgs, s, None, cname) for s in ('bs', 'pl')}
     anc = {}
     for b_ in ('standalone', 'consolidated'):
         ps = [(re.match(r'\d+', found[s][b_][1]), found[s][b_][1]) for s in ('pl', 'bs') if b_ in found[s]]
         ps = [x for x in ps if x[0]]
         anc[b_] = (int(ps[0][0].group()), next((entity(t) for pid, t in pgs if pid == ps[0][1]), None)) if ps else None
-    found['cf'] = find(pgs, 'cf', anc)
+    found['cf'] = find(pgs, 'cf', anc, cname)
     out = {'bases': {}}
     heads = [t for _, t in pgs if any(stmt_head(t, s) for s in HEAD)] or \
         [t for _, t in pgs if any(re.search(HEAD[s], ' '.join(t[:2500].split()).upper()) for s in HEAD)]
@@ -752,24 +899,44 @@ def parse_pages(pgs, fy_hint=None, fym=3):
         B = {'pages': {s: pages[s] for s in found}, 'unit': uword, 'bank': bank,
              'split_found': {s: pages[s + '_split'] for s in found}, 'raw': d, 'years': {},
              'notes': [n for s in pick if pick[s] for n in pick[s][3]] + ([] if unit else ['unit not found'])}
+        B['unit_missing'] = not unit
         for j, y in enumerate(yrs):
-            ck = checks(y, y.pop('_foot', None) is not None)
-            need = NEED_BANK if bank else NEED
-            helper = {f for f in need if f not in y or y[f][1] == 'low'} | \
-                {f for k, ok in ck.items() if ok is False for f in CHECK_FIELDS[k] if f in need}
-            if isinstance(ck.get('magnitude'), list):
-                helper |= {f for f in ck['magnitude'] if f in need} | {'sales', 'total_assets'}
-                ck['magnitude'] = False
-            if len(helper) > len(need) / 2:  # mostly unread: the rest of this column isn't trusted either
-                helper = set(need)
-            if out.get('note_year'):
-                helper.add('year_end')
-            helper = sorted(helper)
+            foot = y.pop('_foot', None) is not None
+            sok = y.pop('_sales_ok', None) is not None
+            ck, helper = finish_year(y, bank, foot, bool(out.get('note_year')))
             key = f'{(yend.year - j) if yend else "?"}-{yend.month:02d}' if yend else f'cur-{j}'
             B['years'][key] = {'fields': {k: [round(x[0], 4), x[1], x[2]] for k, x in y.items()}, 'checks': ck,
-                               'helper': helper}
+                               'helper': helper, 'foot': foot, 'sales_ok': sok}
         out['bases'][basis] = B
+    # the dividend is the company's (the parent's), the same on either basis: a consolidated year without a dividend line
+    # takes the standalone year's from the same report
+    sa, co = out['bases'].get('standalone'), out['bases'].get('consolidated')
+    if sa and co:
+        for k, y in co['years'].items():
+            sy = sa['years'].get(k)
+            if sy and 'dividend' in sy['fields'] and sy['fields']['dividend'][1] != 'low' and 'dividend' not in sy['helper'] and \
+                    ('dividend' not in y['fields'] or 'dividend' in y['helper'] or y['fields']['dividend'][1] == 'low'):
+                y['fields']['dividend'] = [sy['fields']['dividend'][0], 'medium', 'standalone ' + str(sy['fields']['dividend'][2])]
+                y['helper'] = [f for f in y['helper'] if f != 'dividend']
     return out
+
+
+def finish_year(y, bank, foot, note_year):
+    """(checks, helper fields) of one year's {field: [value, confidence, page]}."""
+    ck = checks(y, foot)
+    need = NEED_BANK if bank else NEED
+    helper = {f for f in need if f not in y or y[f][1] == 'low'} | \
+        {f for k, ok in ck.items() if ok is False for f in CHECK_FIELDS[k] if f in need}
+    if isinstance(ck.get('magnitude'), list):
+        helper |= {f for f in ck['magnitude'] if f in need}
+        if set(ck['magnitude']) - {'cfo'}:
+            helper |= {'sales', 'total_assets'}
+        ck['magnitude'] = False
+    if len(helper) > len(need) / 2:  # mostly unread: the rest of this column isn't trusted either
+        helper = set(need)
+    if note_year:
+        helper.add('year_end')
+    return ck, sorted(helper)
 
 
 # ------------------------------------------------------------------ links and downloads ------------------------------------
@@ -804,6 +971,20 @@ def names(sym):
                   re.sub(r'^THE ', '', base)):
             out.append(re.sub(r'\s+', '_', v.strip()))
     return list(dict.fromkeys(out))
+
+
+def company_names(sym):
+    """The company's names today (screener, BSE), as norm_name() makes them: to tell its statements from a subsidiary's."""
+    raw = []
+    ov = ((load(os.path.join(COMP, sym, 'scr', 'overview.json')) or {}).get('data') or {})
+    if ov.get('name'):
+        raw.append(ov['name'])
+    p = os.path.join('data', 'market', 'bse_codes.csv')
+    if os.path.exists(p):
+        for r in csv.DictReader(open(p, encoding='utf-8')):
+            if r['nse_symbol'] == sym and r.get('bse_name'):
+                raw.append(r['bse_name'])
+    return [n for n in dict.fromkeys(norm_name(re.sub(r'\(.*?\)', '', x)) for x in raw) if n]
 
 
 LINKS = {}  # (sym, report year) -> url, from <run>/ar_links.csv (sym, fy, url): links found in BSE's list (browser pane)
@@ -852,32 +1033,64 @@ def fy_folder(y):
     return f'FY{y % 100:02d}Q4'
 
 
+def rescale_basis(res, b, fac):
+    """Figures read raw (no unit on the statements) are in a unit that is 1/fac of a crore: divide every amount."""
+    B = res['bases'][b]
+    for k, y in B['years'].items():
+        for f, v in y['fields'].items():
+            if f != 'eps':
+                v[0] = round(v[0] / fac, 4)
+            if v[1] == 'low':
+                v[1] = 'medium'
+        if y.get('chart_sales_ratio'):
+            y['chart_sales_ratio'] = round(y['chart_sales_ratio'] / fac, 3)
+        yy = {f: list(v) for f, v in y['fields'].items()}
+        y['checks'], y['helper'] = finish_year(yy, B['bank'], y.get('foot'), bool(res.get('note_year')))
+    B['unit_missing'] = False
+    B['unit_from_chart'] = fac
+    B['notes'] = [n for n in B['notes'] if n != 'unit not found'] + [f'no unit on the statements: figures are in 1/{fac:g} crore (sales within 33% of the chart)']
+
+
 def chart_check(sym, res, cache={}):
-    """Sales against the chart's TTM sales 75 days after the year end (history.json, from 2005): when no basis is within
-    25%, that year's sales go to a helper; a ratio near 10, 100, 1000 (or their inverse) means a wrong unit, so every
-    field of that basis-year does."""
+    """Sales against the chart's TTM sales 75 days after the year end (history.json, from 2005). Statements without any
+    unit word: when every year's sales/chart ratio lies within 33% of one standard unit (rupees 1e7, lakhs 100, millions
+    10, thousands 1e4), that is the unit. Otherwise when no basis is within 25% of the chart, that year's sales go to a
+    helper, unless the P&L's total income line confirms the sales line (sales + other income = total income: then the
+    chart is on another basis or restated; the ratio stays in the file); a ratio near 10, 100, 1000 (or their inverse)
+    means a wrong unit, so every field of that basis-year goes."""
     import mb_features as mf
     if sym not in cache:
         cache.clear()
         cache[sym] = mf.Company(sym, COMP, chart_only=True)
     c = cache[sym]
     keys = {k for B in res.get('bases', {}).values() for k in B['years'] if re.match(r'\d{4}-\d\d$', k)}
-    for k in keys:
-        e = mf.month_end(int(k[:4]), int(k[5:]))
-        cv = c.sales.lookup(e + dt.timedelta(days=75)) if c.sales.raw else None
-        if not cv or cv <= 0:
-            continue
-        rs = {}
-        for b, B in res['bases'].items():
-            y = B['years'].get(k)
-            if y and 'sales' in y['fields'] and y['fields']['sales'][0]:
-                rs[b] = y['fields']['sales'][0] / cv
-                y['chart_sales_ratio'] = round(rs[b], 3)
+    def ratios():
+        for k in keys:
+            e = mf.month_end(int(k[:4]), int(k[5:]))
+            cv = c.sales.lookup(e + dt.timedelta(days=75)) if c.sales.raw else None
+            if not cv or cv <= 0:
+                continue
+            for b, B in res['bases'].items():
+                y = B['years'].get(k)
+                if y and 'sales' in y['fields'] and y['fields']['sales'][0]:
+                    y['chart_sales_ratio'] = round(y['fields']['sales'][0] / cv, 3)
+    ratios()
+    for b, B in list(res['bases'].items()):
+        if B.get('unit_missing'):
+            xs = [y['chart_sales_ratio'] for y in B['years'].values() if y.get('chart_sales_ratio')]
+            fits = [fac for fac in (1e7, 1e2, 10, 1e4) if xs and all(0.75 * fac <= x <= 1.33 * fac for x in xs)]
+            if len(fits) == 1:
+                rescale_basis(res, b, fits[0])
+    for k in sorted(keys):
+        rs = {b: B['years'][k]['chart_sales_ratio'] for b, B in res['bases'].items()
+              if k in B['years'] and B['years'][k].get('chart_sales_ratio') is not None}
         if not rs or any(0.75 <= x <= 1.33 for x in rs.values()):
             continue
         for b, x in rs.items():
             y = res['bases'][b]['years'][k]
             unitlike = any(abs(x * 10 ** n - 1) < 0.15 for n in range(-7, 8) if n)
+            if not unitlike and y.get('sales_ok'):
+                continue
             add = [f for f in (NEED_BANK if res['bases'][b]['bank'] else NEED)] if unitlike else ['sales']
             y['helper'] = sorted(set(y['helper']) | set(add))
             y['checks']['chart_sales'] = False
@@ -888,7 +1101,7 @@ def chart_check(sym, res, cache={}):
 def save_report(sym, pgs, keep, url, src, ry, fym):
     """Save the statement pages and parsed JSON; returns (result dict, json path, pages path)."""
     sel = [pgs[i] for i in sorted(keep)]
-    res = chart_check(sym, parse_pages(sel, ry, fym))
+    res = chart_check(sym, parse_pages(sel, ry, fym, company_names(sym)))
     y = int(res['year_end'][:4]) if res.get('year_end') else ry
     d = os.path.join(COMP, sym, fy_folder(y))
     os.makedirs(d, exist_ok=True)
@@ -1173,8 +1386,8 @@ def reparse(a):
     for r in rows:
         if r['pages_file'] and (not keep or r['sym'] in keep) and os.path.exists(r['pages_file']):
             old = load(r['json_file']) or {}
-            pgs = read_pages_file(r['pages_file'])
-            res = chart_check(r['sym'], parse_pages(pgs, int(r['report_fy']), int(r['fym'] or 3)))
+            pgs = respread(read_pages_file(r['pages_file']))
+            res = chart_check(r['sym'], parse_pages(pgs, int(r['report_fy']), int(r['fym'] or 3), company_names(r['sym'])))
             for k in ('sym', 'url', 'src', 'link_year', 'pages_file', 'n_pages_pdf'):
                 res[k] = old.get(k)
             res['parsed_at'] = dt.datetime.now().isoformat(timespec='seconds')
@@ -1199,39 +1412,78 @@ def reparse(a):
 # ------------------------------------------------------------------ queue ---------------------------------------------------
 def cross_check(sym):
     """Across one company's reports: the same year read from two reports (current column of its own report, previous
-    column of the next), and consecutive years, should not differ by a power of ten in sales, PAT or total assets (a wrong
-    unit, which pre-2005 years can't be checked against the chart for). Offending basis-years go wholly to a helper;
-    the flags are written into the reports' JSON (checks.cross_unit). Returns the number of basis-years flagged."""
-    reps = []
+    column of the next), and consecutive years, are compared on sales, PAT, total assets, reserves and equity capital.
+    A wrong unit moves every amount by the same power of ten; one field alone off by a power of ten is a misread
+    field, or (consecutive years) real growth. So: two or more fields off by the same power of ten = unit error, the
+    whole basis-year of both reports goes to a helper, unless one of the two reports printed no unit (its figures are
+    raw rupees, lakhs ...) and the gap is a standard unit: then that basis is rescaled; one field off by a power of ten
+    while others agree, in two reports of the same year = that field goes to a helper in both; one comparable field
+    only: same year = whole basis-year, consecutive years = only a 100-fold or more change in sales / total assets
+    counts. Flags are written into the reports' JSON (checks.cross_unit, checks.cross_field). Returns the number of
+    basis-years flagged."""
+    FS = ('sales', 'pat', 'total_assets', 'reserves', 'equity_cap')
+    reps = {}
     for jf in glob.glob(os.path.join(COMP, sym, 'FY*Q4', 'ar_FY*.json')):
         if not jf.endswith('_helper.json'):
-            reps.append((jf, load(jf) or {}))
+            reps[jf] = load(jf) or {}
     vals = collections.defaultdict(list)  # (basis, year key) -> [(jf, field values)]
-    for jf, r in reps:
+    for jf, r in reps.items():
         for b, B in (r.get('bases') or {}).items():
             for k, y in B['years'].items():
                 if re.match(r'\d{4}-\d\d$', k):
                     vals[(b, k)].append((jf, {f: v[0] for f, v in y['fields'].items()}))
-    p10 = lambda x: x and x > 0 and any(abs(x * 10 ** n - 1) < 0.2 for n in range(-7, 8) if n)
-    bad = set()
+
+    def pw(q):  # n when q is within 20% of 10^n (n != 0); 0 when q is within 25% of 1
+        if 0.8 <= q <= 1.25:
+            return 0
+        return next((n for n in range(-7, 8) if n and abs(q * 10.0 ** -n - 1) < 0.2), None)
+    whole, fieldwise, scale = set(), collections.defaultdict(set), {}
     for (b, k), vs in vals.items():
-        nxt = (b, f'{int(k[:4]) + 1}{k[4:]}')
-        pairs = [(x, y) for i, x in enumerate(vs) for y in vs[i + 1:]] + \
-                [(x, y) for x in vs for y in vals.get(nxt, [])]  # same year twice; consecutive years
-        for (j1, f1), (j2, f2) in pairs:
-            for f in ('sales', 'pat', 'total_assets'):
-                if f1.get(f) and f2.get(f) and p10(abs(f1[f] / f2[f])):
-                    bad |= {(j1, b, k), (j2, b, k if (j2, f2) in vs else nxt[1])}
-    for jf, r in reps:
-        hit = [(b, k) for (j, b, k) in bad if j == jf]
-        if not hit:
+        nk = f'{int(k[:4]) + 1}{k[4:]}'
+        pairs = [('same', x, k, y, k) for i, x in enumerate(vs) for y in vs[i + 1:]] + \
+                [('next', x, k, y, nk) for x in vs for y in vals.get((b, nk), [])]
+        for kind, (j1, f1), k1, (j2, f2), k2 in pairs:
+            comp = {f: pw(f1[f] / f2[f]) for f in FS if f1.get(f, 0) > 0 and f2.get(f, 0) > 0}
+            off = {f: n for f, n in comp.items() if n}
+            if not off:
+                continue
+            ones = [f for f, n in comp.items() if n == 0]
+            if len(off) >= 2 and len(set(off.values())) == 1:
+                n = next(iter(off.values()))
+                for jj, kk, sign in ((j1, k1, 1), (j2, k2, -1)):  # the report without a unit word is the one to rescale
+                    if reps[jj]['bases'][b].get('unit_missing') and kind == 'same':
+                        fac = 10.0 ** (n * sign)
+                        if any(abs(fac / sf - 1) < 0.01 for sf in (1e7, 1e2, 10, 1e4)):
+                            scale[(jj, b)] = fac
+                            break
+                else:
+                    whole |= {(j1, b, k1), (j2, b, k2)}
+            elif len(off) == 1:
+                f = next(iter(off))
+                if kind == 'same' and ones:
+                    fieldwise[(j1, b, k1)].add(f)
+                    fieldwise[(j2, b, k2)].add(f)
+                elif kind == 'same' or (not ones and abs(off[f]) >= 2 and f in ('sales', 'total_assets')):
+                    whole |= {(j1, b, k1), (j2, b, k2)}
+            else:
+                whole |= {(j1, b, k1), (j2, b, k2)}
+    touched = {jj for jj, b in scale} | {jj for jj, b, k in whole} | {jj for jj, b, k in fieldwise}
+    for (jj, b), fac in scale.items():
+        rescale_basis(reps[jj], b, fac)
+        reps[jj]['bases'][b]['notes'][-1] = f'no unit on the statements: figures are in 1/{fac:g} crore (matches another report of the same year)'
+    for jj, b, k in whole:
+        y = reps[jj]['bases'][b]['years'][k]
+        y['checks']['cross_unit'] = False
+        y['helper'] = sorted(set(y['helper']) | set(NEED_BANK if reps[jj]['bases'][b].get('bank') else NEED))
+    for (jj, b, k), fs in fieldwise.items():
+        if (jj, b, k) in whole:
             continue
-        for b, k in hit:
-            y = r['bases'][b]['years'][k]
-            y['checks']['cross_unit'] = False
-            y['helper'] = sorted(set(y['helper']) | set(NEED_BANK if r['bases'][b].get('bank') else NEED))
-        json.dump(r, open(jf, 'w', encoding='utf-8'), indent=1)
-    return len(bad)
+        y = reps[jj]['bases'][b]['years'][k]
+        y['checks']['cross_field'] = sorted(fs)
+        y['helper'] = sorted(set(y['helper']) | fs)
+    for jj in touched:
+        json.dump(reps[jj], open(jj, 'w', encoding='utf-8'), indent=1)
+    return len(whole) + sum(1 for key in fieldwise if key not in whole)
 
 
 def queue(a):
@@ -1336,7 +1588,7 @@ def main():
         queue(a)
     else:
         if a.file.lower().endswith('.txt'):
-            pgs = read_pages_file(a.file)
+            pgs = respread(read_pages_file(a.file))
         else:
             pp = pdf_pages(a.file)
             pgs = [pp[i] for i in sorted({j for i in stmt_pages(pp) for j in (i, i + 1) if j < len(pp)} |

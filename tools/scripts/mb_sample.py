@@ -13,7 +13,7 @@ from config import hist_dir
 a = sys.argv[1:]
 if any(x.startswith('-') and x not in ('--seed', '--repair', '--candidates-only', '--coverage', '--finalize', '--companies', '--dir')
        for x in a):  # -h, --help or a typo must not fall through to the default run, which rewrites sample_candidates.csv
-    sys.exit(''.join(l[2:] for l in open(__file__, encoding='utf-8').readlines()[1:11]))
+    sys.exit(''.join(l[2:] for l in open(__file__, encoding='utf-8').readlines()[1:10]))
 SEED = int(a[a.index('--seed') + 1]) if '--seed' in a else 1
 D = a[a.index('--dir') + 1] if '--dir' in a else hist_dir()
 # horizon: (multiple columns tried in order, threshold, last window start, winners to pick)
