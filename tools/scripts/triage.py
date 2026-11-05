@@ -76,7 +76,7 @@ for s in sorted(set(U) | holds):
     r['flags'] = '; '.join(flags)
     nm = (r['name'] or '').lower()
     if r['held']:
-        r['triage'], r['reason'] = 'holding', 'held: goes straight to F6.1'
+        r['triage'], r['reason'] = 'holding', 'held: goes straight to F6'
     elif 'reit' in nm or 'invit' in nm or ' trust' in nm:
         r['triage'], r['reason'] = 'reject', 'REIT/InvIT'
     elif pledge is not None and pledge > 25:

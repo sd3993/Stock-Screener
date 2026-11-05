@@ -1,5 +1,5 @@
 import csv, glob, json, os, sys
-# Multibagger study, P1.1 (process/past/p1_universe.md): builds runs/past/<date>/universe.csv from the
+# Multibagger study, P1 (process/past/p1_universe.md): builds runs/past/<date>/universe.csv from the
 # saved screener band pages (runs/past/<date>/universe/U<band>_<asc|desc>_p<n>.json, saved with scr_save.py) plus the
 # delisted candidates in data/market/reference_stocks_delisted.json. Columns: sym, screener_id, name, mc_now, status.
 # Prints each band's distinct companies against screener's total_matches, so a missing page shows.

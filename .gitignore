@@ -2,7 +2,6 @@
 # OneDrive): run folders, fetched company data (GBs, would double the OneDrive storage inside .git, can be re-fetched).
 runs/
 data/
-acknowledgements.md
 
 # Run data set aside (abandoned runs, replaced fetches)
 archive/
@@ -14,5 +13,3 @@ archive/
 __pycache__/
 *.pyc
 *.log
-.gemini/settings.local.json
-.gemini/*.lock

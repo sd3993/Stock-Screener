@@ -1,5 +1,5 @@
 import asyncio, csv, datetime as dt, json, os, sys, time
-# Multibagger study, P1.1 (process/past/p1_universe.md): long price and valuation history per company from screener.in's public chart API
+# Multibagger study, P1 (process/past/p1_universe.md): long price and valuation history per company from screener.in's public chart API
 # (no login, no model tokens), back to about 2005: price and volume, P/E with the TTM EPS behind it, and market cap to
 # sales with TTM sales (market cap = the ratio x sales). Saved as data/companies/<SYM>/scr/history.json; a company already
 # saved is skipped unless --refresh, or --recheck-empty (re-fetches saved companies with a series that has no values, unless the standalone series were

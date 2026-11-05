@@ -1,5 +1,5 @@
 import argparse, bisect, csv, datetime as dt, glob, os, sys
-# Multibagger study, P1.1 (process/past/p1_universe.md): from every saved chart history (data/companies/*/scr/history.json, by
+# Multibagger study, P1 (process/past/p1_universe.md): from every saved chart history (data/companies/*/scr/history.json, by
 # mb_history.py), the price and market-cap multiples over 2-, 3-, 5-, 7- and 10-year windows starting at each quarter end
 # from Mar 2006, with the starting market cap, P/E and TTM EPS/sales, and the peak multiple inside the window (for fallen
 # winners), and what could be seen at the start: P/E and its own 5-year median, TTM EPS and sales growth over 1 and 3
