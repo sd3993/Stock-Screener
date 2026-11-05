@@ -12,4 +12,6 @@ About 30 winners (10 per horizon) and about 10 fallen winners, picked in `backte
 4. **What was visible at the time:** for each stage start, which signals an investor could have seen in the filings and figures then, and which of `backtest.md`'s patterns were present; for a fallen winner, the signs before the fall.
 5. Write `runs/past/<date>/stages/<SYM>.md` and reply with a 5-line summary: business type, stages with dates, the early signals, patterns confirmed or contradicted, and anything learned for the next study.
 
+**New patterns:** a measurable pattern a study finds goes back to P8 as a new hypothesis, scored on windows of companies that weren't studied; the studied companies can't confirm it.
+
 **Recheck (P10R.n)** (`process/future/recheck.md`): one Opus medium helper checks dates, figures and the no-hindsight rule against the cited documents, and that the business-type reading follows from them; corrections are made in the file.

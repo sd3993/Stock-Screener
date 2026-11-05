@@ -3,9 +3,9 @@
 Inputs: `backtest.md`, `stages/*.md`, `experts.md`, `process/investing_rules.md`.
 
 **Proposals** (`runs/past/<date>/proposals.md`), per bucket (short, medium, long), only for patterns that passed every test in `README.md`, "What a pattern must pass":
-- **General rules:** new rules, changed thresholds and rules to drop, each with: frequency among winners and controls and the lift; the out-of-sample result; the whole-market precision and returns against the base rate; the periods, regimes and size bands it held in; the mechanism; one or two stage-study examples; the old wording and the new.
+- **General rules:** new rules, changed thresholds and rules to drop, each with: frequency among winners, the lift against the same-date market and against same-type peers; the matched-pair cross-check; the out-of-sample result; the whole-market precision and returns against the base rate; the periods, regimes and size bands it held in; the mechanism; one or two stage-study examples; the old wording and the new.
 - **Business-type notes:** the same evidence within the business type; worded as sector notes under the general rule they adjust (`process/investing_rules.md` structure), with the business type defined by what companies do.
-- **Exit and avoid rules:** from fallen winners and look-alike failures, with the same evidence.
+- **Exit and avoid rules:** from fallen winners against winners that held up, with the same evidence.
 - **Situational notes:** infrequent patterns with a strong mechanism, marked low weight.
 - **Citation corrections** from `experts.md`.
 - **Not adopted:** patterns that looked good but failed a test, and why (so a re-run doesn't chase them again).

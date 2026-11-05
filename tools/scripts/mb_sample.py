@@ -307,20 +307,17 @@ def finalize():
         for c in cs:
             c['_step'] = step_of(c, w['mc0'])
         cs.sort(key=lambda c: len(STEPS) if c['_step'] is None else c['_step'])  # stable: tightest step first, drawn order within
+        if not tag:  # tagged in the next round; candidates are never asked for (controls are a frozen cross-check, p2_sample.md)
+            continue
         if not cs:
             status[wk] = 'no candidates'
-            continue
-        if not tag:  # round 1 tags the nearest candidate with the winner; later ones wait for the winner's type
-            if (cs[0]['sym'], cs[0]['start']) not in tags:
-                need(cs[0]['sym'], cs[0]['start'], 'control_candidate', 'candidate 1', who)
+            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], checks='; '.join(warns)))
             continue
         pick, skipped = None, []
-        for i, c in enumerate(cs):
+        for c in cs:
             ct = tags.get((c['sym'], c['start']))
-            if not ct:
-                need(c['sym'], c['start'], 'control_candidate', f'candidate {i + 1}', who)
-                status[wk] = f'needs candidate {i + 1} ({c["sym"]})'
-                break
+            if not ct:  # never tagged: no longer a candidate
+                continue
             if ct['business_type'] != tag['business_type']:
                 skipped.append(f"{c['sym']} ({ct['business_type']})")
                 continue
@@ -330,10 +327,9 @@ def finalize():
                 continue
             pick = (c, ct, cw)
             break
-        else:
-            status[wk] = f'no same-type candidate among {len(cs)} (up to size {STEPS[max(c["_step"] or 0 for c in cs)][2]})'
         if not pick:
-            status[wk] += f"; skipped {', '.join(skipped)}" if skipped else ''
+            status[wk] = 'no control among the tagged candidates' + (f"; skipped {', '.join(skipped)}" if skipped else '')
+            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], checks='; '.join(warns)))
             continue
         c, ct, cw = pick
         ratio = c['mc0'] / w['mc0']
@@ -343,11 +339,13 @@ def finalize():
                           f"multiple {c['multiple']}")
         st = 'outside' if c['_step'] is None else STEPS[c['_step']][2]
         status[wk] = f"control {c['sym']} (candidate {cs.index(c) + 1}, size {st})" + (f"; skipped {', '.join(skipped)}" if skipped else '')
-        if not (tag['flag'] or fails or not ok):
+        if ok:
             sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], control=c['sym'], size_step=st,
                                checks='; '.join(warns)))
             sample.append(dict(c, group='control', business_type=ct['business_type'], sub_type=ct['sub_type'], size_step=st,
                                checks='; '.join(cw)))
+        else:
+            sample.append(dict(w, business_type=tag['business_type'], sub_type=tag['sub_type'], checks='; '.join(warns)))
     # 5. outputs
     keys = ['group', 'sym', 'horizon', 'start', 'mc0', 'multiple', 'strong', 'matched_to', 'control', 'size_step', 'business_type',
             'sub_type', 'reason', 'checks']
