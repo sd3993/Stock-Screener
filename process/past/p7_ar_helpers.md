@@ -42,7 +42,7 @@ One file per report, at `helper_file` (beside the script's `ar_FY<yy>.json`), UT
                           "2009-03": {"sales": 4652.11}}},
  "notes": {"standalone:2010-03:reserves": "Reserves and surplus 9,597,270 thousand (first of the two values; the second is shareholders' funds)"}}
 ```
-- Write every field the queue lists for each basis and year, and nothing else unless a value the script parsed is wrong (then write the right value and say so in `notes`). A field you write overrides the script's; `null` means "not printed".
+- Write every field the queue lists for each basis and year (only those your brief names, if it narrows them), and nothing else unless a value the script parsed is wrong (then write the right value and say so in `notes`). A field you write overrides the script's; `null` means "not printed".
 - Values in Rs crore (EPS in Rs), as numbers, not strings; keep the printed precision.
 - If the script used the wrong pages or the wrong year for the whole report (or the report is scanned), read every field for every basis and year the report gives, add `"replace_parsed": true` and `"year_end": "YYYY-MM"` (its current year).
 - If the report is not the company's or not an annual report, write `{"wrong_report": true, "notes": {...}}` and nothing else.

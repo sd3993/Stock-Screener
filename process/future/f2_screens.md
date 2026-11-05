@@ -17,6 +17,6 @@ Runs every screen in `process/future/screens.json` and the whole-market sweep on
    - **Extra sweeps:** for each group, `base` AND `<field> > -9999999` for each field in it, run in the same bands, IDs `Q<group>B<band>` (e.g. `Q1B03`).
    - **Paging a query of T rows:** order desc, pages 1 to floor(T/200), then one order-asc page 1 for the remainder (overlap is fine; `tools/tools.md`). Merge a band under 200 rows with its neighbour and report the bounds used.
 4. **Each page goes straight to its file:** out `<run>/screens/<ID>_<desc|asc>_p<NN>.json`. Never read a saved page into context. Skip pages already saved. A call that exits non-zero: check the reason in its file (login, rate limit), wait and re-run it.
-5. Run `python tools/scripts/build_universe.py`. It warns when a query's saved rows don't add up to its total, or when a column never came back: fix those and re-run.
+5. Run `python tools/scripts/build_universe.py` after each query's pages, before the next query. It warns when a query's saved rows don't add up to its total, or when a column never came back: fix those and re-run. The last run gives the full universe.
 
 Reply with: each screen's and band's total and pages saved, the universe size, any band you split, and anything that failed.

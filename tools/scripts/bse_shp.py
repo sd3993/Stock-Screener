@@ -5,7 +5,7 @@ import argparse, csv, datetime as dt, glob, html, json, os, re, subprocess, sys,
 # qtrid = 29 + quarters since Mar 2001 (Mar 2008 = 57); Flag=New is left out before Jun 2006 (qtrid 50). The page has
 # data from Mar 2001 to Jun 2022 (qtrid 114); later quarters come back blank (the new-format pattern is browser-only),
 # and screener/NSE cover them. Delisted companies are served too.
-#   python tools/scripts/bse_shp.py                       # rows of <run>/sample_candidates.csv (sym, start or as_of)
+#   python tools/scripts/bse_shp.py                       # rows of <run>/sample.csv (sym, start or as_of)
 #   python tools/scripts/bse_shp.py --rows FILE           # any CSV with sym and as_of/start (optional bse_code column)
 #   python tools/scripts/bse_shp.py --want SYM[:CODE]=YYYY-MM..YYYY-MM ...   # explicit quarter ranges
 #   options: --back 12 (quarters before the latest filed one), --gap 1.5 (s between requests), --syms A,B, --plan (count
@@ -268,7 +268,7 @@ def main():
             codes[sym] = m.group(2)
     if not a.want or a.rows:
         D = hist_dir()
-        for r in csv.DictReader(open(a.rows or os.path.join(D, 'sample_candidates.csv'), encoding='utf-8')):
+        for r in csv.DictReader(open(a.rows or os.path.join(D, 'sample.csv'), encoding='utf-8')):
             as_of = (r.get('as_of') or r.get('start') or '')[:10]
             if not as_of:
                 continue

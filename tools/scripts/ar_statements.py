@@ -1368,7 +1368,7 @@ def plan(a):
             out.append(dict(sym=s, fy=y, fym=info[s]['fym'], code=info[s]['code'], scr_first=min(info[s]['scr'] or {0}),
                             rows=' '.join(sorted(set(rows_need[(s, y)])))))
     p = os.path.join(D, 'ar_plan.csv')
-    w = csv.DictWriter(open(p, 'w', newline='', encoding='utf-8'), fieldnames=list(out[0]))
+    w = csv.DictWriter(open(p, 'w', newline='', encoding='utf-8'), fieldnames=['sym', 'fy', 'fym', 'code', 'scr_first', 'rows'])
     w.writeheader()
     w.writerows(out)
     print(dict(stat), '| companies', len(need), '| needed years', len(out), '->', p)
