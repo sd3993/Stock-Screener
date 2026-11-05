@@ -5,7 +5,7 @@ import json, sys, glob, os
 # checked so a failed call can't save an older result under a new name.
 marker, out, tag, i, j = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5])
 # The session is CC_SESSION_DIR if set, else the most recently written transcript in this project's Claude folder.
-proj = os.path.join(os.path.expanduser('~'), '.claude', 'projects', 'C--Users-sd391-OneDrive-Documents-Projects-Stock-Screener')
+proj = os.path.join(os.path.expanduser('~'), '.claude', 'projects', 'C--Users-sd391-Projects-Stock-Screener')
 sess = os.environ.get('CC_SESSION_DIR') or max(glob.glob(os.path.join(proj, '*.jsonl')), key=os.path.getmtime)[:-6]
 if tag == 'MAIN':  # the main session's own transcript
     files = [sess + '.jsonl']

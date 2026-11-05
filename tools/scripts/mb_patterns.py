@@ -757,7 +757,7 @@ class Results:
             w = csv.DictWriter(fh, fieldnames=FIELDS, extrasaction='ignore')
             w.writeheader()
             w.writerows(s.rows.values())
-        for attempt in range(10):  # OneDrive can hold the file for a moment
+        for attempt in range(10):  # another process can hold the file for a moment
             try:
                 os.replace(tmp, s.path)
                 break

@@ -21,7 +21,7 @@ a = p.parse_args()
 
 def from_transcript(marker, tag):
     proj = os.environ.get('CC_PROJECT_DIR', os.path.join(os.path.expanduser('~'), '.claude', 'projects',
-                          'C--Users-sd391-OneDrive-Documents-Projects-Stock-Screener'))
+                          'C--Users-sd391-Projects-Stock-Screener'))
     files = glob.glob(os.path.join(proj, '*.jsonl')) + glob.glob(os.path.join(proj, '*', 'subagents', '**', '*.jsonl'), recursive=True)
     files = sorted(files, key=os.path.getmtime, reverse=True)[:40]
     if tag:
