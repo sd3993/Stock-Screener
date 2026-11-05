@@ -5,7 +5,7 @@ screener.in and NSE/BSE cover everything the process needs (3 Nov 2026). Use Tap
 ## Rules
 - **REST only:** reach it through its REST API (`tt.py`, or `tt.py get` for one-off routes), never the Tapetide MCP tools. If the token is missing or rejected, tell the user and carry on with screener and the exchanges.
 - **Plan:** free, 50 calls a day; the user won't pay for more (3 Nov 2026). At the daily limit, carry on with other work and resume when the quota resets.
-- **Token:** the user sets `TAPETIDE_TOKEN` in the Claude app's environment settings for this project; it reaches sessions started after it was set. Never print it.
+- **Token:** the user sets `TAPETIDE_TOKEN` in the Claude app's environment settings for this project; it reaches sessions started after it was set.
 - **Scripts:** `tt.py` (REST client: `usage`, `get <route> k=v [--save PATH] [--all-pages]`, `calls [days]`; caching and the call log `data/calls.csv`), `tt_docs.py` (filings/documents lists, downloads, `index.json`; its download helpers also serve `scr_docs.py`). Answers are cached in `data/companies/<SYM>/api/` and `data/market/`.
 
 ## Trial findings (3 Nov 2026)

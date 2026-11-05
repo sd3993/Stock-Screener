@@ -47,7 +47,7 @@ Run as `python tools/scripts/<name>.py`. The run folder comes from `config.py` (
 
 ## screener.in (main source; the screener library through scripts)
 The screener MCP was removed on 3 Nov 2026. Company data: `scr_company.py`; any single tool call (screens, peers, …): `scr_tool.py` (both in "Scripts" above).
-- **Account:** scripts run with `--login` log in with `SCREENER_USERNAME` and `SCREENER_PASSWORD` from the user-level Claude env config; never read, print or copy them.
+- **Account:** scripts run with `--login` log in with `SCREENER_USERNAME` and `SCREENER_PASSWORD` from the user-level Claude env config.
   - The account's column set (screener.in → Edit columns, `/user/columns/`) decides which fields every screen row carries; fields named in a query are added on top.
   - The user allowed changing it for this project (3 Nov 2026). Free accounts keep at most 15 columns (screener silently drops the rest on save). It holds exactly the fields in `process/future/screens.json` → `columns`; change both together.
   - To change it, use the browser pane, where the account is logged in, at `/user/columns/`: filter, tick or untick, then Save columns. The list's remove buttons re-render after each click, so re-read the page between clicks.
