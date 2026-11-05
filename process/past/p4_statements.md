@@ -8,7 +8,7 @@ Normally already done by P2's single fetch (`p2_sample.md`, "Order"); then P4 on
 
 This gives about 12 years of annual statements (consolidated and standalone), 13 quarters, 12 quarters of shareholding and pledge (`shp_history.json`), the annual-report list with exchange links back to about 2013, and NSE announcements.
 
-**Market statements:** when a pattern using statements reaches P8's out-of-sample stage, P8 writes `market_fetch.txt` (companies with a start market cap of ₹50 cr or more in 2016-2023 and no saved statements); fetch it with `--only statements,overview --skip-saved` in the background.
+**Market statements (needed for P8.3; no tokens, so fetched early, alongside the other scripts, while patterns using statements are alive):** `mb_patterns.py market_fetch --force` writes `market_fetch.txt` (companies with a start market cap of ₹50 cr or more in 2016-2023 and no saved statements); fetch it with `--only statements,overview --skip-saved` in the background.
 
 Record in `status.md` the companies fetched and any failures with the reason. BSE-only companies have no NSE announcements or insider feed; the script saves an empty marker for them (`nse_listed: false`), so they aren't failures and `--skip-saved` doesn't ask again. No step needs them.
 
