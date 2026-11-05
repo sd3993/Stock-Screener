@@ -1,4 +1,4 @@
-import argparse, datetime as dt, glob, json, os, sys
+import argparse, datetime as dt, glob, json, os, re, sys
 # Saves a screener MCP answer to a file, so it is cached without re-typing it (and without reading it into context).
 # Only for old answers in transcripts: the MCP was removed on 3 Nov 2026; new calls go through scr_tool.py.
 #   --file PATH      an oversized answer the app already saved (the path printed in the tool's "exceeds maximum
@@ -21,7 +21,7 @@ a = p.parse_args()
 
 def from_transcript(marker, tag):
     proj = os.environ.get('CC_PROJECT_DIR', os.path.join(os.path.expanduser('~'), '.claude', 'projects',
-                          'C--Users-sd391-Projects-Stock-Screener'))
+                          re.sub(r'[^A-Za-z0-9]', '-', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
     files = glob.glob(os.path.join(proj, '*.jsonl')) + glob.glob(os.path.join(proj, '*', 'subagents', '**', '*.jsonl'), recursive=True)
     files = sorted(files, key=os.path.getmtime, reverse=True)[:40]
     if tag:
