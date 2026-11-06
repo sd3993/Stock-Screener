@@ -47,4 +47,6 @@ One file per report, at `helper_file` (beside the script's `ar_FY<yy>.json`), UT
 - If the script used the wrong pages or the wrong year for the whole report (or the report is scanned), read every field for every basis and year the report gives, add `"replace_parsed": true` and `"year_end": "YYYY-MM"` (its current year).
 - If the report is not the company's or not an annual report, write `{"wrong_report": true, "notes": {...}}` and nothing else.
 
+**Check before moving on:** right after writing each file, run `python -I tools/scripts/ar_helper_check.py <your group's csv> --only <SYM> FY<yy>`. If it lists anything, go back for only that item: read what's missing, correct a wrong value, or add a note saying why a value or `null` is right (a sum, an image read, not printed). Then run it once more and go to the next report. When all are done, run it without `--only`, and clear or explain anything left in your reply.
+
 `mb_features.py` and `ar_statements.py queue` pick the file up on their next run; nothing else to update. Reply with: reports done, fields written, fields left `null` and why, and anything the script got systematically wrong (with an example), so the parser can be fixed.
