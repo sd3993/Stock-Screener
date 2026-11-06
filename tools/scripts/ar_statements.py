@@ -56,6 +56,11 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #     only the part after a ' / ').
 #   - Units: ' ‘000’ with typographic quotes, '(Rs. ‘000)', '` ’ 000' are thousands. A headingless/unit-less page still
 #     takes the unit of the basis's other statement pages.
+# P6.6 (6 Nov 2026; found by ar_parsed_check.py): 'used in' lines keep their printed brackets (cfo_signed); 'Rs. in 'OOOs' read through
+#   OCR; a warrants line holding the funds subtotal is no warrants; 'profit before tax and before minority interest' is the pbt;
+#   preference capital comes out of equity_cap (pref_split); the first adjacent statement pages beat later, higher-scoring ones
+#   (first_pair: subsidiaries come after); a cash flow next to the statements wins; months are read for this year end only, and a
+#   long year's previous column is labelled by them (reparse moves helper answers to the new label: relabel_helper).
 # Second pass (4 Nov 2026; every change below was tested by 'reparse' against the first pass: trusted fields identical except
 # where the old value was wrong, e.g. a subsidiary's page or a wrong unit):
 #   - Ligatures (fi, fl ...) are expanded; 'T O T A L' spaced letters are joined; blank lines no longer reset a wrapped label
@@ -110,7 +115,7 @@ STATUS_COLS = ['sym', 'report_fy', 'fym', 'code', 'src', 'url', 'result', 'years
                'json_file', 'mb', 'note', 'at']
 
 # ------------------------------------------------------------------ parser ------------------------------------------------
-UNIT = [(r'crores?|cr\.', 1.0), (r'lakhs?|lacs?', 0.01), (r'millions?|mn\b', 0.1), (r"thousands?|['’‘]\s*000", 1e-4)]
+UNIT = [(r'crores?|cr\.', 1.0), (r'lakhs?|lacs?', 0.01), (r'millions?|mn\b', 0.1), (r"thousands?|['’‘]\s*[0oq]{3}", 1e-4)]
 NUM = re.compile(r'(\(-\)\s*|-\s?)?\(?\d[\d,]*(\.\d+)?\)?(?=\s|$)|(?<=\s)[—–-](?=\s|$)')
 HEAD = {'bs': r'BALANCE\s*SHEET\s*AS\s*(A[TS]|ON)',
         'pl': r'PROFIT\s*(AND|&)\s*LOSS\s*(ACCOUNT|STATEMENT)?\s*FOR|STATEMENT\s*OF\s*PROFIT\s*(AND|&)\s*LOSS|'
@@ -483,6 +488,8 @@ def parse_page(text, stmt):
                     continue
                 if fld == 'pbt_pre_exc' and re.search(r'operating|interest|depreciation', label):
                     continue
+                if fld == 'pat_pre_mi' and re.search(r'before (income )?tax', label):
+                    continue  # 'Profit before taxation and before minority interest' is the profit before tax
                 if fld == 'pat' and re.search(r'computed|per (equity )?share|basis of', label):
                     continue  # an earnings-per-share line that names the profit it is computed on
                 hit = fld
@@ -490,9 +497,7 @@ def parse_page(text, stmt):
                 if fld == 'cfo':  # the last such line wins ('before extraordinary items' lines come first)
                     if re.search(r'before|continuing|discontinu', label):
                         break
-                    if 'used in' in label and not re.search(r'from|generated|inflow', label):
-                        pair = [None if x is None else -x for x in pair]  # 'net cash used in operating activities 1,234'
-                    out[fld] = pair
+                    out[fld] = cfo_signed(label, pair)
                     break
                 if fld == 'pat':
                     pat_c.append((label, pair, len(cur) > 1 or len(prv) > 1))
@@ -534,6 +539,9 @@ def parse_page(text, stmt):
                     out[b_] = [c_[0], p_[0]]
                     flags.pop(b_)
         # 'Reserves & surplus 20,564 21,575': the outer figure is share capital + reserves (shareholders' funds)
+        if out.get('warrants') and out.get('share_capital') and out.get('reserves'):  # 'Money received against share warrants - 204,572':
+            out['warrants'] = [0.0 if None not in (w_, c_, r_) and close(w_, c_ + r_) else w_  # a dash, then the subtotal of the funds
+                               for w_, c_, r_ in zip(out['warrants'], out['share_capital'], out['reserves'])]
         if flags.get('reserves') == 'several' and 'reserves' in multi and out.get('share_capital') and                 None not in out['share_capital']:
             (c_, p_) = multi['reserves']
             if len(c_) == 2 and len(p_) == 2 and close(c_[0] + out['share_capital'][0], c_[1]) and                     close(p_[0] + out['share_capital'][1], p_[1]):
@@ -612,6 +620,49 @@ def parse_page(text, stmt):
                 out['tax_total'] = [p1[0] - p2[0], p1[1] - p2[1]]
     flags['_ncols'] = len(cols)
     return out, notes, mid, flags
+
+
+def cfo_signed(label, pair):
+    """A cash flow line's printed pair as cash flows: brackets are outflows, whatever the label says ('Net cash used in operating
+    activities (1,234)' is an outflow); a 'used in' line with no brackets in either column is all outflow."""
+    if re.search(r'used', label) and not re.search(r'from|generated|inflow|provided', label) and             not any(x is not None and x < 0 for x in pair):
+        return [None if x is None else -x for x in pair]
+    return list(pair)
+
+
+def prev_year_key(key, months):
+    """The year end before year end key ('YYYY-MM') when that year ran for months months."""
+    t = int(key[:4]) * 12 + int(key[5:]) - 1 - int(months or 12)
+    return f'{t // 12}-{t % 12 + 1:02d}'
+
+
+def pref_split(pm, bs_page, eq, unit):
+    """(equity, preference) in crore when the capital schedule (the pages from the balance sheet on) shows that the share capital
+    read, eq, is equity + preference capital: in its issued / paid-up part (not the authorised one), a figure on an
+    equity-share line and a figure on a preference-share line add up to it, to the rounding."""
+    ids = list(pm)
+    if bs_page not in pm or not unit or not eq:
+        return None
+    i = ids.index(bs_page)
+    for pid in ids[i:i + 10]:
+        lines = pm[pid].splitlines()
+        st = next((n for n, l in enumerate(lines) if re.search(r'(?i)(issued|subscribed|paid[- ]up)', l)), None)
+        if st is None or not re.search(r'(?i)preference', ' '.join(lines[st:])):
+            continue
+        ep, pp = [], []
+        for n, l in enumerate(lines[st:], st):
+            tk = [abs(val(t[0])) for t in tokens(l)] or ([abs(val(t[0])) for t in tokens(lines[n + 1])] if n + 1 < len(lines) else [])
+            if re.search(r'(?i)preference', l):
+                pp += tk
+            elif re.search(r'(?i)equity', l):
+                ep += tk
+        tol = max(0.011, 2e-4 * eq)
+        for p_ in set(pp):
+            if 0.01 * eq <= p_ * unit < eq:
+                for e_ in set(ep):
+                    if abs(e_ * unit + p_ * unit - eq) <= tol:
+                        return (round(eq - p_ * unit, 4), round(p_ * unit, 4))
+    return None
 
 
 def content_pages(pgs, stmt):
@@ -696,6 +747,58 @@ def same_entity(a, b):
     return not a or not b or difflib.SequenceMatcher(None, a, b).ratio() >= 0.6
 
 
+def first_pair(pgs, found):
+    """The company's statements come before its subsidiaries', which often score higher: per basis, the first readable balance
+    sheet and P&L with the statement heading, on different pages within 3 PDF pages of each other, replace a pick that isn't such
+    a pair (unless both its pages come first) or a pair more than 6 pages later."""
+    num = lambda x: int(re.match(r'\d+', x).group()) if re.match(r'\d+', x) else None
+    near = lambda a, b: a is not None and b is not None and abs(a - b) <= 3
+    sales = ('net_ops', 'net_sales', 'turnover', 'gross_sales', 'sum_income', 'int_earned', 'total_income')
+    heads = {'bs': {}, 'pl': {}}
+    y0 = report_year([t for _, t in pgs if any(stmt_head(t, x) for x in HEAD)])[0]
+    for st in heads:
+        for i, (pid, t) in enumerate(pgs):
+            if num(pid) is None or not stmt_head(t, st):
+                continue
+            d_ = report_year([t])[0]
+            if d_ and y0 and d_.year != y0.year:
+                continue  # another year's statement (an old report bound in)
+            h = ' '.join(t[:2500].split()).upper()
+            m = re.search(HEAD[st], h)
+            b = 'consolidated' if 'CONSOLIDATED' in h[max(0, m.start() - 200):m.end() + 100] or 'CONSOLIDATED' in h[:300] else 'standalone'
+            heads[st].setdefault(b, []).append((i, pid))
+    for b in heads['bs']:
+        pair = None
+        for i, a_ in heads['bs'][b]:
+            for k, c_ in heads['pl'].get(b, []):
+                if a_ == c_ or not near(num(a_), num(c_)) or re.search(r'(?i)operating\s+activit', pgs[k][1]):
+                    continue
+                o, n, mid, fl = parse_page(pgs[i][1], 'bs')
+                if len(o) < 4 and i + 1 < len(pgs):
+                    o2, _, _, fl2 = parse_page(pgs[i + 1][1], 'bs')
+                    o, fl = {**o2, **o}, {**fl2, **fl}
+                o_, n_, mid_, fl_ = parse_page(pgs[k][1], 'pl')
+                if 'total' in o and ('share_capital' in o or 'reserves' in o) and ('pat' in o_ or 'pbt' in o_ or 'pat_pre_mi' in o_) and \
+                        any(x in o_ for x in sales):
+                    pair = ((len(o), a_, o, n, mid, fl), (len(o_), c_, o_, n_, mid_, fl_))
+                    break
+            if pair:
+                break
+        if not pair:
+            continue
+        ca, cc = (found['bs'].get(b) or (0, None))[1], (found['pl'].get(b) or (0, None))[1]
+        na, nc, pa, pc = num(ca) if ca else None, num(cc) if cc else None, num(pair[0][1]), num(pair[1][1])
+        if (ca, cc) == (pair[0][1], pair[1][1]):
+            continue
+        if near(na, nc) and ca != cc:
+            if na - pa <= 6:
+                continue  # already a pair, the first or close to it
+        elif na is not None and nc is not None and pa > na and pc > nc:
+            continue  # both pages picked come first
+        found['bs'][b], found['pl'][b] = pair
+    return found
+
+
 def find(pgs, stmt, anchors=None, cname=None):
     """find_one() with the strict headings; for a basis it found nothing for, the looser headings ('Consolidated Balance
     Sheet' with the date on the next line, 'Profit and Loss Statement')."""
@@ -770,6 +873,7 @@ def find_one(pgs, stmt, anchors=None, cname=None, content=False):
             if a_ is None or not pn or abs(int(pn.group()) - a_[0]) > 150 or not same_entity(entity(p), a_[1]):
                 continue
             score -= abs(int(pn.group()) - a_[0]) / 1000
+            score += 100 if abs(int(pn.group()) - a_[0]) <= 6 else 0  # the page next to the statements, not a subsidiary's with more lines
         if score > best.get(basis, (0,))[0]:
             best[basis] = (score, pid, o, n, mid, fl)
     return best
@@ -778,25 +882,29 @@ def find_one(pgs, stmt, anchors=None, cname=None, content=False):
 def report_year(texts):
     """(year-end date, months) read from the statement headings: the most common 'as at / year ended <date>'."""
     c = collections.Counter()
-    months = 12
+    months, long_ = 12, []
     for t in texts:
         h = ' '.join(t[:2500].split()).upper()
         for m in re.finditer(r'(AS\s*(AT|ON)|(YEAR|PERIOD)\s*ENDED|ENDED\s*ON|ENDED)\s*(THE\s*)?(\d{1,2})\s*(ST|ND|RD|TH)?\s*'
                              r'(DAY\s*OF\s*)?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*[,.\s]*((19|20)\d\d)', h):
             c[(int(m.group(9)), MON[m.group(8)])] += 1
-        for m in re.finditer(r'(AS\s*(AT|ON)|ENDED(\s*ON)?)\s*(THE\s*)?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s*'
-                             r'(\d{1,2})\s*(ST|ND|RD|TH)?\s*[,.]?\s*((19|20)\d\d)', h):  # 'March 31, 2014'
+        for m in re.finditer(r'(AS\s*(AT|ON)|ENDED(\s*ON)?)\s*(THE\s*)?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\.?\s*'
+                             r'(\d{1,2})\s*(ST|ND|RD|TH)?\s*[,.]?\s*((19|20)\d\d)', h):  # 'March 31, 2014', 'Sept. 30, 2006'
             c[(int(m.group(8)), MON[m.group(5)])] += 1
         for m in re.finditer(r'(AS\s*(AT|ON)|ENDED)\s*(\d{1,2})[./-](\d{1,2})[./-]((19|20)\d\d)', h):
             if 1 <= int(m.group(4)) <= 12:
                 c[(int(m.group(5)), int(m.group(4)))] += 1
-        m = re.search(r'(FIFTEEN|EIGHTEEN|NINE|SIX|TWELVE|FOURTEEN|SIXTEEN|\d{1,2})\s*MONTHS?\s*(PERIOD\s*)?ENDED', h)
-        if m:
+        for m in re.finditer(r'(FIFTEEN|EIGHTEEN|NINE|SIX|TWELVE|FOURTEEN|SIXTEEN|\d{1,2})\s*MONTHS?\s*(PERIOD\s*)?ENDED(.{0,30})', h):
             w = {'FIFTEEN': 15, 'EIGHTEEN': 18, 'NINE': 9, 'SIX': 6, 'TWELVE': 12, 'FOURTEEN': 14, 'SIXTEEN': 16}
-            months = w.get(m.group(1)) or int(m.group(1)) if m.group(1).isdigit() or m.group(1) in w else 12
+            n_ = w.get(m.group(1)) or int(m.group(1))
+            d_ = re.search(r'(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*.{0,8}?((19|20)\d\d)', m.group(3))
+            if 3 <= n_ <= 24 and d_:
+                long_.append((int(d_.group(2)), MON[d_.group(1)], n_))
     if not c:
         return None, months
-    (y, mo), _ = c.most_common(1)[0]
+    y, mo = max(c, key=lambda d: (c[d], d))
+    # the period named for this year end only: a '9 months ended' in the previous year's column isn't this year's length
+    months = next((n_ for y_, m_, n_ in long_ if (y_, m_) == (y, mo)), months)
     return dt.date(y, mo, 28), months
 
 
@@ -950,7 +1058,7 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
     """pgs: list of (page_no, text). -> result dict (bases with years, fields, checks, helper lists). cname: the company's
     names (list), to tell its statements from a subsidiary's printed in the same report."""
     pgs = [(i, t.translate(LIG)) for i, t in pgs]
-    found = {s: find(pgs, s, None, cname) for s in ('bs', 'pl')}
+    found = first_pair(pgs, {s: find(pgs, s, None, cname) for s in ('bs', 'pl')})
     anc = {}
     for b_ in ('standalone', 'consolidated'):
         ps = [(re.match(r'\d+', found[s][b_][1]), found[s][b_][1]) for s in ('pl', 'bs') if b_ in found[s]]
@@ -961,6 +1069,17 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
     heads = [t for _, t in pgs if any(stmt_head(t, s) for s in HEAD)] or \
         [t for _, t in pgs if any(re.search(HEAD[s], ' '.join(t[:2500].split()).upper()) for s in HEAD)]
     yend, months = report_year(heads)
+    # the statements used decide the year end within the year and the length: a subsidiary's dates on other pages can outnumber
+    # them. Only when most of those pages agree, on the same calendar year as the report's headings overall.
+    tp = dict(pgs)
+    used = [tp[v[1]] for s in found for v in found[s].values()]
+    votes = collections.Counter(y_.isoformat()[:7] for y_ in (report_year([t])[0] for t in used) if y_)
+    top = votes.most_common(1)[0] if votes else None
+    if top and yend and top[1] > sum(votes.values()) / 2 and int(top[0][:4]) == yend.year:
+        yend = dt.date(int(top[0][:4]), int(top[0][5:]), 28)
+    months = report_year(used)[1] if used else 12
+    if yend and months != 12 and report_year(used)[0] and report_year(used)[0].isoformat()[:7] != yend.isoformat()[:7]:
+        months = 12
     order = {pid: i for i, (pid, _) in enumerate(pgs)}
     starts = sorted(order[v[1]] for s in found for v in found[s].values())
     if yend is None and fy_hint:
@@ -1019,13 +1138,20 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
             out.setdefault('notes', []).append(f'{basis}: heading found on pages {pages} but under 3 fields a year read; '
                                                'treated as not a statement')
             continue
+        pref_notes = []
+        if pages['bs'] and (units.get('bs') or (None,))[0]:  # screener's Equity Capital has no preference capital
+            for y in yrs:
+                ep = pref_split(text_of, pages['bs'], y['equity_cap'][0], units['bs'][0]) if 'equity_cap' in y else None
+                if ep:
+                    y['equity_cap'][0] = ep[0]
+                    pref_notes.append(f'equity_cap: {ep[0]:g} after preference capital {ep[1]:g} (capital schedule)')
         if unit is None:
             for y in yrs:
                 for k in y:
                     y[k][1] = 'low'
         B = {'pages': {s: pages[s] for s in found}, 'unit': uword, 'bank': bank,
              'split_found': {s: pages[s + '_split'] for s in found}, 'raw': d, 'years': {},
-             'notes': [n for s in pick if pick[s] for n in pick[s][3]] + ([] if unit else ['unit not found'])}
+             'notes': [n for s in pick if pick[s] for n in pick[s][3]] + ([] if unit else ['unit not found']) + pref_notes}
         B['unit_missing'] = not unit
         for j, y in enumerate(yrs):
             foot = y.pop('_foot', None) is not None
@@ -1034,7 +1160,7 @@ def parse_pages(pgs, fy_hint=None, fym=3, cname=None):
             for k_ in absent:
                 y.pop('_abs_' + k_)
             ck, helper = finish_year(y, bank, foot, bool(out.get('note_year')), absent)
-            key = f'{(yend.year - j) if yend else "?"}-{yend.month:02d}' if yend else f'cur-{j}'
+            key = (f'{yend.year}-{yend.month:02d}' if not j else prev_year_key(f'{yend.year}-{yend.month:02d}', months)) if yend else f'cur-{j}'
             B['years'][key] = {'fields': {k: [round(x[0], 4), x[1], x[2]] for k, x in y.items()}, 'checks': ck,
                                'helper': helper, 'foot': foot, 'sales_ok': sok, 'absent': sorted(absent)}
         out['bases'][basis] = B
@@ -1290,39 +1416,48 @@ def load_ar(sym, root=COMP):
             continue
         rep = os.path.basename(jf)[3:-5]
         has_c = 'consolidated' in (r.get('bases') or {}) or 'consolidated' in (hp.get('bases') or {})
-        for basis in ('consolidated', 'standalone'):
-            yrs = dict(((r.get('bases') or {}).get(basis) or {}).get('years') or {})
-            if hp.get('replace_parsed'):  # the helper re-read the whole report (wrong year, wrong pages, scanned)
-                yrs = {}
-            for k in ((hp.get('bases') or {}).get(basis) or {}):
-                yrs.setdefault(k, {'fields': {}})
-            for j, (key, y) in enumerate(sorted(yrs.items(), reverse=True)):
-                if not re.match(r'\d{4}-\d\d$', key):
-                    continue
-                cur = key == (hp.get('year_end') or r.get('year_end') or '')
-                f = {k: (v[0], v[1], 'ar') for k, v in (y.get('fields') or {}).items()
-                     if v[1] != 'low' and k not in (y.get('helper') or [])}  # flagged fields wait for the helper
-                hv = ((hp.get('bases') or {}).get(basis) or {}).get(key) or {}
-                for k, v in hv.items():
-                    if k in FIELDS and isinstance(v, (int, float)):
-                        f[k] = (float(v), 'helper', 'ar_helper')
-                    elif k in FIELDS and v is None:
-                        f.pop(k, None)  # the helper found the field isn't on the page
-                if isinstance(hv.get('other_income'), (int, float)) and isinstance(hv.get('exceptional'), (int, float)):
-                    f['other_income'] = (hv['other_income'] + hv['exceptional'], 'helper', 'ar_helper')  # screener's way
-                if 'op' not in f or f['op'][1] != 'helper':  # recompute op from final components
-                    c = [f.get(k) for k in ('pbt', 'interest', 'dep', 'other_income')]
-                    if None not in c and not (((r.get('bases') or {}).get(basis) or {}).get('bank')):
-                        f['op'] = (c[0][0] + c[1][0] + c[2][0] - c[3][0], 'derived', 'ar')
-                    else:
-                        f.pop('op', None)
-                pr = (1 if cur else 0)
-                if key not in out[basis] or pr > rank.get((basis, key), -1):
-                    out[basis][key] = {'fields': f, 'months': r.get('months', 12) if cur else 12, 'report': rep,
-                                       'has_consolidated': has_c,
-                                       'bank': bool(((r.get('bases') or {}).get(basis) or {}).get('bank'))}
-                    rank[(basis, key)] = pr
+        for basis, key, f, cur in report_final(r, hp):
+            pr = (1 if cur else 0)
+            if key not in out[basis] or pr > rank.get((basis, key), -1):
+                out[basis][key] = {'fields': f, 'months': r.get('months', 12) if cur else 12, 'report': rep,
+                                   'has_consolidated': has_c,
+                                   'bank': bool(((r.get('bases') or {}).get(basis) or {}).get('bank'))}
+                rank[(basis, key)] = pr
     return out
+
+
+def report_final(r, hp):
+    """One report's final values: (basis, year, {field: (value, conf, src)}, is its current year) with the helper's values over
+    the parsed ones; parsed values flagged for a helper (or low confidence) are left out until the helper answers."""
+    res = []
+    for basis in ('consolidated', 'standalone'):
+        yrs = dict(((r.get('bases') or {}).get(basis) or {}).get('years') or {})
+        if hp.get('replace_parsed'):  # the helper re-read the whole report (wrong year, wrong pages, scanned)
+            yrs = {}
+        for k in ((hp.get('bases') or {}).get(basis) or {}):
+            yrs.setdefault(k, {'fields': {}})
+        for key, y in sorted(yrs.items(), reverse=True):
+            if not re.match(r'\d{4}-\d\d$', key):
+                continue
+            cur = key == (hp.get('year_end') or r.get('year_end') or '')
+            f = {k: (v[0], v[1], 'ar') for k, v in (y.get('fields') or {}).items()
+                 if v[1] != 'low' and k not in (y.get('helper') or [])}  # flagged fields wait for the helper
+            hv = ((hp.get('bases') or {}).get(basis) or {}).get(key) or {}
+            for k, v in hv.items():
+                if k in FIELDS and isinstance(v, (int, float)):
+                    f[k] = (float(v), 'helper', 'ar_helper')
+                elif k in FIELDS and v is None:
+                    f.pop(k, None)  # the helper found the field isn't on the page
+            if isinstance(hv.get('other_income'), (int, float)) and isinstance(hv.get('exceptional'), (int, float)):
+                f['other_income'] = (hv['other_income'] + hv['exceptional'], 'helper', 'ar_helper')  # screener's way
+            if 'op' not in f or f['op'][1] != 'helper':  # recompute op from final components
+                c = [f.get(k) for k in ('pbt', 'interest', 'dep', 'other_income')]
+                if None not in c and not (((r.get('bases') or {}).get(basis) or {}).get('bank')):
+                    f['op'] = (c[0][0] + c[1][0] + c[2][0] - c[3][0], 'derived', 'ar')
+                else:
+                    f.pop('op', None)
+            res.append((basis, key, f, cur))
+    return res
 
 
 # ------------------------------------------------------------------ plan ---------------------------------------------------
@@ -1507,6 +1642,28 @@ def fetch(a):
     print(f'done: {len(by)} companies, {n} reports tried, {time.time() - t0:.0f}s')
 
 
+def relabel_helper(hf, res, old_end=None):
+    """A helper file written under an old label (a misread year end; a long year's previous column labelled 12 months back): move
+    its answers to the true labels. old_end: the report's year end before this parse."""
+    ye, months = res.get('year_end'), res.get('months') or 12
+    hp = load(hf)
+    if not hp or not ye or hp.get('replace_parsed'):
+        return
+    moves = {f'{int(ye[:4]) - 1}{ye[4:]}': prev_year_key(ye, months)}
+    if old_end and old_end != ye:
+        moves = {old_end: ye, f'{int(old_end[:4]) - 1}{old_end[4:]}': prev_year_key(ye, months)}
+    changed = False
+    for ys in (hp.get('bases') or {}).values():
+        for old, new in moves.items():
+            if old != new and old in ys and new not in ys:
+                ys[new] = ys.pop(old)
+                changed = True
+    if changed:
+        with open(hf + '.tmp', 'w', encoding='utf-8') as fh:
+            json.dump(hp, fh, indent=1, ensure_ascii=False)
+        os.replace(hf + '.tmp', hf)
+
+
 def reparse(a):
     D = hist_dir()
     keep = set(a.syms.split(',')) if a.syms else None
@@ -1527,8 +1684,13 @@ def reparse(a):
             jf = os.path.join(COMP, r['sym'], fy_folder(y), f'ar_FY{y % 100:02d}.json')
             if jf.replace('\\', '/') != r['json_file'] and os.path.exists(r['json_file']):
                 os.remove(r['json_file'])
+                hf_ = r['json_file'][:-5] + '_helper.json'
+                if os.path.exists(hf_) and not os.path.exists(jf[:-5] + '_helper.json'):
+                    os.makedirs(os.path.dirname(jf), exist_ok=True)
+                    os.replace(hf_, jf[:-5] + '_helper.json')  # the helper's answers go with the report
             os.makedirs(os.path.dirname(jf), exist_ok=True)
             json.dump(res, open(jf, 'w', encoding='utf-8'), indent=1)
+            relabel_helper(jf[:-5] + '_helper.json', res, old.get('year_end'))
             result, note = result_of(res)
             r.update(result=result, years=' '.join(sorted({k for b in res['bases'].values() for k in b['years']})),
                      bases=' '.join(res['bases']), helper_fields=helper_summary(res, plan_need[r['sym']]),
