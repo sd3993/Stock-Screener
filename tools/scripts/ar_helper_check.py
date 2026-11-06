@@ -1,6 +1,6 @@
 # P7 recheck, run after each helper group: is each value a helper wrote printed in that report?
 #   python -I tools/scripts/ar_helper_check.py FILE.csv      # rows with sym, fy, page_text, helper_file (a group's rows)
-# Looks for the value's digits in the report's full page text at each unit (crore, lakh, thousand, million, rupees), allowing for
+# Looks for the value's digits in the report's page text and whole-report text at each unit (crore, lakh, thousand, million, rupees), allowing for
 # rounding and for Indian or Western commas. Prints the values it can't find: arithmetic the helper noted, a read from the PDF, or a wrong
 # figure. Also prints checks on the figures themselves: pat <= pbt + small tax credit, debtors and borrowings within total assets.
 import csv, json, os, re, sys
@@ -29,8 +29,9 @@ for r in csv.DictReader(open(sys.argv[1], encoding='utf-8')):
         continue
     h = json.load(open(hf, encoding='utf-8'))
     text = ''
-    if os.path.exists(r['page_text']):
-        text = re.sub(r'[,\s]', '', open(r['page_text'], encoding='utf-8', errors='replace').read())
+    for tf in (r['page_text'], r['page_text'].replace('_pages.txt', '_full.txt')):
+        if os.path.exists(tf):
+            text += re.sub(r'[,\s]', '', open(tf, encoding='utf-8', errors='replace').read())
     notes = h.get('notes') or {}
     for b, years in (h.get('bases') or {}).items():
         for y, fields in years.items():

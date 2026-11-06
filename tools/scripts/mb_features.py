@@ -280,7 +280,7 @@ class Company:
             try:
                 end, _ = parse_period(r['date'])
                 filed = dt.datetime.strptime(r['submissionDate'], '%d-%b-%Y').date()
-            except (KeyError, ValueError, TypeError):
+            except (KeyError, ValueError, TypeError, AttributeError):
                 continue
             e = q.setdefault(end, {'inst': None, 'pledge': None})
             if fnum(r.get('pr_and_prgrp')) is not None:
@@ -289,7 +289,7 @@ class Company:
             try:
                 end, _ = parse_period(r['quarter_end'])
                 filed = dt.datetime.strptime(r['filed'], '%d-%b-%Y').date()
-            except (KeyError, ValueError, TypeError):
+            except (KeyError, ValueError, TypeError, AttributeError):
                 continue
             e = q.setdefault(end, {'inst': None, 'prom': None, 'src': 'nse'})
             e['filed'] = min(filed, e.get('filed') or filed)
