@@ -33,6 +33,15 @@ for r in csv.DictReader(open(sys.argv[1], encoding='utf-8')):
         if os.path.exists(tf):
             text += re.sub(r'[,\s]', '', open(tf, encoding='utf-8', errors='replace').read())
     notes = h.get('notes') or {}
+    # was every basis and year asked for read? (a helper file drops the report from the queue, so a gap here is never asked again)
+    bases = h.get('bases') or {}
+    has = lambda b, y=None: any(isinstance(v, (int, float)) for yy, fs in (bases.get(b) or {}).items() if y in (None, yy) and isinstance(fs, dict) for v in fs.values())
+    for part in r.get('fields', '').split(';'):
+        m = re.match(r'\s*([sc]):(\d{4}-\d{2}):', part)
+        if m and not has({'s': 'standalone', 'c': 'consolidated'}[m[1]], m[2]) and not h.get('replace_parsed'):
+            report.append(f"{r['sym']} FY{r['fy']}: asked {m[1]}:{m[2]}, nothing read | {str(notes.get('all', ''))[:60]}")
+    if (h.get('replace_parsed') or r.get('fields', '').startswith('all')) and not has('consolidated') and re.search(r'consolidatedbalancesheetasat', text, re.I):
+        report.append(f"{r['sym']} FY{r['fy']}: report prints a consolidated balance sheet, none read")
     for b, years in (h.get('bases') or {}).items():
         for y, fields in years.items():
             if not isinstance(fields, dict):
