@@ -29,7 +29,7 @@ for r in csv.DictReader(open(sys.argv[1], encoding='utf-8')):
         continue
     h = json.load(open(hf, encoding='utf-8'))
     text = ''
-    for tf in (r['page_text'], r['page_text'].replace('_pages.txt', '_full.txt')):
+    for tf in (r['page_text'], r['json'][:-5] + '_full.txt'):
         if os.path.exists(tf):
             text += re.sub(r'[,\s]', '', open(tf, encoding='utf-8', errors='replace').read())
     notes = h.get('notes') or {}

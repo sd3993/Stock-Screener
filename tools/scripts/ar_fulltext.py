@@ -16,7 +16,7 @@ rows = list(csv.DictReader(open(os.path.join(D, 'ar_helper_queue.csv'), encoding
 done = scanned = failed = 0
 t0 = time.time()
 for r in rows:
-    out = r['page_text'].replace('_pages.txt', '_full.txt')
+    out = r['json'][:-5] + '_full.txt'  # beside the parse; page_text is empty for a report the parser found no pages in
     if os.path.exists(out) or not r['url'].lower().startswith('http'):
         continue
     if a.limit and done + failed >= a.limit:
