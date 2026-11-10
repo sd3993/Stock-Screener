@@ -25,7 +25,7 @@ import argparse, csv, datetime as dt, glob, html, json, os, re, subprocess, sys,
 # From Dec 2015 BSE serves the new-format filings mapped onto the old table (e.g. FPIs under "Qualified Foreign
 # Investor", employee-trust shares left out of the total, so promoter % can differ from NSE's by a few hundredths).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 URL = 'https://www.bseindia.com/corporates/ShareholdingPattern.aspx?scripcd={code}&flag_qtr=1&qtrid={q}.00{flag}'
@@ -267,7 +267,7 @@ def main():
             need.setdefault(sym, set()).update(range(max(q0, FIRST), min(q1, LAST) + 1))
             codes[sym] = m.group(2)
     if not a.want or a.rows:
-        D = hist_dir()
+        D = playbook_dir()
         for r in csv.DictReader(open(a.rows or os.path.join(D, 'sample.csv'), encoding='utf-8')):
             as_of = (r.get('as_of') or r.get('start') or '')[:10]
             if not as_of:
@@ -278,7 +278,7 @@ def main():
     if a.syms:
         keep = set(a.syms.split(','))
         need = {k: v for k, v in need.items() if k in keep}
-    run = hist_dir()
+    run = playbook_dir()
     nocode, todo = [], []
     for sym in sorted(need):
         code = bse_code(sym, root, codes.get(sym))

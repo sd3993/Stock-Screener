@@ -1,5 +1,5 @@
 import argparse, ast, bisect, collections, csv, datetime as dt, hashlib, json, math, os, random, re, statistics, sys, time
-# Study and playbook features, S6 (process/s6_playbook.md, steps 2-8; tests in process/s6_playbook.md, "Pattern tests").
+# Playbook base data features, S6 (process/s6_playbook.md, steps 2-8; tests in process/s6_playbook.md, "Pattern tests").
 # Staged tests, one subcommand per round. No fetching; nothing here writes outcomes.csv, sample.csv or a features file.
 #   python -I tools/scripts/mb_patterns.py scan [--features FILE[,FILE]]     # steps 2-3: winners, then market lift (chart features)
 #   python -I tools/scripts/mb_patterns.py panel [--seed 1] [--n 3]          # step 4: peer_panel.csv, peer_untagged.csv
@@ -7,7 +7,7 @@ import argparse, ast, bisect, collections, csv, datetime as dt, hashlib, json, m
 #   python -I tools/scripts/mb_patterns.py market_fetch [--force]            # market_fetch.txt (statements for the market test)
 #   python -I tools/scripts/mb_patterns.py test  [--tag-limit 200]           # steps 6-7: 2016-2023 unchanged; whole market
 #   python -I tools/scripts/mb_patterns.py exits [--write-rows] [--exit-features FILE]   # step 8
-#   common: --dir DIR (reads and writes there, default the newest study run), --out FILE (patterns.csv), --features,
+#   common: --dir DIR (reads and writes there, default the playbook base data folder), --out FILE (patterns.csv), --features,
 #           --market-features FILE (default <dir>/market_features.csv), --companies DIR, --force (redo a finished stage)
 # After `panel`: mb_features.py --rows peer_panel.csv --out features_panel.csv; bse_shp.py --rows peer_panel.csv;
 #   ar_statements.py plan --rows peer_panel.csv --groups peer (its default --groups drops group=peer rows).
@@ -41,7 +41,7 @@ import argparse, ast, bisect, collections, csv, datetime as dt, hashlib, json, m
 #     or below half the signal date's price within FALL_YEARS.
 # Not testable as written: NOT_TESTED, listed in patterns.csv as kind=not_tested with the reason.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 
 FREQ_MIN, LIFT_MIN = 0.5, 1.5
 MIN_TYPE_WINNERS = 15  # a business type with fewer winners in a horizon is reported as too few
@@ -1292,9 +1292,9 @@ def exits(a):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='Study and playbook pattern tests (process/s6_playbook.md)')
+    ap = argparse.ArgumentParser(description='Playbook base data pattern tests (process/s6_playbook.md)')
     ap.add_argument('cmd', choices=['scan', 'panel', 'peers', 'market_fetch', 'test', 'exits'])
-    ap.add_argument('--dir', help='read and write there, not the newest study run')
+    ap.add_argument('--dir', help='read and write there, not the playbook base data folder')
     ap.add_argument('--out', help='patterns.csv path')
     ap.add_argument('--features', help='features file(s), comma-separated; default features.csv')
     ap.add_argument('--market-features', dest='market_features')
@@ -1308,7 +1308,7 @@ def main():
     ap.add_argument('--force', action='store_true')
     ap.add_argument('--refresh', action='store_true', help='redo the artefact checks of market winners')
     a = ap.parse_args()
-    a.dir = a.dir or hist_dir()
+    a.dir = a.dir or playbook_dir()
     {'scan': scan, 'panel': panel, 'peers': peers, 'market_fetch': market_fetch, 'test': test, 'exits': exits}[a.cmd](a)
 
 

@@ -6,7 +6,7 @@ Read by the orchestrator (any session that runs or resumes a run). Where each da
 - **`full`:** research from scratch: market-wide screens, sector tailwind map, gate, then every holding and survivor analysed. Run yearly, and at once when a sector marker breaks, a major policy is notified that touches a sector on the map or a preferred sector (rule 21), or the list runs thin (fewer names passing the hurdle than rule 13's position count needs).
 - **`recheck`:** existing companies only (holdings and every name currently listed in the sheet), each quarter after results. It is the same pipeline entered at the company list (S9) with the last full run's sector map; same step files, same status files. A script checks each company's thesis markers (S11); only companies it sends on get the fetch helper and a new analysis.
 
-Screening is always market-wide (S2, S3), never sector-only. Why (study evidence, `runs/study/sector_test.md`): multibaggers cluster by industry only moderately (the top-20% industries held 47% of 3x-in-5-years winners against 38% by chance); a company with high EPS growth in a low-growth industry still reached 3x 48% of the time against 56% in a high-growth one; and no backward-looking industry figure predicted which industries would produce winners (rank correlation about 0 from 2016). So the sector map orders and frames the work (which companies go first, each company's thesis horizon and re-rating case, which sectors get a playbook); it never excludes a company. Because backward numbers didn't predict, every sector call is logged with its date and markers, and its hit rate is tracked across runs (S5).
+Screening is always market-wide (S2, S3), never sector-only. Why (evidence from the playbook base data, `data/playbook/sector_test.md`): multibaggers cluster by industry only moderately (the top-20% industries held 47% of 3x-in-5-years winners against 38% by chance); a company with high EPS growth in a low-growth industry still reached 3x 48% of the time against 56% in a high-growth one; and no backward-looking industry figure predicted which industries would produce winners (rank correlation about 0 from 2016). So the sector map orders and frames the work (which companies go first, each company's thesis horizon and re-rating case, which sectors get a playbook); it never excludes a company. Because backward numbers didn't predict, every sector call is logged with its date and markers, and its hit rate is tracked across runs (S5).
 
 ## In one picture
 ```
@@ -45,8 +45,8 @@ Tiers (script / light / standard / deep / deepest) are defined in the user's glo
 | S4 | Sector numbers | full; recheck (stage numbers only) | scripts `scr_company.py --only overview,shareholding`, `sector_numbers.py` (to write) | `s4_sector_numbers.md` | `triage.csv`, `holdings.csv`, `scr/overview.json`, `scr/history.json`, `scr/shareholding.json`, `scr/announcements.json` | `sector_clusters.csv`, `sector_stage.csv` | every queued company and holding has an industry label or a recorded gap; every industry with 5+ companies has its stage numbers |
 | S5 | Sector tailwind map | full (build or review); recheck (review due sector markers only) | deep; then scripts `sector_order.py` (to write), `sector_calls.py` (to write) | `s5_sector_map.md` | S4's files, the previous `sector_map.md`, `sectors.json`, `runs/sector_calls.csv`, rule 21, official sources | `sector_map.md`, `sectors.json`, `sector_of.tsv`, reordered `gate_batches.json`, rows in `runs/sector_calls.csv` | every sector entry complete (all fields in the step file), every queued company and holding has a sector and rank, every call logged |
 | S5R | Sector map recheck | full; recheck when a marker status changed | deep | `s5r_sector_recheck.md` | `sector_map.md`, `sectors.json` | `sector_map_rc1.md`, `sectors_rc1.json` (rc2 if needed) | per `recheck.md` |
-| S6.0 | Playbook data | full, chosen sectors | scripts `mb_history.py`, `mb_outcomes.py`, `mb_features.py`, `mb_sector_test.py`, `playbook_data.py` (to write) | `s6_playbook.md` ("S6") | `sectors.json`, `runs/study/` | `runs/playbooks/<sector>/episodes.csv`, `data.md` | the sector's episodes and their companies listed with outcomes and start features |
-| S7.0 | Sector playbook | full, chosen sectors | deepest, one sector: it writes the sector notes every later analysis in that sector applies, weighing past episodes read strictly without hindsight; a few a year | `s6_playbook.md` ("S7") | S6's files, the companies' dated filings, `runs/study/experts.md`, `process/investing_rules.md` | `runs/playbooks/<sector>/playbook.md`, `notes_proposed.md` | every episode studied, every proposed note has passed the tests or is marked "possibly chance" |
+| S6.0 | Playbook data | full, chosen sectors | scripts `mb_history.py`, `mb_outcomes.py`, `mb_features.py`, `mb_sector_test.py`, `playbook_data.py` (to write) | `s6_playbook.md` ("S6") | `sectors.json`, `data/playbook/` | `runs/playbooks/<sector>/episodes.csv`, `data.md` | the sector's episodes and their companies listed with outcomes and start features |
+| S7.0 | Sector playbook | full, chosen sectors | deepest, one sector: it writes the sector notes every later analysis in that sector applies, weighing past episodes read strictly without hindsight; a few a year | `s6_playbook.md` ("S7") | S6's files, the companies' dated filings, `data/playbook/experts.md`, `process/investing_rules.md` | `runs/playbooks/<sector>/playbook.md`, `notes_proposed.md` | every episode studied, every proposed note has passed the tests or is marked "possibly chance" |
 | S7R.n | Playbook recheck | full | deep | `s6_playbook.md` ("S7R") | `playbook.md`, cited documents | `playbook_rc1.md` | per `recheck.md` |
 | S8.0 | Gate | full | deep, batches of ~10, tailwind sectors first | `s8_gate.md` | `gate_batches.json`, `triage.csv`, `sector_map.md`, `scr/`, filings | `gate/bNN.json`, `gate/<SYM>.json` | every company in the batch has a decision and a confirmed sector |
 | S8R.n | Gate recheck | full | deep | `s8r_gate_recheck.md` | `gate/bNN.json`, `gate/<SYM>.json` | `gate/bNN_rc1.json` (rc2 if needed), `gate/decisions.csv` (`gate_merge.py`) | per `recheck.md` |
@@ -58,7 +58,7 @@ Tiers (script / light / standard / deep / deepest) are defined in the user's glo
 | S13R1.n | Analysis recheck 1 | full, recheck | deep (deepest for an `unresolved` judgement call) | `s13r_analysis_recheck.md` | `analysis/<SYM>/main.json` | `analysis/<SYM>/recheck1.json`, `.md` | per `recheck.md` |
 | S13R2.n | Analysis recheck 2 | full, recheck | deep (deepest for an `unresolved` judgement call) | `s13r_analysis_recheck.md` | `analysis/<SYM>/recheck1.json` | `analysis/<SYM>/recheck2.json`, `.md` | per `recheck.md` |
 | S14.0 | Listing | full, recheck | light, batches of agreed analyses (trial: the first batch read back cell by cell; else standard); script `thesis_register.py` (to write); `sheet_write.py listing` (to write) replaces the helper | `s14_listing.md` | agreed analyses (`recheck2.json` or later); recheck: `marker_check.csv` | Data, Data Flags, pending tabs; `runs/verdict_history.csv`; `runs/theses/<SYM>.json` | every agreed analysis (and every marker-check hold) since the last listing is recorded |
-| S15 | Allocation | full, recheck | deep | `s15_allocation.md` (part "decide") | Kite holdings, `company_list.csv`, bucket and Data tabs, `runs/theses/`, rules | `holdings.csv`, `allocation/main.json` | decisions written with reasons |
+| S15 | Allocation | full, recheck | deep | `s15_allocation.md` (part "decide") | Kite holdings, `company_list.csv`, horizon and Data tabs, `runs/theses/`, rules | `holdings.csv`, `allocation/main.json` | decisions written with reasons |
 | S15R | Allocation recheck | full, recheck | deep, rechecks 1 and 2 (S15R1, S15R2) | `s15r_allocation_recheck.md` | `allocation/main.json`, then `recheck1.json`; `holdings.csv` | `allocation/recheck1.json`, `recheck2.json` | per `recheck.md` |
 | S16 | Sheet write | full, recheck | light (trial: read-back matches; else standard); `sheet_write.py allocation` (to write) replaces it | `s15_allocation.md` (part "write") | the last recheck's file, `holdings.csv` | Holdings and Allocation tabs | rows match the last recheck exactly |
 
@@ -107,7 +107,7 @@ Every to-do list names each step's tier (e.g. "S13.3 (RELIANCE): Deep analysis [
 ## Run folders and shared files (`runs/`, git-ignored)
 - `runs/<FYyyQn>/`: one folder per run, named after the latest quarter that has ended; the mode is the first line of its `progress.md`. A second run in the same quarter (a full run after that quarter's recheck run) gets the suffix `_full` (`runs/FY27Q2_full/`). Scripts take the run from `tools/scripts/config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
 - Shared across runs: `runs/verdict_history.csv` (S14), `runs/theses/<SYM>.json` (S14), `runs/sector_calls.csv` (S5), `runs/playbooks/<sector>/` (S6-S7).
-- `runs/study/`: the multibagger study's data, kept for the playbooks (outcomes, features, business types, pattern results, experts, the sector test; `s6_playbook.md`). Scripts find it through `config.py` (`hist_dir()`, or the `STUDY` environment variable). The study's working files from its 2026-11-03 run are in `archive/past_2026-11-03/` (never depended on).
+- `data/playbook/`: the playbook base data, kept for the playbooks (outcomes, features, business types, pattern results, experts, the sector test; `s6_playbook.md`). Scripts find it through `config.py` (`playbook_dir()`, or the `PLAYBOOK_DATA` environment variable). The working files of its 2026-11-03 build are in `archive/past_2026-11-03/` (never depended on).
 
 ## Resuming
 1. Read `COMMON_AI.md` (and the agent-specific file), this file, the run's `progress.md` (mode first) and `status.csv`.
@@ -119,25 +119,4 @@ Every to-do list names each step's tier (e.g. "S13.3 (RELIANCE): Deep analysis [
 - **Survivorship:** screener's screens list only listed companies; delisted and merged names come from the delisted list and whatever screener still has.
 - **Labels:** industry labels are today's NSE classification (screener's copy), not the one at a past date.
 - **Old fundamentals:** screener's statements cover about 12 years; before them only chart features (growth, P/E, size, price) cover every company, and annual-report statements cover only what was parsed (`tools/ar_statements.md`).
-- **Forward evidence only:** backward industry figures did not predict winning industries in the study, so a sector call rests on official forward evidence and is scored later, not trusted on its numbers.
-
-## Old → new step numbers (for reading old notes and run folders)
-| Old | New |
-|---|---|
-| F1 | S1 |
-| F2, F3 | S2, S3 |
-| F4, F4R | S8, S8R |
-| F5, F5R | S5, S5R (now before the gate) |
-| F6, F7 | S9, S10 |
-| F8 | S12 |
-| F9, F9R1, F9R2 | S13, S13R1, S13R2 |
-| F10 | S14 |
-| F11, F11R, F12 | S15, S15R, S16 |
-| P1 (universe, history, outcomes) | S6 (refreshed per playbook; data in `runs/study/`) |
-| P2, P3 (sample, business-type tagging) | dropped as general steps; scripts kept (`mb_sample.py`, `mb_tag_batch.py`) for a playbook that needs them |
-| P4, P5 (statements, BSE shareholding) | S6, only the companies a playbook needs |
-| P6, P7 (annual-report statements and helpers) | dropped as general steps; `tools/ar_statements.md` when a playbook needs pre-2014 statements |
-| P8, P9 (features, pattern tests, mechanisms) | S6-S7, short form ("Pattern tests" in `s6_playbook.md`) |
-| P10, P10R (stage studies) | S7, S7R (episode studies inside a playbook) |
-| P11 (experts) | S7 (expert sourcing per sector) |
-| P12, P12R, P13 (proposals, checks) | S7, S7R (sector notes; general-rule proposals to the user) |
+- **Forward evidence only:** backward industry figures did not predict winning industries in the playbook base data, so a sector call rests on official forward evidence and is scored later, not trusted on its numbers.

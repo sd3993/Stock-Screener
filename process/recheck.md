@@ -26,7 +26,7 @@ Write the corrected work as your output file, in the same format as the work fil
 - `recheck_log`: one entry per change {item, old, new, evidence (document and page)};
 - `contrary_search`: one entry per claim checked {claim, searched_for, where, found, result: "confirmed" / "contradicted" / "unresolved"};
 - `unresolved`: conflicts needing a deepest-tier judgement {item, side_a, side_b, sources};
-- `verdict_changed`: true if any decision, eligibility, horizon, stage, marker, non-negotiable status, rank, proposed note or action changed;
+- `verdict_changed`: true if any decision, horizon, stage, marker, non-negotiable status, rank, proposed note or action changed;
 - `learnings`: each gap the instructions, the fetch list or the rules should prevent next time {where: step file / checklist / `process/fetch_learnings.md` / `process/investing_rules.md` sector note, what, evidence}. Don't edit those files yourself.
 Downloads go into `data/companies/<SYM>/<FYyyQn>/` and are recorded in that company's `index.json` as `process/data_rules.md` describes.
 

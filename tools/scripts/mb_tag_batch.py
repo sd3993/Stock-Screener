@@ -1,8 +1,8 @@
-# Builds the next business-type tagging batch for the multibagger study (business-type tagging, process/s6_playbook.md): rows from needs_next.csv (written by
-# mb_sample.py --finalize) not in any earlier batch (input or output), for companies already fetched by the study run (scr/documents.json;
+# Builds the next business-type tagging batch for the playbook base data (business-type tagging, process/s6_playbook.md): rows from needs_next.csv (written by
+# mb_sample.py --finalize) not in any earlier batch (input or output), for companies already fetched for the playbook base data (scr/documents.json;
 # the industry-label fetch writes only overview.json),
 # up to 25 companies, in needs_next order. Writes business_types/batch_<N>_input.csv, N = next free number.
-# Usage (project root): python tools/scripts/mb_tag_batch.py runs/study [--size 25]
+# Usage (project root): python tools/scripts/mb_tag_batch.py data/playbook [--size 25]
 import csv, glob, os, re, sys
 
 run = sys.argv[1]

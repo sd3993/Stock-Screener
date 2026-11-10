@@ -1,5 +1,5 @@
 import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, subprocess, sys, tempfile, time, zipfile
-# Study and playbook data (tools/ar_statements.md, process/s6_playbook.md): annual statements for the years before screener's
+# Playbook base data (tools/ar_statements.md, process/s6_playbook.md): annual statements for the years before screener's
 # statements (screener has ~12 years), read from the annual reports. Plain curl with its default identity; no model tokens.
 #   python -I tools/scripts/ar_statements.py plan  [--rows FILE] [--groups winner,fallen_winner]   -> <run>/ar_plan.csv
 #   python -I tools/scripts/ar_statements.py fetch [--gap 1.5] [--syms A,B] [--tmp DIR]   download, extract, parse (resumable)
@@ -100,7 +100,7 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #     several entities on one page, sales with no 'sales' label (contract income ...), and whatever the chart / cross-report
 #     checks flag. Counts after the second pass: see the helper queue ('queue' prints them).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 
 COMP = os.path.join('data', 'companies')
 KEEP_PDF = None  # --keep-pdf DIR: keep a copy of each PDF (debugging)
@@ -1464,7 +1464,7 @@ def report_final(r, hp):
 def plan(a):
     import mb_features as mf
     from bse_shp import bse_code
-    D = hist_dir()
+    D = playbook_dir()
     rows_f = a.rows or os.path.join(D, 'sample_candidates.csv')
     groups = set(a.groups.split(',')) if a.groups else None
     rows = [r for r in csv.DictReader(open(rows_f, encoding='utf-8')) if not groups or r.get('group') in groups]
@@ -1600,7 +1600,7 @@ def get_report(sym, ry, fym, code, docs, gap, tmp, D, want):
 
 
 def fetch(a):
-    D = hist_dir()
+    D = playbook_dir()
     pl = list(csv.DictReader(open(os.path.join(D, 'ar_plan.csv'), encoding='utf-8')))
     if a.syms:
         keep = set(a.syms.split(','))
@@ -1665,7 +1665,7 @@ def relabel_helper(hf, res, old_end=None):
 
 
 def reparse(a):
-    D = hist_dir()
+    D = playbook_dir()
     keep = set(a.syms.split(',')) if a.syms else None
     rows = read_status(D)
     plan_need = collections.defaultdict(set)
@@ -1706,7 +1706,7 @@ def reparse(a):
 def refetch(a):
     """Download again (recorded url, default gap) the reports whose saved pages lack a balance sheet, P&L or cash flow
     for some basis (or any statement), and save the pages with the current page selection (keep_pages)."""
-    D = hist_dir()
+    D = playbook_dir()
     rows = read_status(D)
     only = set(a.syms.split(',')) if a.syms else None
     plan_need = collections.defaultdict(set)
@@ -1844,7 +1844,7 @@ def queue(a):
     finds them). ar_helper_queue.csv: reports with fields a helper must read, for needed years only; a year's previous-year
     column in the next report is skipped when the year's own report exists (the helper reads that one). Runs cross_check
     on every company first."""
-    D = hist_dir()
+    D = playbook_dir()
     pl = list(csv.DictReader(open(os.path.join(D, 'ar_plan.csv'), encoding='utf-8')))
     st = read_status(D)
     nx = sum(cross_check(s) for s in sorted({r['sym'] for r in pl}))

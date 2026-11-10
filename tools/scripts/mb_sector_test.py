@@ -7,7 +7,7 @@ import argparse, csv, json, os, random, statistics as st, sys
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-D = os.environ.get('STUDY') or os.path.join(ROOT, 'runs', 'study')  # the study folder (config.hist_dir)
+D = os.environ.get('PLAYBOOK_DATA') or os.path.join(ROOT, 'data', 'playbook')  # the playbook base data folder (config.playbook_dir)
 COMPANIES = os.path.join(ROOT, 'data', 'companies')
 H = {'short': (2, 2.0, ['2y']), 'medium': (5, 3.0, ['5y']), 'long': (7, 10.0, ['7y', '10y'])}  # years, multiple, windows
 FLOOR, MIN_N, SHUFFLES = 50.0, 5, 300

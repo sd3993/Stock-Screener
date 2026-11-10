@@ -21,12 +21,12 @@ def api_path(sym, name):
     return os.path.join(MARKET_DIR, name + '.json') if sym in ('', '_market') else os.path.join(COMPANIES_DIR, sym, 'api', name + '.json')
 
 
-STUDY_DIR = os.path.join('runs', 'study')
+PLAYBOOK_DIR = os.path.join('data', 'playbook')
 
-def hist_dir():
-    # The multibagger study's data, kept for the sector playbooks (process/s6_playbook.md): the STUDY environment
-    # variable (a folder path) if set, else runs/study.
-    h = os.environ.get('STUDY') or STUDY_DIR
+def playbook_dir():
+    # The playbook base data (market-wide history kept for the sector playbooks, process/s6_playbook.md): the
+    # PLAYBOOK_DATA environment variable (a folder path) if set, else data/playbook.
+    h = os.environ.get('PLAYBOOK_DATA') or PLAYBOOK_DIR
     if not os.path.isdir(h):
-        raise SystemExit(f'no study folder: {h} (process/s6_playbook.md, "The study data")')
+        raise SystemExit(f'no playbook base data folder: {h} (process/s6_playbook.md, "The playbook base data")')
     return h

@@ -15,7 +15,7 @@ for b, (rc, fn) in sorted(latest.items()):
     d = json.load(open(fn, encoding='utf-8'))
     for e in (d['entries'] if isinstance(d, dict) else d):
         rows.append({'sym': e['sym'], 'decision': e['decision'], 'batch': b, 'stage': f'rc{rc}' if rc else 'gate',
-                     'est_cagr': e.get('est_cagr'), 'bucket': e.get('bucket'), 'floor_failed': e.get('floor_failed'), 'why': e.get('why')})
+                     'est_cagr': e.get('est_cagr'), 'horizon': e.get('horizon', e.get('bucket')), 'floor_failed': e.get('floor_failed'), 'why': e.get('why')})
 with open(os.path.join(g, 'decisions.csv'), 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=list(rows[0]) if rows else ['sym'])
     w.writeheader()

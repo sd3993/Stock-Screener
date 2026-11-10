@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
 # S3: scores every company in <run>/universe.csv (and every holding) and writes <run>/triage.csv and
 # <run>/gate_batches.json. See process/s3_triage.md for what it decides.
-#  (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per bucket (short 2y, medium 5y, long 7y) at
+#  (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per horizon (short 2y, medium 5y, long 7y) at
 #      exit P/E = min(own 5y median P/E, 30), with dividends, vs growth VISIBLE in trailing data (conservative, optimistic);
 #  (b) earnings evidence (rule 6): E1 acceleration, E2 stalwart rebound, E3 sustained growth, E4 turnaround;
 #  (c) flags from the screener figures; only clear failures are rejected here, near-misses go to the gate.
@@ -84,7 +84,7 @@ for s in sorted(set(U) | holds):
     elif c2 is not None and c5 is not None and c2 < 0.3 and c5 < 0.3:
         r['triage'], r['reason'] = 'reject', f'cash conversion 2y {c2}, 5y {c5} (rule 1.4)'
     elif r['math'] == 'dead':
-        r['triage'], r['reason'] = 'reject', f"return math fails every bucket by more than {MARGIN} points of growth"
+        r['triage'], r['reason'] = 'reject', f"return math fails every horizon by more than {MARGIN} points of growth"
     elif r['math'] == 'no_pe':
         r['triage'], r['reason'] = 'not_queued', 'no positive P/E'
     elif r['hits'] or (r['evidence'] and r['math'] not in ('near',)):

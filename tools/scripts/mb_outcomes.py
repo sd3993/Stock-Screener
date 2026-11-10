@@ -1,9 +1,9 @@
 import argparse, bisect, csv, datetime as dt, glob, os, sys
-# Study data for the sector playbooks, S6 (process/s6_playbook.md): from every saved chart history (data/companies/*/scr/history.json, by
+# Playbook base data for the sector playbooks, S6 (process/s6_playbook.md): from every saved chart history (data/companies/*/scr/history.json, by
 # mb_history.py), the price and market-cap multiples over 2-, 3-, 5-, 7- and 10-year windows starting at each quarter end
 # from Mar 2006, with the starting market cap, P/E and TTM EPS/sales, and the peak multiple inside the window (for fallen
 # winners), and what could be seen at the start: P/E and its own 5-year median, TTM EPS and sales growth over 1 and 3
-# years, and the prior 1-year price return. Writes runs/study/outcomes.csv (or --out FILE).
+# years, and the prior 1-year price return. Writes data/playbook/outcomes.csv (or --out FILE).
 #   python -I tools/scripts/mb_outcomes.py [--out FILE] [--syms A,B] [--companies DIR]
 # Point in time: start figures come from mb_features.py's Company (one rule for both scripts): TTM EPS and sales as filed
 # by the start (a chart step stamped on a quarter end counts from its filing lag), P/E = price / that EPS, and its 5-year
@@ -11,7 +11,7 @@ import argparse, bisect, csv, datetime as dt, glob, os, sys
 # divided by on that same date (Company.mcap), at the window start and end alike; it is a market figure, needs no lag.
 # Prices and the price multiples (px_*, pxpeak_*) are unchanged by this (the price series has no filing lag).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 from mb_features import Company, add_years, cagr
 
 YEARS = (2, 3, 5, 7, 10)
@@ -73,7 +73,7 @@ for sym in syms:
 keys = ['sym', 'start', 'px0', 'mc0', 'pe0', 'pe_med5', 'eps0', 'sales0', 'eps_g1', 'eps_g3', 'sales_g1', 'sales_g3', 'px_ret1',
         'last_price_date'] + \
        [f'{k}_{n}y' for n in YEARS for k in ('px', 'mc', 'pxpeak')]
-out = a.out or os.path.join(hist_dir(), 'outcomes.csv')
+out = a.out or os.path.join(playbook_dir(), 'outcomes.csv')
 with open(out, 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=keys)
     w.writeheader()

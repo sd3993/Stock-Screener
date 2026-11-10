@@ -32,7 +32,7 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, sys
 #   year_label      a previous-year column labelled 12 months before a year that isn't 12 months long
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ar_statements as A
-from config import hist_dir
+from config import playbook_dir
 
 COLS = ['sym', 'fy', 'basis', 'year', 'field', 'value', 'check', 'detail']
 FEATURE_FIELDS = set(A.FIELDS)  # mb_features.add_ar: every field feeds a feature (dep, interest, other_income through op / ROCE)
@@ -485,7 +485,7 @@ def main():
     p.add_argument('--test', action='store_true')
     p.add_argument('--comp')
     a = p.parse_args()
-    D = hist_dir()
+    D = playbook_dir()
     if a.test:
         return test(D, a.comp)
     rows, errs, reports = run(D, set(a.syms.split(',')) if a.syms else None, a.raw, a.comp)

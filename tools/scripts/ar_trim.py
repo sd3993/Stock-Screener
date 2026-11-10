@@ -1,7 +1,7 @@
 # Cut each report in ar_helper_queue.csv down to the pages reading helpers need: writes ar_FY<yy>_stmt.txt beside its ar_FY<yy>_pages.txt,
 # holding the pages the parser used (bases.*.pages in ar_FY<yy>.json) and every page showing cash from operating activities.
 # Helpers open it first and go to the full pages file only if a statement is missing.
-#   python -I tools/scripts/ar_trim.py [--dir runs/study]
+#   python -I tools/scripts/ar_trim.py [--dir data/playbook]
 # A report with no page identified gets no _stmt.txt, so its helper reads the full file. Safe to re-run.
 import argparse, csv, glob, json, os, re
 
@@ -9,7 +9,7 @@ CF = re.compile(r'operating\s+activit', re.I)
 a = argparse.ArgumentParser()
 a.add_argument('--dir', default=None)
 a = a.parse_args()
-D = a.dir or os.environ.get('STUDY') or os.path.join('runs', 'study')  # the study folder (config.hist_dir)
+D = a.dir or os.environ.get('PLAYBOOK_DATA') or os.path.join('data', 'playbook')  # the playbook base data folder (config.playbook_dir)
 
 
 def used_pages(o, out):

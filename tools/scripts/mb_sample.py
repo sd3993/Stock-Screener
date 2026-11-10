@@ -1,6 +1,6 @@
 import csv, os, random, sys
-# Study sample (not a workflow step; kept for playbooks; process/s6_playbook.md): picks winners, fallen winners and ~5 control candidates per
-# winner from outcomes.csv (S6), seeded so the picks repeat. Writes runs/study/sample_candidates.csv (group, sym,
+# Playbook base data sample (not a workflow step; kept for playbooks; process/s6_playbook.md): picks winners, fallen winners and ~5 control candidates per
+# winner from outcomes.csv (S6), seeded so the picks repeat. Writes data/playbook/sample_candidates.csv (group, sym,
 # horizon, start, mc0, multiples, reason, matched_to) and prints counts per group, horizon, period and size band.
 # --finalize (after each business-type tagging round): merges the batch files, picks each winner's control (nearest candidate
 # of the same type), counts the peers flags and runs the checks; outputs and checks in the script below.
@@ -10,13 +10,13 @@ import csv, os, random, sys
 #   python -I tools/scripts/mb_sample.py [--seed 1] [--repair <old sample_candidates.csv> [--candidates-only]] | --coverage
 #     | --finalize  [--companies <dir>] [--dir DIR: read and write there, not the run folder]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 a = sys.argv[1:]
 if any(x.startswith('-') and x not in ('--seed', '--repair', '--candidates-only', '--coverage', '--finalize', '--companies', '--dir')
        for x in a):  # -h, --help or a typo must not fall through to the default run, which rewrites sample_candidates.csv
     sys.exit(''.join(l[2:] for l in open(__file__, encoding='utf-8').readlines()[1:11]))
 SEED = int(a[a.index('--seed') + 1]) if '--seed' in a else 1
-D = a[a.index('--dir') + 1] if '--dir' in a else hist_dir()
+D = a[a.index('--dir') + 1] if '--dir' in a else playbook_dir()
 # horizon: (multiple columns tried in order, threshold, last window start, winners to pick)
 H = {'short': (['px_2y'], 2, '2023-12-31', 70), 'medium': (['px_5y'], 3, '2021-12-31', 80),
      'long': (['px_7y', 'px_10y'], 10, '2019-12-31', 50)}
@@ -721,7 +721,7 @@ with open(os.path.join(D, 'sample_candidates.csv'), 'w', newline='', encoding='u
     w.writeheader()
     w.writerows(out)
 if rep:
-    # fetch_order.txt: companies without the study fetch (no scr/documents.json; the label-only fetch writes just
+    # fetch_order.txt: companies without the base-data fetch (no scr/documents.json; the label-only fetch writes just
     # overview.json): new winners and fallen winners first, then
     # the other winners and fallen winners, then candidates by rank (every winner's nearest, then each one's second, ...)
     new = {(r['group'], r['sym'], r['horizon']) for r in repl.values()}
@@ -739,7 +739,7 @@ if rep:
             order.append(r['sym'])
     open(os.path.join(D, 'fetch_order.txt'), 'w', encoding='utf-8').write(''.join(s + '\n' for s in order))
     psyms = {r['sym'] for r in picked}
-    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without the study fetch (`scr/documents.json`) '
+    rep[5:5] = [f'- fetch_order.txt: {len(order)} companies without the base-data fetch (`scr/documents.json`) '
                 f'({sum(1 for s in order if s in psyms)} of them winners or fallen winners).']
     open(os.path.join(D, 'sample_repair.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
     print('\n'.join(rep[4:8]))

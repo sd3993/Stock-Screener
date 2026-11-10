@@ -1,9 +1,9 @@
 import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sys, time
-# Study and playbook features, S6 (process/s6_playbook.md, step 1): point-in-time features for any list of (sym, as_of)
+# Playbook base data features, S6 (process/s6_playbook.md, step 1): point-in-time features for any list of (sym, as_of)
 # rows, from each company's saved screener data (data/companies/<SYM>/scr/: history.json from S6; statements, quarterly and
-# shareholding from the study fetch). No fetching. Writes features.csv (one row per input row: sym, as_of, group, horizon,
+# shareholding from the base-data fetch). No fetching. Writes features.csv (one row per input row: sym, as_of, group, horizon,
 # the features, the bases and periods used) and features_coverage.md (share of rows with each feature, by start period).
-#   python -I tools/scripts/mb_features.py                       # sample.csv of the newest study run
+#   python -I tools/scripts/mb_features.py                       # sample.csv in the playbook base data folder
 #   python -I tools/scripts/mb_features.py --rows FILE           # any CSV with sym and as_of (or start); other columns kept
 #   python -I tools/scripts/mb_features.py --candidates          # sample_candidates.csv
 #   python -I tools/scripts/mb_features.py --market [--from 2006] [--chart-only]   # every (sym, start) in outcomes.csv
@@ -48,7 +48,7 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 #   differ by more than 10% from the chart's TTM sales after that year's results (restated, merged, or a basis gap: before
 #   FY20 many companies filed only standalone quarterly results, which the chart's TTM then follows).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import hist_dir
+from config import playbook_dir
 
 LAG_Q, LAG_Q4, LAG_SHP, LAG_CF_AR = 45, 60, 21, 180
 OVERRIDE = {(2020, 3): 120, (2020, 6): 75, (2021, 3): 90}
@@ -605,7 +605,7 @@ def main():
     ap.add_argument('--out')
     ap.add_argument('--companies', default=os.path.join('data', 'companies'))
     a = ap.parse_args()
-    D = hist_dir()
+    D = playbook_dir()
     if a.market:
         src_file = os.path.join(D, 'outcomes.csv')
     else:
