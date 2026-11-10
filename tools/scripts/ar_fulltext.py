@@ -1,6 +1,6 @@
-# Whole-report text for P7 helpers, so they Grep it instead of reading PDFs: writes ar_FY<yy>_full.txt beside each report's _pages.txt in
+# Whole-report text for reading helpers, so they search it instead of reading PDFs: writes ar_FY<yy>_full.txt beside each report's _pages.txt in
 # ar_helper_queue.csv, with '=== page N ===' markers. Plain curl and pdftotext, no model tokens. Resumable; one request at a time.
-#   python -I tools/scripts/ar_fulltext.py --tmp <empty scratch folder> [--dir runs/past/<date>] [--limit N] [--gap 1.5]
+#   python -I tools/scripts/ar_fulltext.py --tmp <empty scratch folder> [--dir runs/study] [--limit N] [--gap 1.5]
 # A report whose pages hold almost no text is scanned: the file says so on its first line and the helper reads the PDF's images.
 import argparse, csv, glob, os, shutil, subprocess, time
 
@@ -10,7 +10,7 @@ a.add_argument('--dir', default=None)
 a.add_argument('--limit', type=int, default=0)
 a.add_argument('--gap', type=float, default=1.5)
 a = a.parse_args()
-D = a.dir or sorted(glob.glob(os.path.join('runs', 'past', '20*')))[-1]
+D = a.dir or os.environ.get('STUDY') or os.path.join('runs', 'study')  # the study folder (config.hist_dir)
 os.makedirs(a.tmp, exist_ok=True)
 rows = list(csv.DictReader(open(os.path.join(D, 'ar_helper_queue.csv'), encoding='utf-8')))
 done = scanned = failed = 0

@@ -1,5 +1,5 @@
 import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, subprocess, sys, tempfile, time, zipfile
-# Multibagger study (process/past/p4_statements.md, p8_features.md): annual statements for the years before screener's
+# Study and playbook data (tools/ar_statements.md, process/s6_playbook.md): annual statements for the years before screener's
 # statements (screener has ~12 years), read from the annual reports. Plain curl with its default identity; no model tokens.
 #   python -I tools/scripts/ar_statements.py plan  [--rows FILE] [--groups winner,fallen_winner]   -> <run>/ar_plan.csv
 #   python -I tools/scripts/ar_statements.py fetch [--gap 1.5] [--syms A,B] [--tmp DIR]   download, extract, parse (resumable)
@@ -25,7 +25,7 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #   ar_FY<yy>_pages.txt  the statement pages, '=== page N ===' markers (N = page in the PDF)
 #   ar_FY<yy>.json       url, pages, unit, per basis per year (year-end date): fields in Rs crore (EPS in Rs) with per-field
 #                        confidence and source page, checks, notes, and 'helper' = fields a helper must read
-#   ar_FY<yy>_helper.json  written by a fallback helper (process/past/p7_ar_helpers.md); overrides parsed fields
+#   ar_FY<yy>_helper.json  written by a fallback helper (tools/ar_statements.md); overrides parsed fields
 # Fields (screener's definitions): sales (net of excise; banks: interest earned), other_income (incl. exceptional items),
 #   interest, dep, pbt, tax, pat (before minority interest), eps (basic, as reported), dividend (proposed/paid on equity,
 #   excl. tax), op (= pbt + interest + dep - other_income), equity_cap, reserves (incl. share warrants), borrowings (all
@@ -56,7 +56,7 @@ import argparse, collections, csv, datetime as dt, glob, json, os, re, shutil, s
 #     only the part after a ' / ').
 #   - Units: ' ‘000’ with typographic quotes, '(Rs. ‘000)', '` ’ 000' are thousands. A headingless/unit-less page still
 #     takes the unit of the basis's other statement pages.
-# P6.6 (6 Nov 2026; found by ar_parsed_check.py): 'used in' lines keep their printed brackets (cfo_signed); 'Rs. in 'OOOs' read through
+# Parser check (6 Nov 2026; found by ar_parsed_check.py): 'used in' lines keep their printed brackets (cfo_signed); 'Rs. in 'OOOs' read through
 #   OCR; a warrants line holding the funds subtotal is no warrants; 'profit before tax and before minority interest' is the pbt;
 #   preference capital comes out of equity_cap (pref_split); the first adjacent statement pages beat later, higher-scoring ones
 #   (first_pair: subsidiaries come after); a cash flow next to the statements wins; months are read for this year end only, and a

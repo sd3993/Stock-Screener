@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# P6.0 follow-up: turns ar_parsed_flags.csv into rows for helpers to re-read, in the shape of p7_group.csv plus `flags`.
+# Annual-report statements follow-up (tools/ar_statements.md): turns ar_parsed_flags.csv into rows for helpers to re-read, in the shape of p7_group.csv plus `flags`.
 #   python -I tools/scripts/ar_flag_reread.py <run folder> [--size 25]
 # Takes values that reach the features ([used]). A report flagged only by the weak checks (page_earlier, unit_mismatch,
 # cross_value, chart_value: high false positives or nothing a re-read would settle alone) is left out. Reports still in the

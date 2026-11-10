@@ -1,5 +1,5 @@
 import argparse, collections, csv, datetime as dt, glob, json, os, re, sys
-# P6.0 (process/past/p4_statements.md): checks the annual-report values that reach the features: every report's final values
+# Annual-report statements (tools/ar_statements.md): checks the annual-report values that reach the features: every report's final values
 # (parsed after the helper override, as ar_statements.load_ar reads them). Read-only: no network, no tokens, changes no
 # shared file but the flags file.
 #   python -I tools/scripts/ar_parsed_check.py [--syms A,B] [--raw] [--out FILE] [--test] [--comp DIR]
@@ -396,7 +396,7 @@ def run(D, syms, raw, comp=None):
     return rows, errs, reports
 
 
-# the faults annual-report helpers found (P6.6): (sym, report, basis, year, field, checks that count as caught, what it is)
+# the faults annual-report helpers found (Nov 2026 parser check): (sym, report, basis, year, field, checks that count as caught, what it is)
 PG = ('page_far', 'page_head', 'page_earlier', 'entity')
 KNOWN = [('GESHIP', f'FY{y:02d}', None, None, None, PG, 'subsidiary pages') for y in (4, 6, 8, 10)] + \
     [('GOLDIAM', 'FY05', None, None, None, PG, 'subsidiary pages'), ('GOLDIAM', 'FY07', None, None, None, PG, 'subsidiary pages'),

@@ -1,7 +1,7 @@
 import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sys, time
-# Multibagger study, P8 (process/past/p8_features.md, step 1): point-in-time features for any list of (sym, as_of)
-# rows, from each company's saved screener data (data/companies/<SYM>/scr/: history.json from P1; statements, quarterly and
-# shareholding from the P2/P4 fetch). No fetching. Writes features.csv (one row per input row: sym, as_of, group, horizon,
+# Study and playbook features, S6 (process/s6_playbook.md, step 1): point-in-time features for any list of (sym, as_of)
+# rows, from each company's saved screener data (data/companies/<SYM>/scr/: history.json from S6; statements, quarterly and
+# shareholding from the study fetch). No fetching. Writes features.csv (one row per input row: sym, as_of, group, horizon,
 # the features, the bases and periods used) and features_coverage.md (share of rows with each feature, by start period).
 #   python -I tools/scripts/mb_features.py                       # sample.csv of the newest study run
 #   python -I tools/scripts/mb_features.py --rows FILE           # any CSV with sym and as_of (or start); other columns kept
@@ -9,7 +9,7 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 #   python -I tools/scripts/mb_features.py --market [--from 2006] [--chart-only]   # every (sym, start) in outcomes.csv
 #   options: --out FILE (default <run>/features.csv; coverage beside it), --syms A,B (limit), --companies DIR
 #
-# Point in time (README "What a pattern must pass", 1): a figure is used only once it counts as filed by as_of.
+# Point in time (process/s6_playbook.md, "Pattern tests", 1): a figure is used only once it counts as filed by as_of.
 #   - quarter results: quarter end + 45 days; the fiscal year's last quarter and annual P&L, balance sheet and ratios: + 60;
 #     COVID extensions: periods ending Mar 2020 + 120, Jun 2020 + 75, Mar 2021 + 90 (SEBI relaxations; conservative);
 #   - annual cash flow: + 60 for years ending from Sep 2019 (SEBI made the cash-flow statement part of the half-year
@@ -32,7 +32,7 @@ import argparse, bisect, calendar, csv, datetime as dt, json, os, statistics, sy
 # Basis: annual and quarterly statements use consolidated when it has the latest period filed by as_of, else standalone,
 #   and all multi-year figures for that row use the same basis (missing if that basis lacks the years). Chart series are
 #   consolidated where screener has them, else standalone (mb_history.py). Missing stays empty, never 0.
-# Annual reports (ar_statements.py, p4_statements.md): fiscal years before screener's statements come from the parsed
+# Annual reports (ar_statements.py, tools/ar_statements.md): fiscal years before screener's statements come from the parsed
 #   reports in data/companies/<SYM>/FY<yy>Q4/ar_FY<yy>.json (helper answers in ar_FY<yy>_helper.json override; fields flagged
 #   for a helper and not yet answered stay empty). They fill only years screener lacks, each basis from the same basis of the
 #   report; a year whose report has no consolidated statements fills the consolidated table from its standalone figures

@@ -1,11 +1,11 @@
-# Tapetide (reference only; no phase uses it)
+# Tapetide (reference only; no step uses it)
 
-screener.in and NSE/BSE cover everything the process needs (3 Nov 2026). Use Tapetide only for a specific gap neither can fill, and say what it was. Moved here from `tools/tools.md` and `CLAUDE.md` so it isn't read when unused.
+screener.in and NSE/BSE cover everything the process needs (3 Nov 2026). Use Tapetide only for a specific gap neither can fill, and say what it was. Moved here from `tools/tools.md` and `COMMON_AI.md` so it isn't read when unused.
 
 ## Rules
 - **REST only:** reach it through its REST API (`tt.py`, or `tt.py get` for one-off routes), never the Tapetide MCP tools. If the token is missing or rejected, tell the user and carry on with screener and the exchanges.
 - **Plan:** free, 50 calls a day; the user won't pay for more (3 Nov 2026). At the daily limit, carry on with other work and resume when the quota resets.
-- **Token:** the user sets `TAPETIDE_TOKEN` in the Claude app's environment settings for this project; it reaches sessions started after it was set.
+- **Token:** the user sets `TAPETIDE_TOKEN` in the agent app's environment settings for this project; it reaches sessions started after it was set.
 - **Scripts:** `tt.py` (REST client: `usage`, `get <route> k=v [--save PATH] [--all-pages]`, `calls [days]`; caching and the call log `data/calls.csv`), `tt_docs.py` (filings/documents lists, downloads, `index.json`; its download helpers also serve `scr_docs.py`). Answers are cached in `data/companies/<SYM>/api/` and `data/market/`.
 
 ## Trial findings (3 Nov 2026)

@@ -1,15 +1,15 @@
 import glob, os
 # Shared paths for the scripts. The run folder is the RUN environment variable if set,
-# else RUN below, else the newest runs/future/FY* folder. Run every script from the project root.
-RUN = ''  # e.g. 'FY27Q2'; set at run start (F1)
+# else RUN below, else the newest runs/FY* folder (process/README.md, "Run folders"). Run every script from the project root.
+RUN = ''  # e.g. 'FY27Q2' or 'FY27Q2_full'; set at run start (S1)
 
 def run_dir():
     r = os.environ.get('RUN') or RUN
     if r:
-        return os.path.join('runs', 'future', r)
-    runs = sorted(d for d in glob.glob(os.path.join('runs', 'future', 'FY*')) if os.path.isdir(d))
+        return os.path.join('runs', r)
+    runs = sorted(d for d in glob.glob(os.path.join('runs', 'FY*')) if os.path.isdir(d))
     if not runs:
-        raise SystemExit('no run folder: create runs/future/<FYyyQn>/ and set RUN in tools/scripts/config.py')
+        raise SystemExit('no run folder: create runs/<FYyyQn>/ and set RUN in tools/scripts/config.py')
     return runs[-1]
 
 # One folder per company: documents in quarter subfolders, Tapetide answers in api/, index/facts at the top.
@@ -21,12 +21,12 @@ def api_path(sym, name):
     return os.path.join(MARKET_DIR, name + '.json') if sym in ('', '_market') else os.path.join(COMPANIES_DIR, sym, 'api', name + '.json')
 
 
+STUDY_DIR = os.path.join('runs', 'study')
+
 def hist_dir():
-    # The multibagger study's run folder: HIST_RUN (a date, e.g. 2026-11-03) if set, else the newest runs/past/*.
-    h = os.environ.get('HIST_RUN')
-    if h:
-        return os.path.join('runs', 'past', h)
-    hs = sorted(d for d in glob.glob(os.path.join('runs', 'past', '*')) if os.path.isdir(d))
-    if not hs:
-        raise SystemExit('no study run folder: create runs/past/<YYYY-MM-DD>/')
-    return hs[-1]
+    # The multibagger study's data, kept for the sector playbooks (process/s6_playbook.md): the STUDY environment
+    # variable (a folder path) if set, else runs/study.
+    h = os.environ.get('STUDY') or STUDY_DIR
+    if not os.path.isdir(h):
+        raise SystemExit(f'no study folder: {h} (process/s6_playbook.md, "The study data")')
+    return h

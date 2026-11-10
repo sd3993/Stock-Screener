@@ -1,0 +1,11 @@
+# S11.0: marker check (script, one company; recheck mode)
+
+After S10 has refreshed the company's screener data and documents: `python -I tools/scripts/marker_check.py <SYM>` (to write; logic and tests in `runs/new_scripts_spec.md`). Run `python -I tools/scripts/marker_check.py --sectors` once per run before S5's review, so the sector markers' script states are in `<run>/marker_check.csv` too.
+
+What it does: reads the company's thesis (`runs/theses/<SYM>.json`: horizon, stage, results used, and its 4-6 markers, company-level and sector-level), the sector markers' states (`<run>/sectors.json`), and the saved data (`data/companies/<SYM>/scr/` quarterly, shareholding, `shp_history`, announcements, pledge; `facts.json` where newer). For each "script" marker it computes the metric for the newest declared quarter and compares it with the threshold; "manual" markers due by now are listed for the orchestrator. It appends one row per marker to `<run>/marker_check.csv` (sym, marker id, level, metric, value, threshold, due, state: held / near / broken / due-manual / no-data, source file) and one row per company with its **action**, the first that applies:
+1. **integrity review:** an announcement since the thesis date whose title matches an integrity term (auditor resignation, forensic audit, SEBI/ED order, fraud, default, pledge invocation; the list is in the script). Integrity flags override every marker (rule 1.3).
+2. **re-analyse:** a marker broken (company-level, or its sector's), no thesis file (a new holding or an old analysis without markers), or the half-yearly re-analysis due (two newer quarters declared since the thesis's results used).
+3. **verify:** a marker within 10% of its line, a manual marker due, or a metric the script couldn't compute (`no-data`).
+4. **hold:** every marker held.
+
+**Orchestrator:** act per `process/README.md`, "Order of work", recheck. Manual markers due go with the company to S12 (verify), which reads them from their named source. A `verify` company goes back through S11 after S12 has rebuilt `facts.json`, and the second result stands. How a broken marker weighs against the position (hold, trim, exit) is decided in S15 under `process/investing_rules.md`, not here.

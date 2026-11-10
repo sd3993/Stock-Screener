@@ -1,5 +1,5 @@
 import asyncio, datetime as dt, json, os, re, sys
-# F4/F7: one company's screener.in data into data/companies/<SYM>/scr/, with no model tokens and no login: the
+# S8/S10: one company's screener.in data into data/companies/<SYM>/scr/, with no model tokens and no login: the
 # screener-mcp library in public mode reads screener's public company page (every year and quarter on it, not the
 # library tools' 8-quarter cut) and NSE's feeds: announcements, insider trades, promoter pledge (latest), SAST Reg 29 disclosures,
 # corporate actions and the shareholding-pattern list (about 26 quarters), plus promoter holding and pledge per quarter read

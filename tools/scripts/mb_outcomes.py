@@ -1,9 +1,9 @@
 import argparse, bisect, csv, datetime as dt, glob, os, sys
-# Multibagger study, P1 (process/past/p1_universe.md): from every saved chart history (data/companies/*/scr/history.json, by
+# Study data for the sector playbooks, S6 (process/s6_playbook.md): from every saved chart history (data/companies/*/scr/history.json, by
 # mb_history.py), the price and market-cap multiples over 2-, 3-, 5-, 7- and 10-year windows starting at each quarter end
 # from Mar 2006, with the starting market cap, P/E and TTM EPS/sales, and the peak multiple inside the window (for fallen
 # winners), and what could be seen at the start: P/E and its own 5-year median, TTM EPS and sales growth over 1 and 3
-# years, and the prior 1-year price return. Writes runs/past/<date>/outcomes.csv (or --out FILE).
+# years, and the prior 1-year price return. Writes runs/study/outcomes.csv (or --out FILE).
 #   python -I tools/scripts/mb_outcomes.py [--out FILE] [--syms A,B] [--companies DIR]
 # Point in time: start figures come from mb_features.py's Company (one rule for both scripts): TTM EPS and sales as filed
 # by the start (a chart step stamped on a quarter end counts from its filing lag), P/E = price / that EPS, and its 5-year

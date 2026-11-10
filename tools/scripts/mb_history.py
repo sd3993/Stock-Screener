@@ -1,10 +1,10 @@
 import asyncio, csv, datetime as dt, json, os, sys, time
-# Multibagger study, P1 (process/past/p1_universe.md): long price and valuation history per company from screener.in's public chart API
+# Study data for the sector playbooks, S6 (process/s6_playbook.md): long price and valuation history per company from screener.in's public chart API
 # (no login, no model tokens), back to about 2005: price and volume, P/E with the TTM EPS behind it, and market cap to
 # sales with TTM sales (market cap = the ratio x sales). Saved as data/companies/<SYM>/scr/history.json; a company already
 # saved is skipped unless --refresh, or --recheck-empty (re-fetches saved companies with a series that has no values, unless the standalone series were
 # already checked). --workers N fetches N companies at once (default 1); the library's shared pacing and 429 cooldown still apply. Input: symbols, or a CSV with columns sym and (optionally) screener_id.
-#   uvx --from screener-mcp==0.5.0 python tools/scripts/mb_history.py SYM ... | --csv runs/past/<date>/universe.csv [--refresh | --recheck-empty] [--workers N]
+#   uvx --from screener-mcp==0.5.0 python tools/scripts/mb_history.py SYM ... | --csv runs/study/universe.csv [--refresh | --recheck-empty] [--workers N]
 # Starts 1.2 s between requests, where screener stopped answering 429 at the same throughput as the library's 0.25 s
 # (3 Nov 2026), and adds 0.05 s after each cooldown, up to 3 s, in case its limit tightens.
 os.environ.setdefault('SCREENER_MIN_INTERVAL', '1.2')

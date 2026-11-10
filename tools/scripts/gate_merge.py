@@ -1,7 +1,7 @@
 import csv, glob, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
-# F4R: writes <run>/gate/decisions.csv from each batch's latest file (bNN_rc2 > bNN_rc1 > bNN).
+# S8R: writes <run>/gate/decisions.csv from each batch's latest file (bNN_rc2 > bNN_rc1 > bNN).
 g = os.path.join(run_dir(), 'gate')
 latest = {}
 for fn in glob.glob(os.path.join(g, 'b[0-9]*.json')):

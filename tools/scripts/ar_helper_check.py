@@ -1,4 +1,4 @@
-# P7 recheck, run after each helper group: is each value a helper wrote printed in that report?
+# Reading-helper check (tools/ar_statements.md), run after each helper group: is each value a helper wrote printed in that report?
 #   python -I tools/scripts/ar_helper_check.py FILE.csv      # rows with sym, fy, page_text, helper_file (a group's rows)
 #   python -I tools/scripts/ar_helper_check.py FILE.csv --only SYM FY   # one report: a helper's check after writing its file; fix what it lists, then go on
 # Exits 1 if anything asked for is missing or a value is unexplained. Completeness: every asked field is there, a null has a note, a whole-report read has all fields.

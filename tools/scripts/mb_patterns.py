@@ -1,10 +1,10 @@
 import argparse, ast, bisect, collections, csv, datetime as dt, hashlib, json, math, os, random, re, statistics, sys, time
-# Multibagger study, P8 (process/past/p8_features.md, steps 2-8; tests in process/past/README.md, "What a pattern must pass").
+# Study and playbook features, S6 (process/s6_playbook.md, steps 2-8; tests in process/s6_playbook.md, "Pattern tests").
 # Staged tests, one subcommand per round. No fetching; nothing here writes outcomes.csv, sample.csv or a features file.
 #   python -I tools/scripts/mb_patterns.py scan [--features FILE[,FILE]]     # steps 2-3: winners, then market lift (chart features)
 #   python -I tools/scripts/mb_patterns.py panel [--seed 1] [--n 3]          # step 4: peer_panel.csv, peer_untagged.csv
 #   python -I tools/scripts/mb_patterns.py peers [--panel-features FILE]     # steps 4-5: panel / same-type lift, matched pairs
-#   python -I tools/scripts/mb_patterns.py market_fetch [--force]            # market_fetch.txt (p4_statements.md)
+#   python -I tools/scripts/mb_patterns.py market_fetch [--force]            # market_fetch.txt (statements for the market test)
 #   python -I tools/scripts/mb_patterns.py test  [--tag-limit 200]           # steps 6-7: 2016-2023 unchanged; whole market
 #   python -I tools/scripts/mb_patterns.py exits [--write-rows] [--exit-features FILE]   # step 8
 #   common: --dir DIR (reads and writes there, default the newest study run), --out FILE (patterns.csv), --features,
@@ -160,14 +160,14 @@ EXIT_SIGNALS = [
     ('X.mc_gt15k', RULE + '12', [('mcap_cr', '>', 15000)]),
     ('X.mc_gt20k', RULE + '12', [('mcap_cr', '>', 20000)]),
     ('X.sales_opm_fall2q', RULE + '12; ' + HYP + 'H14', [('q_sales_opm_fall2q', '==', 1)]),
-    ('X.off_hi52_30', 'P8 list', [('px_off_hi52', '<=', -0.3)]),
-    ('X.off_hi52_50', 'P8 list', [('px_off_hi52', '<=', -0.5)]),
-    ('X.eps_g1_neg', 'P8 list', [('eps_g1', '<', 0)]),
-    ('X.sales_g1_neg', 'P8 list', [('sales_g1', '<', 0)]),
-    ('X.eps_acc_neg', 'P8 list', [('eps_acc', '<', 0)]),
-    ('X.pe_rel5_gt15', 'P8 list', [('pe_rel5', '>', 1.5)]),
-    ('X.pe_rel5_gt2', 'P8 list', [('pe_rel5', '>', 2)]),
-    ('X.dilution_5', 'P8 list', [('shares_chg1', '>', 5)]),
+    ('X.off_hi52_30', 'fixed list', [('px_off_hi52', '<=', -0.3)]),
+    ('X.off_hi52_50', 'fixed list', [('px_off_hi52', '<=', -0.5)]),
+    ('X.eps_g1_neg', 'fixed list', [('eps_g1', '<', 0)]),
+    ('X.sales_g1_neg', 'fixed list', [('sales_g1', '<', 0)]),
+    ('X.eps_acc_neg', 'fixed list', [('eps_acc', '<', 0)]),
+    ('X.pe_rel5_gt15', 'fixed list', [('pe_rel5', '>', 1.5)]),
+    ('X.pe_rel5_gt2', 'fixed list', [('pe_rel5', '>', 2)]),
+    ('X.dilution_5', 'fixed list', [('shares_chg1', '>', 5)]),
     ('X.prom_fall_5', RULE + '3', [('prom_chg_1y', '<', -5)]),
     ('X.new_pledge', RULE + '1.1', [('pledge_new_4q', '==', 1)]),
     ('X.cfo_lt04', RULE + '1.4', [('cfo_pat_3y', '<', 0.4)]),
@@ -180,7 +180,7 @@ NOT_TESTED = [
     ('NT.H5', HYP + 'H5', 'partial (H5.*): tests prior growth among winners, not P(next CAGR | prior CAGR); PAT floor not built'),
     ('NT.H6', HYP + 'H6', 'partial (H6.*): first crossing of 15% in 10+ years and the PAT floor not computable from the features'),
     ('NT.H7', HYP + 'H7', 'partial (H7.*): 3-year PAT CAGR for 2-year; the outcome (reaching the top 100) not measured'),
-    ('NT.H9', HYP + 'H9', 'not tested: a decomposition of the run (EPS and P/E change, lag), not a start-date pattern; left to P10'),
+    ('NT.H9', HYP + 'H9', 'not tested: a decomposition of the run (EPS and P/E change, lag), not a start-date pattern; left to the playbook episode studies (S7)'),
     ('NT.H11', HYP + 'H11', 'not tested: no SUE or results-date returns in the features; q_eps_yoy is only a loose proxy'),
     ('NT.H12', HYP + 'H12', 'partial (H12.*): 12-month return, not 12-1 month; no 6-12 month excess return'),
     ('NT.H13', HYP + 'H13', 'not tested: needs 3x-in-2-years cases and later give-back by ROE, Consistent/Volatile and re-rating share'),
@@ -208,14 +208,14 @@ class Pat:
 def make_patterns():
     out = []
     for f in CHART_NUM + STMT_NUM + SHP_NUM:
-        out.append(Pat(f'T.{f}.top', 'third', [(f, 'pct>=', 2 / 3)], 'P8 list'))
-        out.append(Pat(f'T.{f}.bottom', 'third', [(f, 'pct<=', 1 / 3)], 'P8 list'))
+        out.append(Pat(f'T.{f}.top', 'third', [(f, 'pct>=', 2 / 3)], 'fixed list'))
+        out.append(Pat(f'T.{f}.bottom', 'third', [(f, 'pct<=', 1 / 3)], 'fixed list'))
     for f in CHART_BIN + STMT_BIN + SHP_BIN:
-        out.append(Pat(f'B.{f}.1', 'binary', [(f, '==', 1)], 'P8 list'))
-        out.append(Pat(f'B.{f}.0', 'binary', [(f, '==', 0)], 'P8 list'))
+        out.append(Pat(f'B.{f}.1', 'binary', [(f, '==', 1)], 'fixed list'))
+        out.append(Pat(f'B.{f}.0', 'binary', [(f, '==', 0)], 'fixed list'))
     for f, vals in ATTRS.items():
-        out += [Pat(f'A.{f}.{v}', 'attribute', [(f, '==', v)], 'P8 list') for v in vals]
-    out += [Pat(f'A.customers.{v}', 'attribute', [('customers', 'has', v)], 'P8 list') for v in CUSTOMERS]
+        out += [Pat(f'A.{f}.{v}', 'attribute', [(f, '==', v)], 'fixed list') for v in vals]
+    out += [Pat(f'A.customers.{v}', 'attribute', [('customers', 'has', v)], 'fixed list') for v in CUSTOMERS]
     for pid, src, legs, o in THRESHOLDS:
         out.append(Pat(pid, 'rule' if o.get('rule') else 'threshold', legs, src, o.get('h'), o.get('min_mc'), bool(o.get('rule')), o.get('note', '')))
     return out
@@ -919,7 +919,7 @@ def panel(a):
     print('by band:', dict(collections.Counter(r['size_band'] for r in out)))
     for s in short[:40]:
         print('  short:', s)
-    print('next: tag peer_untagged.csv (P3); re-run panel until none is untagged; then mb_features.py --rows peer_panel.csv '
+    print('next: tag peer_untagged.csv (business-type tagging, process/s6_playbook.md); re-run panel until none is untagged; then mb_features.py --rows peer_panel.csv '
           '--out features_panel.csv; bse_shp.py --rows peer_panel.csv; ar_statements.py plan --rows peer_panel.csv --groups peer')
 
 
@@ -1151,7 +1151,7 @@ def test(a):
             w.writerow(['sym', 'as_of', 'groups', 'for_winner', 'status'])
             for (s, d), e in sorted(tag_needs.items()):
                 w.writerow([s, d, 'type_pattern', ';'.join(sorted(e)), 'untagged'])
-        print(f'{fn}: {len(tag_needs)} companies a business-type pattern passes, untagged: tag them (P3) and re-run with --force for precision within the type')
+        print(f'{fn}: {len(tag_needs)} companies a business-type pattern passes, untagged: tag them (business-type tagging, process/s6_playbook.md) and re-run with --force for precision within the type')
     if waiting:
         print(f'{waiting} rows wait for market statements')
     R.report()
@@ -1292,7 +1292,7 @@ def exits(a):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='Multibagger study P8: staged pattern tests (process/past/p8_features.md)')
+    ap = argparse.ArgumentParser(description='Study and playbook pattern tests (process/s6_playbook.md)')
     ap.add_argument('cmd', choices=['scan', 'panel', 'peers', 'market_fetch', 'test', 'exits'])
     ap.add_argument('--dir', help='read and write there, not the newest study run')
     ap.add_argument('--out', help='patterns.csv path')
