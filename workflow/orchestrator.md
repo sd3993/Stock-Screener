@@ -76,7 +76,7 @@ S1 setup+holdings ─> S4 stage ─> S5 (marker review) ────────
 4. **S15 → S15R → S16** as in full mode.
 
 ## Run rules
-- **Sources:** before a step uses Kite or fetches from screener.in: `/principles/access_rules.md`.
+- **Sources:** before a step uses Kite or fetches from screener.in: `/sources/kite.md`, `/sources/screener.md`.
 - **Pending results:** companies are analysed on their latest declared results. At run start, create the sheet tab "Pending <FYyyQn> results" (replacing the previous quarter's; only one exists) and put its name in Data!BA1. S14 lists there the companies that haven't declared the run quarter. After the quarter's SEBI deadline, schedule a reminder to the user to re-run them.
 - **Re-research:** a company is re-analysed only when S11 sends it (marker broken, integrity review, half-yearly re-analysis due: two newer quarters declared since the results its thesis used), when it has declared newer results in a full run, or when the user asks; a quarter passing isn't a reason by itself. An interrupted analysis is resumed from `status.csv`, not restarted. The sheet keeps a company's last row until its replacement completes.
 - **Thesis markers:** every analysed company's markers (the exit rules and `/principles/sector_rules.md`) are in `runs/companies/<SYM>/thesis.json`, written by `thesis.py register` from the agreed analysis (S14); every S11 check is kept in the company's `marker_checks.csv`. How a break is weighed against the position: `/principles/investing_rules.md` (exit rules).

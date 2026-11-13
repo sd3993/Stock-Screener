@@ -2,7 +2,7 @@
 screener-mcp library in public mode reads screener's public company page (every year and quarter on it, not the
 library tools' 8-quarter cut) and NSE's feeds: announcements, insider trades, promoter pledge (latest), SAST Reg 29 disclosures,
 corporate actions and the shareholding-pattern list (about 26 quarters), plus promoter holding and pledge per quarter read
-from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed); if screener.in can't be reached: principles/access_rules.md:
+from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed); if screener.in can't be reached: sources/screener.md:
   uvx --from screener-mcp==0.5.0 python scripts/scr_company.py SYM [SYM ...] [--syms-file list.txt] [--days 1100]
       [--only quarterly,shareholding] [--skip-saved]
 Several companies in one run save the start-up time; --skip-saved skips a company whose --only items are all saved already

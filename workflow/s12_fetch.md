@@ -3,7 +3,7 @@
 You fetch and store everything the analysis of one company will need, extract its key figures accurately, and report what changed. No analysis, opinions or verdicts; copy figures exactly from the documents. Working directory: the project root (PowerShell; never cd elsewhere). The company, the run quarter (`FYyyQn`) and whether the fetch scripts already ran are in your brief.
 
 1. Read `/principles/data_rules.md`, `/workflow/fetch_learnings.md` (known quirks; apply them) and `/sources/screener.md` and `/sources/exchanges.md`.
-2. **Data** (skip what's cached and current per `/principles/data_rules.md`). The orchestrator has already run the two fetch scripts (S10), in this order. Check their printed summaries against this list and fill any gap (`/sources/SOURCES.md`; if screener.in can't be reached: `/principles/access_rules.md`):
+2. **Data** (skip what's cached and current per `/principles/data_rules.md`). The orchestrator has already run the two fetch scripts (S10), in this order. Check their printed summaries against this list and fill any gap (`/sources/SOURCES.md`; if screener.in can't be reached: `/sources/screener.md`):
    - `uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM>` puts the company's screener answers in `data/companies/<SYM>/scr/`, with no model tokens:
      - statements, 12 years, consolidated and standalone;
      - every quarter on screener's page (13);

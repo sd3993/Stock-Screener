@@ -1,20 +1,17 @@
 # Workflow index
 
-Single entry point for the stock research workflow: the two modes, the rules every step follows, the step table and the state folders. How the orchestrator runs and resumes a run: `/workflow/orchestrator.md`.
+Entry point for the stock research workflow. How the orchestrator runs and resumes a run: `/workflow/orchestrator.md`.
 
 ## Two modes, one pipeline
 - **`full`:** research from scratch: market-wide screens, sector tailwind map, gate, then every holding and survivor analysed. Run yearly, and at once when a sector marker breaks, a major policy is notified that touches a sector on the map or a preferred sector (the sector preferences rule), or the list runs thin (fewer names passing the hurdle than the position size and count rule's position count needs).
 - **`recheck`:** existing companies only (holdings and every name currently listed in the sheet), each quarter after results. It is the same pipeline entered at the company list (S9) with the last full run's sector map; same step files, same status files. A script checks each company's thesis markers (S11); only companies it sends on get the fetch subagent and a new analysis.
 
-Screening is always market-wide (S2, S3), never sector-only, and the sector map frames and orders the work without excluding a company (`/principles/sector_rules.md`).
+Screening (S2, S3) is market-wide and the sector map never excludes a company: `/principles/sector_rules.md`.
 
 ## Universal workflow rules
 
-- Standing instructions and working preferences: `/COMMON_AI.md` (and the agent-specific file beside it).
-- Investing rules: `/principles/investing_rules.md`.
-- Where each data item comes from and what is settled about each source: `/sources/SOURCES.md`.
-- Tiers (script / light / standard / deep / deepest) are the global capability tiers (`~/.common-ai/COMMON_AI.md`); each step uses the lightest tier that is accurate, and the step table gives each step's tier, with the reason wherever it is deepest.
-- Outputs are in the run folder `runs/<FYyyQn>/` unless noted; a company's own judgement outputs are in `runs/companies/<SYM>/` (its thesis, marker-check history, and its analyses in one folder per results quarter, `runs/companies/<SYM>/<FYyyQn>/`). Each script's exact rules are in its `--help`.
+- Tiers (script / light / standard / deep / deepest) are the global capability tiers (`~/.common-ai/COMMON_AI.md`); the step table gives each step's tier, with the reason wherever it is deepest.
+- Outputs are in the run folder `runs/<FYyyQn>/` unless noted; a company's own judgement outputs are in `runs/companies/<SYM>/` (its thesis, marker-check history, and its analyses in one folder per results quarter, `runs/companies/<SYM>/<FYyyQn>/`).
 
 ## Steps
 
@@ -79,7 +76,7 @@ Every recheck step also follows `recheck.md`.
 - `data/companies/<SYM>/`: everything about one company, shared across runs: documents and their text in quarter folders (`FY27Q1/` …), cached screener answers in `scr/`, BSE answers in `bse/`, and `index.json`, `facts.json`, `search_log.json`. `data/market/`: market-wide answers. `data/kite/`: holdings pulled from Kite (latest `holdings.csv` and dated copies). `data/playbook/`: the playbook base data (market-wide history and the evidence drawn from it), with each sector playbook in `data/playbook/sectors/<sector>/` (past tailwind episodes: historical evidence, reused across runs; layout: `s6_playbook.md`). The working files of its 2026-11-03 build are in `archive/past_2026-11-03/` (never depended on).
 
 ### Run folders and shared files (`runs/`, git-ignored)
-- `runs/<FYyyQn>/`: one folder per run, named after the latest quarter that has ended; the mode is the first line of its `progress.md`. A second run in the same quarter (a full run after that quarter's recheck run) gets the suffix `_full` (`runs/FY27Q2_full/`). Scripts take the run from `scripts/config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
+- `runs/<FYyyQn>/`: one folder per run, named after the latest quarter that has ended; the mode is the first line of its `progress.md`. A second run in the same quarter (a full run after that quarter's recheck run) gets the suffix `_full` (`runs/FY27Q2_full/`). How scripts pick the run: `/scripts/SCRIPTS.md`.
 - Run-scoped only, in `runs/<FYyyQn>/`: the run's progress and status, screens and triage, gate decisions, that run's sector map and allocation.
 - Per company, across runs, in `runs/companies/<SYM>/`: `thesis.json` (the current thesis markers, S14), `marker_checks.csv` (S11 history), and `<FYyyQn>/` per results quarter the analysis used (S13 and its rechecks; the newest folder is the latest analysis). A recheck run works from these and the copied sector map alone.
 - Shared across runs: `runs/verdict_history.csv` (S14), `runs/sector_calls.csv` and `runs/sector_marker_states.csv` (S5).

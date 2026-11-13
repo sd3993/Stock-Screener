@@ -2,7 +2,7 @@
 
 Runs every screen in `/workflow/screens.json` and the whole-market sweep on screener.in, saves every page, and builds the universe. No analysis, and never sector-only: the whole market is swept every full run (`/principles/sector_rules.md`). The orchestrator starts it from the project root:
 
-`uvx --from screener-mcp==0.5.0 python scripts/screens.py run` (logged in, through the screener library; in the background, never beside another screener fetch; if screener.in can't be reached: `/principles/access_rules.md`). Its `--help` has the exact rules; in short:
+`uvx --from screener-mcp==0.5.0 python scripts/screens.py run` (logged in, through the screener library; in the background, never beside another screener fetch; if screener.in can't be reached: `/sources/screener.md`). Its `--help` has the exact rules; in short:
 
 - **screens** are the user's idea screens (T1…): every company that hits one joins the universe.
 - **The sweep** covers the whole market (`base`: market cap above ₹250 cr, positive P/E) and gives S3 the figures it needs for every company, so names outside the screens can still qualify.

@@ -1,4 +1,4 @@
-"""Pulls holdings through the official Kite CLI (read-only: principles/access_rules.md) and writes the same data to two copies:
+"""Pulls holdings through the official Kite CLI (read-only: sources/kite.md) and writes the same data to two copies:
   - data/kite/: holdings_<YYYY-MM-DD_HHMM>.json (the CLI's answer as is) and holdings.csv (the latest, one row per stock);
   - the sheet's Holdings tab (sheetId 104) through the gws CLI: only the data columns (layout: sources/kite.md).
     Status (F) and the Notes cells (M2 down) are S15's decisions and are never written; only the header M1 gets the fetch time.
@@ -6,10 +6,13 @@
 Kite unavailable: changes nothing except the sheet's Kite-stale column (Q = TRUE on every holding row), prints when each
   copy was last fetched and which is newer, exits 3.
 gws unavailable or a sheet write fails: the local copy is still saved; prints a line starting "SHEET NOT UPDATED", exits 0.
+Also printed: "sold: ...", "new holding ...", "NO FREE ROW ..." (rows 2-100 full).
 Usage (from the project root):
   python scripts/kite_holdings.py                 fetch from Kite, write local and sheet
-  python scripts/kite_holdings.py --latest PATH   no Kite: write the newer of local holdings.csv / sheet to PATH
-Overrides (tests): env KITE_EXE, GWS_EXE (a .py path runs as a Python stand-in for gws).
+  python scripts/kite_holdings.py --latest PATH   no Kite: print both fetch times and write the newer of local holdings.csv /
+                                                  sheet (rows with Qty > 0, exchange from the Google code) to PATH, in holdings.csv's format
+Overrides (tests): env KITE_EXE, GWS_EXE (a .py path runs as a Python stand-in for gws); KITE_CONFIG=<missing file> simulates
+  a lapsed Kite login.
 Other scripts reuse gws(), sheet_get(), SheetError and SHEET from here (wf_lib.py).
 """
 import argparse, csv, datetime as dt, json, os, re, subprocess, sys, time

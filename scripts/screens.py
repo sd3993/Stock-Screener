@@ -1,5 +1,5 @@
 """S2 (workflow/s2_screens.md): the market screens and whole-market sweep, and the universe built from their pages.
-If screener.in can't be reached: principles/access_rules.md.
+If screener.in can't be reached: sources/screener.md.
   uvx --from screener-mcp==0.5.0 python scripts/screens.py run [--only T3,B05,Q1B02] [--probe-only]   (logged in)
   python -I scripts/screens.py build        (universe.csv from the saved pages; also run by "run" after each query)
 run: the column probe, the query-field probes and groups, then every idea screen, whole-market band and extra sweep, each

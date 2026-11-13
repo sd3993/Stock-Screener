@@ -9,7 +9,7 @@ You analyse one company in depth and write one analysis file (`main`); two reche
 - `data/companies/<SYM>/`: `index.json`, `facts.json`, `facts_check.json` and the documents (never the `_superseded` ones); the cached answers in `scr/` (and `bse/`, `api/` where present).
 
 ## Before analysing: newer results?
-Refresh the company's announcements (`uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM> --only announcements`; no model tokens; if screener.in can't be reached: `/principles/access_rules.md`). If the company has declared results newer than `latest_declared_quarter` in `index.json`, stop and reply only `NEW_RESULTS: <FYyyQn>` (unless your brief says the loop cap is reached; then note it and carry on).
+Refresh the company's announcements (`uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM> --only announcements`; no model tokens; if screener.in can't be reached: `/sources/screener.md`). If the company has declared results newer than `latest_declared_quarter` in `index.json`, stop and reply only `NEW_RESULTS: <FYyyQn>` (unless your brief says the loop cap is reached; then note it and carry on).
 
 ## The analysis
 Apply `/principles/investing_rules.md` throughout, weighing what the company passes against what it fails. Your results must not depend on today's share price: give EPS paths, exit P/Es and judgements only; the sheet computes P/E, PEG, multiples and CAGR from live prices.

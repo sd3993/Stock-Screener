@@ -4,9 +4,9 @@ Single entry point for the deterministic scripts under `scripts/`: which script 
 
 ## Running scripts
 
-- Run as `python scripts/<name>.py`. The run folder comes from `config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
-- Run everything from the project root (PowerShell). Scripts run with `python -I` unless their `--help` says otherwise (some run through `uvx`); `--help` itself always works with plain `python -I`.
-- Python 3.13 with `pypdf`, `openpyxl` and `Pillow` (installed 3 Nov 2026, so `page.images` works on scanned PDFs); `curl.exe` for downloads.
+- Run from the project root (PowerShell) as `python -I scripts/<name>.py`, unless the script's `--help` says otherwise (some run through `uvx`); `--help` itself always works with plain `python -I`.
+- The run folder comes from `config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
+- Python 3.13 with `pypdf`, `openpyxl` and `Pillow` (so `page.images` works on scanned PDFs); `curl.exe` for downloads.
 
 ## Scripts reference
 

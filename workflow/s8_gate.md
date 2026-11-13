@@ -8,7 +8,7 @@ Decide NEXT or REJECT for each company in your batch, from its figures, its late
 ## Per company (write its file before starting the next)
 1. **Data:**
    - The company's row in `<run>/triage.csv` (it holds the screen fields, including "Pledged percentage").
-   - Its screener answers in `data/companies/<SYM>/scr/`, fetched with no model tokens by `uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM>` (the orchestrator runs it for the batch; run it yourself for any company it missed; if screener.in can't be reached: `/principles/access_rules.md`):
+   - Its screener answers in `data/companies/<SYM>/scr/`, fetched with no model tokens by `uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM>` (the orchestrator runs it for the batch; run it yourself for any company it missed; if screener.in can't be reached: `/sources/screener.md`):
      - statements (12 years, consolidated and standalone);
      - the last 13 quarters;
      - shareholding for the last 12 quarters;

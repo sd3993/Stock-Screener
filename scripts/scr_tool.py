@@ -2,7 +2,7 @@
 screener-mcp library and saves the answer to a file, never into context. Replaces the MCP.
   uvx --from screener-mcp==0.5.0 python scripts/scr_tool.py <tool> '<args as JSON>' <out.json> [--login]
   e.g. scr_tool.py screen_stocks '{"query": "Market Capitalization > 250", "limit": 200, "page": 1}' runs/.../B01_p01.json --login
-Screens need --login (the screener login from the environment; sources/screener.md); company tools work without it. If screener.in can't be reached: principles/access_rules.md.
+Screens need --login (the screener login from the environment; sources/screener.md); company tools work without it. If screener.in can't be reached: sources/screener.md.
 Writes {fetched_at (IST), via: "screener-lib", tool, args, warnings, data} and prints
 the page and totals for screens. Exits non-zero on an error answer (the file is still written, with the reason).
 Other scripts reuse call() and save() (screens.py); they import this file without running it.
