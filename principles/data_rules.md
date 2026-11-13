@@ -1,31 +1,16 @@
-# Data rules (read by every step that fetches or uses figures: S2-S13)
+# Data rules
 
-How to reach each source (routes, scripts, quirks) is in `/sources/SOURCES.md`. This file says which sources count and how to treat them.
+Which sources count and how to treat them. What each source offers, how to reach it and its quirks: `/sources/SOURCES.md`.
 
 ## Sources
-- **screener.in (the screener library through scripts: `scr_company.py`, `scr_tool.py`) is the main source:**
-  - figures: annual statements (up to 12 years), the last 13 quarters, ratios, screens;
-  - shareholding (12 quarters) with screener's pledge flag;
-  - insider trades (NSE PIT feeds) and NSE bulk deals;
-  - announcements (NSE, up to 10 years back, with the exchange PDF link);
-  - the list of annual reports and call transcripts (exchange links, back to about 2013).
-
-  Ask for consolidated or standalone explicitly (`financial_type`). If screener.in can't be reached: `/principles/access_rules.md`.
-- **NSE's own feeds** (read by `scr_company.py` through the screener library) add:
-  - promoter pledge (latest);
-  - SAST Reg 29 disclosures;
-  - corporate actions;
-  - the shareholding-pattern list (about 26 quarters);
-  - promoter holding and pledge per quarter, read from the filed shareholding-pattern XBRLs (last 12 quarters).
-
-  screener's company page lists the credit-rating letters.
+- **screener.in is the main source** (through the screener scripts, which also read NSE's feeds). Ask for consolidated or standalone explicitly (`financial_type`).
 - **Filed documents are ground truth.** A figure that decides an outcome (a reject, a non-negotiable, an EPS path, a data flag) is checked against the filed document itself: the results filing, annual report or shareholding pattern.
   - Get the document from the exchange link in screener's lists.
   - On a mismatch, rule out definition gaps first: standalone vs consolidated, restatements, bonus/split, one-offs, TTM vs FY, units, rounding to whole crore.
   - Then use the filing, record both values as a data flag, and re-check the source's other figures for the company.
 - **Basis:** use consolidated figures where the company files them, standalone otherwise, and say which. Confirm against the results filing on a company's first fetch and record it in `index.json`.
-- **BSE/NSE directly** for what neither source has:
-  - a filing missing from both lists;
+- **BSE/NSE directly** for what the screener scripts don't give:
+  - a filing missing from their lists;
   - shareholding patterns older than screener's 12 quarters;
   - an unreadable document;
   - an SME company not covered;
@@ -39,10 +24,8 @@ How to reach each source (routes, scripts, quirks) is in `/sources/SOURCES.md`. 
   - unaudited statutory disclosures (shareholding, pledge, SAST/insider);
   - presentations and call transcripts (guidance and explanations only, never figures that override results).
 - **Evidence quality** (High / Medium / Low, graded in each analysis): filed orders and running capacity rank above guidance, guidance above extrapolation.
-- **Guidance and news** come only from exchange disclosures, never from news sites, blogs, broker notes, analyst estimates or other websites. These are pointers only; every number or claim used is read in the filed document itself:
-  - screener's AI and research tools (`ask_company_research`, `notebook_ai`, `get_forward_outlook`, `analyze_red_flags`, `get_moat_signals`, `get_recent_news`, `get_analyst_targets`).
+- **Guidance and news:** only from exchange disclosures (the news and events rule); blogs, broker notes, analyst estimates and other websites count as news sites. screener's AI and research tools (`ask_company_research`, `notebook_ai`, `get_forward_outlook`, `analyze_red_flags`, `get_moat_signals`, `get_recent_news`, `get_analyst_targets`) are pointers only: every number or claim used is read in the filed document itself.
 - **Figures only from the report** (annual-report statements read by subagents, `/workflow/ar_statements.md`): Every value you write is read from the report's own statement pages (or the schedule/note the statement points to), or is plain arithmetic on figures printed there (say which). Never estimate, never take a figure from memory, another source, a later report or screener. If a field is not printed and can't be computed from printed figures, write `null` and say why in `notes`.
-- **Known quirks of each source:** `/sources/SOURCES.md`.
 
 ## Calls and caching
 - **Every answer is saved:** screener answers in `data/companies/<SYM>/scr/` (market-wide ones in the run folder or `data/market/`), written by `scr_company.py` and `scr_tool.py`.
@@ -50,8 +33,9 @@ How to reach each source (routes, scripts, quirks) is in `/sources/SOURCES.md`. 
 - Downloads from document links (exchange PDFs) are free.
 
 ## Storing company data (`data/companies/<SYM>/`)
-- One folder per company holds everything about it, whatever the source: documents in quarter folders, screener answers in `scr/`, and `index.json`, `facts.json`, `facts_check.json`, `search_log.json` at the top.
-- Documents go in quarter subfolders `<FYyyQn>/` (year first, e.g. `FY27Q1`): a quarter's results, call transcript, presentation and shareholding together; an annual report under that year's Q4 (AR FY26 → `FY26Q4`); ad-hoc announcements by the quarter of their filing date. `index.json`, `facts.json` and `facts_check.json` stay in `data/companies/<SYM>/` itself. Files left loose by earlier sessions are moved into their quarter subfolder.
+- One folder per company holds everything about it, whatever the source (layout: `/workflow/WORKFLOW.md`).
+- **Full downloads** (S12) only for companies on `company_list.csv`; earlier steps download only the documents they read.
+- Documents go in quarter subfolders `<FYyyQn>/` (year first, e.g. `FY27Q1`): a quarter's results, call transcript, presentation and shareholding together; an annual report under that year's Q4 (AR FY26 → `FY26Q4`); ad-hoc announcements by the quarter of their filing date. Files left loose by earlier sessions are moved into their quarter subfolder.
 - **No re-downloads:** `index.json` records the company's latest declared quarter, last fetch date and, for every file, its source (exchange attachment ID), source URL and SHA-256. List the company's filings first and download only what isn't in the index; if a new file has the same SHA-256 as one already held, record it but keep no second copy. A repeat fetch with nothing new downloads nothing. Every phase that downloads records the file in `index.json` (creating it if missing); S12 also indexes any file in the folder that isn't in `index.json` yet.
 - **Missing documents** listed in `index.json` are searched for again on every fetch.
 - **Superseded documents:** when the company re-files a document (revised results, a corrigendum, a re-filed shareholding pattern or transcript), rename the old file and its text with the suffix `_superseded` before the extension and update its name in `index.json`. No phase reads superseded files.

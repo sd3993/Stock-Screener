@@ -1,6 +1,6 @@
 # Recheck rules: what every recheck must meet
 
-Judgement work is rechecked instead of being redone from scratch. This file holds the standards all rechecks share; how a recheck runs is in `/workflow/recheck.md`, and each step's own checklist in its recheck file.
+Standards all rechecks of judgement work share. How a recheck runs: `/workflow/recheck.md`.
 
 ## How many rechecks
 | Work | How many rechecks |
@@ -10,8 +10,6 @@ Judgement work is rechecked instead of being redone from scratch. This file hold
 | Gate, per batch (S8) | 1; a 2nd only if the 1st changed a decision |
 | Analysis (S13) | 2; a 3rd if the 2nd still changes the verdict |
 | Allocation (S15) | 2; a 3rd if the 2nd still changes an action |
-
-Why the gate and sector map get fewer: they are filters and orderings whose survivors get the full analysis and two rechecks in S13, so a second recheck adds something only when the first found a mistake. S13 and S15 produce the verdicts and actions the user acts on.
 
 - **Cap:** if the last allowed recheck still changes a verdict, flag it to the user; never go past 3.
 

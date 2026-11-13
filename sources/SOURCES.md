@@ -1,6 +1,6 @@
 # Sources index
 
-How to reach each source, and what has already been found about each, so no session re-researches it; no policy. Which sources count and how filings are stored: `/principles/data_rules.md`. Investing rules: `/principles/investing_rules.md`. What each step does: `/workflow/WORKFLOW.md`. Scripts: `/scripts/SCRIPTS.md`.
+How to reach each source, and what has already been found about each, so no session re-researches it, with each source's own access rules. Which sources count: `/principles/data_rules.md`.
 
 ## Where each item comes from (start here)
 | Need | Source | How (no model tokens unless noted) |
