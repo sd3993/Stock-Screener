@@ -4,8 +4,8 @@
   },
   "permissions": {
     "allow": [
-      "PowerShell(python tools/scripts/*)",
-      "PowerShell(python -I tools/scripts/*)",
+      "PowerShell(python scripts/*)",
+      "PowerShell(python -I scripts/*)",
       "PowerShell(curl.exe -s -m 60 -o *)"
     ]
   }

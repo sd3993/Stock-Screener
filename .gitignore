@@ -1,4 +1,4 @@
-# Only the workflow is committed: COMMON_AI.md, CLAUDE.md, process/ and tools/. Everything a run produces stays out (it lives on
+# Only the workflow is committed: COMMON_AI.md, CLAUDE.md, principles/, workflow/, sources/ and scripts/. Everything a run produces stays out (it lives on
 # OneDrive): run folders, fetched company data (GBs, would double the OneDrive storage inside .git, can be re-fetched).
 runs/
 data/
