@@ -22,6 +22,9 @@ Resumable: saved pages, probes and _groups.json are reused (delete _groups.json 
   then the script stops with the reason (exit 2), keeping every saved page. It stops (exit 3) when a column in
   screens.json is missing from the account's column set (named), or when the universe check finds that a query's
   saved rows don't add up to its total; the "columns never returned" warning counts only after the last query.
+  A query whose pages report different totals, or whose distinct saved companies don't equal its total (the market
+  moved while paging, even within one page), has its pages deleted and is refetched, up to 3 fetches, then the script
+  stops (exit 3); build warns on such a query, and a re-run refetches it.
 """
 import argparse, asyncio, glob, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -141,6 +144,9 @@ def build(sdir=None):
         sid = re.sub(r'_(asc|desc)$', '', re.match(r'(.+)_p\d+\.json$', os.path.basename(fn)).group(1))
         data = json.load(open(fn, encoding='utf-8'))['data']
         t = totals.setdefault(sid, [data.get('total_matches'), set()])
+        if data.get('total_matches') != t[0]:
+            warn.append(f'{sid}: page totals differ ({t[0]} and {data.get("total_matches")}): the market moved while '
+                        f'paging; re-run to refetch it')
         for r in data.get('results', []):
             t[1].add(r['symbol'])  # asc and desc pages overlap: count distinct companies
             row = rows.setdefault(r['symbol'], {'sym': r['symbol'], 'name': r.get('name') or '', 'screener_id': r.get('company_id')})
@@ -171,7 +177,7 @@ def check_build(final, done):
     last query (later queries' pages may still be missing from an interrupted run)."""
     warn, summ = build()
     def counts(w):
-        m = re.match(r'(\S+): \d+ companies saved', w)
+        m = re.match(r'(\S+): (\d+ companies saved|page totals differ)', w)
         return (m.group(1) in done) if m else (final or 'columns never returned' not in w)
     bad = [w for w in warn if counts(w)]
     if bad:
@@ -180,18 +186,31 @@ def check_build(final, done):
 
 
 async def query(qid, q, sdir, log, summary):
-    d, new = await fetch(os.path.join(sdir, f'{qid}_desc_p01.json'), args_for(q), log)
-    t = d['total_matches']
-    files = [(f'{qid}_desc_p{p:02d}.json', 'desc', p) for p in range(2, max(1, t // LIMIT) + 1)]
-    if t > LIMIT and t % LIMIT:
-        files.append((f'{qid}_asc_p01.json', 'asc', 1))
-    fetched = int(new)
-    for fn, order, p in files:
-        _, new = await fetch(os.path.join(sdir, fn), args_for(q, order, p), log)
-        fetched += new
-    syms = set()
-    for fn in glob.glob(os.path.join(sdir, f'{qid}_*_p*.json')):
-        syms |= {r['symbol'] for r in (valid(fn) or {}).get('data', {}).get('results', [])}
+    for attempt in range(3):
+        d, new = await fetch(os.path.join(sdir, f'{qid}_desc_p01.json'), args_for(q), log)
+        t = d['total_matches']
+        files = [(f'{qid}_desc_p{p:02d}.json', 'desc', p) for p in range(2, max(1, t // LIMIT) + 1)]
+        if t > LIMIT and t % LIMIT:
+            files.append((f'{qid}_asc_p01.json', 'asc', 1))
+        fetched = int(new)
+        for fn, order, p in files:
+            _, new = await fetch(os.path.join(sdir, fn), args_for(q, order, p), log)
+            fetched += new
+        pages = glob.glob(os.path.join(sdir, f'{qid}_*_p*.json'))
+        page_totals = {(valid(fn) or {}).get('data', {}).get('total_matches') for fn in pages}
+        syms = set()
+        for fn in pages:
+            syms |= {r['symbol'] for r in (valid(fn) or {}).get('data', {}).get('results', [])}
+        if page_totals == {len(syms)}:
+            break
+        # the market moved while paging (a company crossed a band bound, even inside one page, which the library
+        # assembles from several raw requests): the pages are not one snapshot
+        msg = f'{qid}: totals {sorted(page_totals, key=str)}, companies saved {len(syms)}'
+        if attempt == 2:  # the last fetch's pages are kept for diagnosis; a re-run refetches them
+            raise Stop(f'{msg}: still differ after 3 fetches: re-run later')
+        for fn in pages:
+            os.remove(fn)
+        log(f'{msg}; pages deleted, refetching')
     summary.append((qid, t, len(files) + 1, len(syms)))
     log(f'{qid}: total {t}, pages {len(files) + 1} ({fetched} fetched now), companies saved {len(syms)}')
 

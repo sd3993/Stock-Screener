@@ -3,7 +3,7 @@ import glob, os
 # else RUN below, else the newest runs/FY* folder (run-folder layout: workflow/WORKFLOW.md). Run every script from the project root.
 # Every run-folder, shared-run-file and company-output path the scripts use comes from the functions below, so a layout
 # change is one edit here (/COMMON_AI.md: data/ = reusable facts; runs/ = predictive or judgement outputs).
-RUN = ''  # e.g. 'FY27Q2' or 'FY27Q2_full'; set at run start (S1)
+RUN = 'FY27Q2'  # e.g. 'FY27Q2' or 'FY27Q2_full'; set at run start (S1)
 RUNS_DIR = 'runs'
 
 
