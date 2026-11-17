@@ -10,6 +10,9 @@ Several companies in one run save the start-up time; --skip-saved skips a compan
 start-up per company. If uvx can't reach PyPI, add --offline to uvx to use the cached package. A fetch may still be running after an
 agent restart: before resuming one, check that no scr_company.py python process is still running, or two copies double the request rate.
 Writes {fetched_at (IST), via: "screener-public", tool, args, warnings, data} per item, the same envelope as scr_tool.py.
+announcements and insider: when the library returns no rows (it misreads an NSE SME company's symbol), the same NSE
+feeds are read directly (index sme, then equities) and saved in the library's row format, with tool "nse:... (direct)"
+and a warning saying so.
 --only items: statements, quarterly, shareholding, peers, overview, documents, announcements, insider, credit_ratings, nse
 (default: all). Exits 2 if any item or company failed (the rest are still saved).
 Public mode by default, even when the screener login is in the environment; --login keeps the login (sources/screener.md).
@@ -115,14 +118,51 @@ async def main():
         data, warns = result(await get_document_list(sym))
         save('documents', 'get_document_list', {'symbol': sym}, data, warns)
 
+    async def nse_direct(path):
+        """Rows of an NSE feed for the last `days`, read directly under index sme then equities (the library reads an SME
+        company's symbol as "- SME: <SYM>" and returns nothing). Each row tagged with its _index."""
+        nse = await get_nse_client()
+        span = {'from_date': (dt.date.today() - dt.timedelta(days=days)).strftime('%d-%m-%Y'),
+                'to_date': dt.date.today().strftime('%d-%m-%Y')}
+        rows, seen = [], set()
+        for idx in ('sme', 'equities'):
+            r = await nse.get_json(path, {'index': idx, 'symbol': sym, **span})
+            for x in (r.get('data', []) if isinstance(r, dict) else (r or [])):
+                k = json.dumps(x, sort_keys=True, default=str)
+                if k not in seen:
+                    seen.add(k)
+                    rows.append(dict(x, _index=idx))
+        return rows
+
     async def announcements():
         nse_symbol, rows, total, d, warns, meta = await _fetch_filtered(sym, 'all', days)
-        save('announcements', 'get_company_announcements', {'symbol': sym, 'category': 'all', 'days': d, 'uncapped': True},
+        via = 'get_company_announcements'
+        if not rows:  # an SME company: the library's symbol lookup fails; read NSE directly
+            raw = await nse_direct('/api/corporate-announcements')
+            if raw:
+                rows = [{'date': x.get('an_dt'), 'category': 'general', 'nse_category': x.get('desc'),
+                         'headline': x.get('attchmntText'), 'url': x.get('attchmntFile'), 'nse_index': x['_index']}
+                        for x in raw]
+                total, nse_symbol, via = len(rows), sym, 'nse:/api/corporate-announcements (direct)'
+                warns = list(warns) + ['library returned no rows; read from NSE directly (SME symbol)']
+        save('announcements', via, {'symbol': sym, 'category': 'all', 'days': d, 'uncapped': True},
              {'symbol': nse_symbol, 'days': d, 'total_announcements_fetched': total, 'matches': len(rows), 'announcements': rows}, warns)
 
     async def insider():
         data, warns = result(await get_insider_trading(sym, days))
-        save('insider', 'get_insider_trading', {'symbol': sym, 'days': days}, data, warns)
+        via = 'get_insider_trading'
+        if not (data or {}).get('filings'):  # an SME company: as for announcements
+            raw = await nse_direct('/api/corporates-pit')
+            if raw:
+                data = {'symbol': sym, 'days': days, 'filings': [
+                    {'date': x.get('acqfromDt'), 'person': x.get('acqName'), 'person_category': x.get('personCategory'),
+                     'transaction': str(x.get('tdpTransactionType') or '').upper(), 'shares': x.get('secAcq'),
+                     'value_inr': x.get('secVal'), 'mode': x.get('acqMode'), 'holding_pre_pct': x.get('befAcqSharesPer'),
+                     'holding_post_pct': x.get('afterAcqSharesPer'), 'note': x.get('remarks'), 'nse_index': x['_index']}
+                    for x in raw]}
+                via = 'nse:/api/corporates-pit (direct)'
+                warns = list(warns) + ['library returned no rows; read from NSE directly (SME symbol)']
+        save('insider', via, {'symbol': sym, 'days': days}, data, warns)
 
     async def credit_ratings():  # the rating agencies' rationale letters listed on screener's company page
         soup = BeautifulSoup((await page('consolidated')).html, 'lxml')
