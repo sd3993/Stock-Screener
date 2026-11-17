@@ -21,7 +21,8 @@ listing writes, per company: its Data row (found by ticker in A2:A300, else the 
   row but a blank what_changed is refused: written nowhere (no Data, flags, pending or history row), printed as
   "NO WHAT-CHANGED LINE: <sym>"; the others are still handled and the script exits 5 (5 wins over 3).
 allocation inputs: <run>/allocation/recheck<N>.json (highest N; the S13 format in workflow/s13_allocation.md) and
-  <run>/holdings.csv. Writes Holdings F (status) and M (notes) on each holding's row (found by ticker in Z); clears the
+  <run>/holdings.csv. Writes Holdings F (status) and M (notes, followed by "| Swap candidate: <SYM> (base-case CAGR
+  +<gap> pts): <why>" when the holding has a swap) on each holding's row (found by ticker in Z); clears the
   written columns of sold rows (Qty 0: B, C, D, F, M, N, O, P, Q, V, Z; never deletes a row); rewrites the Allocation
   block rows 2-100, columns B, C, D, E, H, I (trim_above, a weight), N, Z (rows past the last position cleared); rewrites
   Data U2:V300 as one block: U top_up.waiting_for and V top_up.next_check on the row of each ticker whose allocation row
@@ -323,7 +324,12 @@ def cmd_allocation(a):
             notes.append(f'holding {h["sym"]} not on the Holdings tab (run kite_holdings.py): not written')
             continue
         r = hit[0]
-        plan += [(f'Holdings!F{r}', [[h.get('status', '')]]), (f'Holdings!M{r}', [[h.get('notes', '')]])]
+        note = h.get('notes', '')
+        sw = h.get('swap')
+        if sw:
+            note = (f'{note} | Swap candidate: {sw["with"]} (base-case CAGR +{sw["cagr_gap"]:.0f} pts): '
+                    f'{sw.get("why", "")}').strip(' |:')
+        plan += [(f'Holdings!F{r}', [[h.get('status', '')]]), (f'Holdings!M{r}', [[note]])]
     decided = {h['sym'] for h in hold_dec}
     for sym, (r, qty) in rows.items():
         if qty in (0, '0') and sym not in decided:

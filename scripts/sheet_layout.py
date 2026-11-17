@@ -145,10 +145,10 @@ ALLOC_F = {
           'MATCH($Z2,Holdings!$Z:$Z,0)),"")))'),
     'X': FLAGC_Z, 'Y': PEND_Z}
 ALLOC_BLOCK = [['Check', 'Rule', 'Target', 'Current'],
-               ['Largest position', 'target ~10%, trim above 15%', '=IFERROR(MAX($D$2:$D$100),"")',
+               ['Largest position', 'target ~7%, trim above 15%', '=IFERROR(MAX($D$2:$D$100),"")',
                 '=IFERROR(MAX($F$2:$F$100)/SUM(Holdings!$G$2:$G$100),"")'],
                ['Total target weight', 'unfilled weight in a liquid fund', '=SUM($D$2:$D$100)', ''],
-               ['Positions', 'about 6-7 at target plus starters', '=COUNT($D$2:$D$100)',
+               ['Positions', 'as many as pass; at most 2 per sector', '=COUNT($D$2:$D$100)',
                 '=COUNTIF(Holdings!$C$2:$C$100,">0")']]
 ALLOC_CLEAR = ['L', 'M']
 HOLD_HEAD = {'A': 'Ticker', 'B': 'Name', 'C': 'Qty', 'D': 'Avg cost', 'E': 'Price', 'F': 'Status', 'G': 'Value', 'H': 'P&L',
