@@ -18,7 +18,7 @@ if __name__ == '__main__' and {'-h', '--help'} & set(sys.argv[1:]):
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
 base = run_dir()
-HURDLE, MARGIN, BATCH = 0.25, 5, 10
+HURDLE, MARGIN, BATCH = 0.25, 5, 5
 CAPS = (('2y', 2, 60), ('5y', 5, 40), ('7y', 7, 35))
 
 def num(x):

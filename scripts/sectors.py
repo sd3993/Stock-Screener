@@ -47,7 +47,8 @@ Maps every queued company and holding to a sector of the map, queues the emergin
 gate batches not yet run, tailwind sectors first.
 Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides, emerging, participants), triage.csv (queued =
   triage "gate"; name, headroom, triage, reason), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json
-  (S3), gate/bNN.json (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`); industry
+  (S3), gate/bNN.json (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`), overridden
+  by a `sector` field on the company's entry in its batch's latest gate/bNN_rcN.json (a recheck's correction); industry
   labels from data/companies/<SYM>/scr/overview.json.
 Sector of a company: an `overrides` entry first, an emerging entry before the others (source emerging, else override;
   several entries overriding the same company: the lower rank number among those, listed as ambiguous), else the
@@ -66,7 +67,7 @@ Emerging names: every `overrides` company (an emerging company) and every `parti
 Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous)
   for every holding, queued company and emerging name added; gate_batches.json rebuilt: batches already run (a
   gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (holdings
-  never) goes into batches of 10 ordered by sector rank, then triage headroom (highest first), numbered after the last
+  never) goes into batches of 5 ordered by sector rank, then triage headroom (highest first), numbered after the last
   run batch; the old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes.
   Safe to re-run: nothing changes when nothing changed.
 
@@ -477,7 +478,7 @@ def cmd_stage(a):
 
 
 # ---------- order (S5, S6R) ----------
-BATCH = 10  # gate batch size
+BATCH = 5  # gate batch size
 OF_FIELDS = ['sym', 'name', 'held', 'industry', 'sector', 'rank', 'source', 'ambiguous']
 
 
@@ -549,8 +550,18 @@ def cmd_order(a):
                 W.fail(f'{fn}: not JSON')
             if sec:
                 gate_sec[sym] = sec
-                if sec not in ids:
-                    unknown.append(f'{sym}: {sec}')
+        # a recheck's correction: the `sector` field of the company's entry in its batch's latest bNN_rcN.json
+        latest = {}
+        for fn in glob.glob(os.path.join(run, 'gate', 'b*_rc*.json')):
+            m = re.match(r'b(\d+)_rc(\d+)\.json$', os.path.basename(fn))
+            if m and (m.group(1) not in latest or int(m.group(2)) > latest[m.group(1)][0]):
+                latest[m.group(1)] = (int(m.group(2)), fn)
+        for _, fn in latest.values():
+            d = W.read_json(fn) or {}
+            for e in (d.get('entries') if isinstance(d, dict) else d) or []:
+                if e.get('sector') and e.get('sym'):
+                    gate_sec[e['sym']] = e['sector']
+        unknown = [f'{s}: {sec}' for s, sec in sorted(gate_sec.items()) if sec not in ids]
         if unknown:
             W.fail(f'gate files name sectors not in sectors.json: {unknown} (fix the gate file or add the sector)')
     # batches already run
