@@ -1,10 +1,12 @@
-"""Owns the Google Sheet's layout: every header and formula of the Data, List, Watchlist, Allocation and Holdings tabs
+"""Owns the Google Sheet's layout: every header and formula of the Data, List, Watchlist, Rejected, Allocation and Holdings tabs
 (the single List + Watchlist layout, sources/sheet.md), and changes the sheet from the old horizon layout (tabs Short term
 101, Medium term 102, Long term 103) to it, or repairs headers, formulas and formats once it is applied. Through the gws CLI.
   python -I scripts/sheet_layout.py [--dry-run] [--out FILE]      the default: read the sheet, save the plan, write nothing
   python -I scripts/sheet_layout.py --apply [--out FILE]          run the plan, read it back, log it
---dry-run reads the tab list, the conditional-format rules and (FORMULA render) Data A1:BF300, List/Watchlist A1:Z200,
-  Allocation and Holdings A1:Z100, and builds the ordered plan: 1 renames (101 -> List, 102 -> Watchlist); 2 header texts
+--dry-run reads the tab list, the conditional-format rules and (FORMULA render) Data A1:BG300, List/Watchlist A1:Z200,
+  Allocation and Holdings A1:Z100, and builds the ordered plan: 1 renames (101 -> List, 102 -> Watchlist), columns appended to Data when its grid
+  ends before the last owned column, and the Rejected tab (108) added when missing (a formula view of Data: status
+  Reject, or Exit once no longer held, newest analysis first; hidden Z the ticker list); 2 header texts
   (RAW) and every formula row by row (USER_ENTERED: Data 2-300, List and Watchlist 2-200, Allocation and Holdings 2-100;
   Data, List and Watchlist always in full, Allocation and Holdings only the columns that differ from the owned ones);
   3 clears (Data AW:AX and BE with their headers; List and Watchlist Z3:Z200; Allocation L:M; Holdings K); 4 number
@@ -30,10 +32,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wf_lib as W
 from sheet_write import Fail, formula_cols
 
-IDS = {'list': 101, 'watch': 102, 'long': 103, 'alloc': 7, 'hold': 104, 'data': 106}
-TITLES = {101: 'List', 102: 'Watchlist', 7: 'Allocation', 104: 'Holdings', 106: 'Data'}
+IDS = {'list': 101, 'watch': 102, 'long': 103, 'alloc': 7, 'hold': 104, 'data': 106, 'rejected': 108}
+TITLES = {101: 'List', 102: 'Watchlist', 7: 'Allocation', 104: 'Holdings', 106: 'Data', 108: 'Rejected'}
 OLD_TITLES = {101: 'Short term', 102: 'Medium term', 103: 'Long term'}
-LAST = {106: 300, 101: 200, 102: 200, 7: 100, 104: 100}
+LAST = {106: 300, 101: 200, 102: 200, 7: 100, 104: 100, 108: 200}
 HZ_RE = re.compile(r"'?(Short term|Medium term|Long term)'?!")
 
 # ---------- owned headers and formulas (row-2 form; at_row() moves relative row references) ----------
@@ -65,7 +67,8 @@ DATA_HEAD = {
     'AK': '[f] Multiple', 'AL': '[f] CAGR', 'AM': '[f] Bear multiple', 'AN': '[f] Buy below', 'AO': '[f] % above buy below',
     'AP': '[f] Re-rating share', 'AQ': '[f] Below rule (live)', 'AR': '[f] Tab', 'AS': '[f] Watch type',
     'AT': '[f] Waiting for (shown)', 'AU': '[f] Next check (shown)', 'AY': '[f] Results pending', 'AZ': '[f] Data flag',
-    'BC': 'Non-negotiables failed (names)', 'BD': '[f] Held', 'BF': 'Stage'}
+    'BC': 'Non-negotiables failed (names)', 'BD': '[f] Held', 'BF': 'Stage', 'BG': 'Moat',
+    'BH': 'Why rejected / exited', 'BI': 'What would change it'}
 DATA_F = {
     # kept as the sheet has them
     'AD': '=IF($A2="","",IFERROR(GOOGLEFINANCE($B2,"price"),""))',
@@ -114,22 +117,33 @@ LIST_COLS = [('A', 'Ticker', FLAG_A), ('B', 'Name', look('D')), ('C', 'Sector', 
              ('J', 'Status', '=IF($Z2="","",IF(INDEX(Data!$BD:$BD,MATCH($Z2,Data!$A:$A,0))=TRUE,IF(INDEX(Data!$K:$K,'
                              'MATCH($Z2,Data!$A:$A,0))="Exit","Held: exit call","Held"),"Candidate"))'),
              ('K', 'Exit P/E (used)', look('AV')), ('L', 'P/E now', look('AH')), ('M', 'Fwd P/E', look('AI')), ('N', 'PEG', look('AJ')),
-             ('O', 'Re-rating share', look('AP')), ('P', 'Evidence', look('X')), ('Q', 'Non-negotiables', look('Y')),
+             ('O', 'Re-rating share', look('AP')), ('P', 'Evidence / moat', '=IF($Z2="","",INDEX(Data!$X:$X,MATCH($Z2,Data!$A:$A,0))&IF(INDEX(Data!$BG:$BG,MATCH($Z2,Data!$A:$A,0))="",""," / moat: "&INDEX(Data!$BG:$BG,MATCH($Z2,Data!$A:$A,0))))'), ('Q', 'Non-negotiables', look('Y')),
              ('R', 'Results used', look('F')), ('S', 'Thesis', look('AA')), ('T', 'Stage', look('BF')),
              ('U', 'Exit call', look('T')), ('V', 'Below rule (live)', look('AQ'))]
 WATCH_COLS = [('A', 'Ticker', FLAG_A), ('B', 'Name', look('D')), ('C', 'Sector', look('E')), ('D', 'Price', look('AF')),
               ('E', 'Expected CAGR', look('AL')), ('F', 'Type', look('AS')), ('G', 'Waiting for', look('AT')),
               ('H', 'Evidence so far', look('R')), ('I', 'Next check', look('AU')), ('J', 'Buy below', look('AN')),
               ('K', '% above buy below', look('AO')), ('L', 'Visible until', look('L')), ('M', 'Years', look('M')),
-              ('N', 'Exit P/E (used)', look('AV')), ('O', 'P/E now', look('AH')), ('P', 'Evidence', look('X')),
+              ('N', 'Exit P/E (used)', look('AV')), ('O', 'P/E now', look('AH')), ('P', 'Evidence / moat', '=IF($Z2="","",INDEX(Data!$X:$X,MATCH($Z2,Data!$A:$A,0))&IF(INDEX(Data!$BG:$BG,MATCH($Z2,Data!$A:$A,0))="",""," / moat: "&INDEX(Data!$BG:$BG,MATCH($Z2,Data!$A:$A,0))))'),
               ('Q', 'Non-negotiables', look('Y')), ('R', 'Results used', look('F')), ('S', 'Thesis', look('AA')),
               ('T', 'Stage', look('BF')),
               ('U', 'Held', '=IF($Z2="","",IF(INDEX(Data!$BD:$BD,MATCH($Z2,Data!$A:$A,0))=TRUE,"Yes",""))'),
               ('V', 'Below rule (live)', look('AQ'))]
-LIST_Z2 = ('=IFERROR(SORT(FILTER(Data!$A$2:$A$300,Data!$AR$2:$AR$300="List"),FILTER(ARRAYFORMULA(IF(ISNUMBER('
-           'Data!$AL$2:$AL$300),Data!$AL$2:$AL$300,-1)),Data!$AR$2:$AR$300="List"),FALSE),"")')
-WATCH_Z2 = ('=IFERROR(SORT(FILTER(Data!$A$2:$A$300,Data!$AS$2:$AS$300<>""),FILTER(Data!$AS$2:$AS$300,Data!$AS$2:$AS$300<>""),'
-            'TRUE,FILTER(ARRAYFORMULA(IF(ISNUMBER(Data!$AL$2:$AL$300),Data!$AL$2:$AL$300,-1)),Data!$AS$2:$AS$300<>""),FALSE),"")')
+def zlook(c):
+    return f'=IF($Z2="","",INDEX(Data!${c}:${c},MATCH($Z2,Data!$A:$A,0)))'
+
+
+REJ_FILT = '(Data!$K$2:$K$300="Reject")+((Data!$K$2:$K$300="Exit")*(Data!$BD$2:$BD$300<>TRUE))'
+REJ_COLS = [('A', 'Ticker', '=IF($Z2="","",$Z2)'), ('B', 'Name', zlook('D')), ('C', 'Sector', zlook('E')),
+            ('D', 'Status', '=IF($Z2="","",IF(INDEX(Data!$K:$K,MATCH($Z2,Data!$A:$A,0))="Exit","Exited","Rejected"))'),
+            ('E', 'Analysis date', zlook('G')), ('F', 'Results used', zlook('F')), ('G', 'Why', zlook('BH')),
+            ('H', 'What would change it', zlook('BI')), ('I', 'Price at analysis', zlook('H')), ('J', 'Price now', zlook('AF')),
+            ('K', 'Analysis file', zlook('AC'))]
+REJ_Z2 = ('=IFERROR(INDEX(SORT(FILTER({Data!$A$2:$A$300,Data!$G$2:$G$300},' + REJ_FILT + '),2,FALSE),0,1),"")')
+REJ_NF = dict(E='text', F='text', G='text', H='text', I='price', J='price', K='text')
+LIST_Z2 = ('=IFERROR(INDEX(SORT(FILTER({Data!$A$2:$A$300,ARRAYFORMULA(IF(ISNUMBER(Data!$AL$2:$AL$300),Data!$AL$2:$AL$300,-1))},Data!$AR$2:$AR$300="List"),2,FALSE),0,1),"")')
+WATCH_Z2 = ('=IFERROR(INDEX(SORT(FILTER({Data!$A$2:$A$300,Data!$AS$2:$AS$300,ARRAYFORMULA(IF(ISNUMBER(Data!$AL$2:$AL$300),Data!$AL$2:$AL$300,-1))},Data!$AS$2:$AS$300<>""),2,TRUE,3,FALSE),0,1),"")')
+# SORT is given one array with its keys as extra columns: a FILTER result as SORT's sort column gives #VALUE!
 
 ALLOC_HEAD = {'A': 'Ticker', 'B': 'Name', 'C': 'Action', 'D': 'Target weight', 'E': 'Target value (₹)',
               'F': 'Current value (₹)', 'G': 'Price', 'H': 'Buy below (₹)', 'I': 'Trim above (weight)', 'J': 'List',
@@ -234,6 +248,9 @@ def desired():
         fs.update(rows(TAIL_F, 200))
         fs['Z'] = {2: z2}
         out[sid] = {'head': head, 'f': fs, 'mode': 'all', 'clear': ['Z3:Z200']}
+    fs = rows({c: f for c, _, f in REJ_COLS}, 200)
+    fs['Z'] = {2: REJ_Z2}
+    out[108] = {'head': dict({c: h for c, h, _ in REJ_COLS}, Z='[h] ticker'), 'f': fs, 'mode': 'all', 'clear': ['Z3:Z200']}
     af = rows(ALLOC_F, 100)
     for i, row in enumerate(ALLOC_BLOCK[1:], 2):
         for j, v in enumerate(row[2:], 2):
@@ -258,10 +275,10 @@ def cell(vals, col, r):
 def read_sheet():
     k = W.gws_mod()
     meta = k.gws('sheets', 'spreadsheets', 'get', '--params', json.dumps(
-        {'spreadsheetId': k.SHEET, 'fields': 'sheets(properties(sheetId,title),conditionalFormats)'}))
+        {'spreadsheetId': k.SHEET, 'fields': 'sheets(properties(sheetId,title,gridProperties),conditionalFormats)'}))
     tabs = {s['properties']['sheetId']: s for s in meta.get('sheets', [])}
     titles = {sid: s['properties']['title'] for sid, s in tabs.items()}
-    want = [(sid, 'Z' if sid in (101, 102, 7, 104) else 'BF') for sid in (106, 101, 102, 7, 104, 103) if sid in titles]
+    want = [(sid, 'Z' if sid in (101, 102, 7, 104, 108) else 'BI') for sid in (106, 101, 102, 7, 104, 103, 108) if sid in titles]
     vals = W.sheet_get([f'{W.quote_tab(titles[sid])}!A1:{c}{LAST.get(sid, 200)}' for sid, c in want], 'FORMULA')
     return tabs, titles, {sid: v for (sid, _), v in zip(want, vals)}
 
@@ -303,9 +320,18 @@ def build_plan(tabs, titles, vals):
            for sid in (101, 102) if sid in titles and titles[sid] != TITLES[sid]]
     if ren:
         steps.append({'step': 'renames', 'method': 'spreadsheets.batchUpdate', 'requests': ren})
+    need = max(W.col_index(c) for c in DATA_HEAD) + 1
+    have = ((tabs.get(106) or {}).get('properties', {}).get('gridProperties') or {}).get('columnCount', need)
+    if have < need:
+        steps.append({'step': 'widen Data', 'method': 'spreadsheets.batchUpdate', 'requests': [
+            {'appendDimension': {'sheetId': 106, 'dimension': 'COLUMNS', 'length': need - have}}]})
+    if 108 not in titles:
+        steps.append({'step': 'add Rejected', 'method': 'spreadsheets.batchUpdate', 'requests': [
+            {'addSheet': {'properties': {'sheetId': 108, 'title': TITLES[108],
+                                         'gridProperties': {'rowCount': 200, 'columnCount': 26}}}}]})
     raw, user, clears = [], [], []
-    for sid in (106, 101, 102, 7, 104):
-        if sid not in titles:
+    for sid in (106, 101, 102, 7, 104, 108):
+        if sid not in titles and sid != 108:
             continue
         w, v, q = want[sid], vals.get(sid, []), W.quote_tab(TITLES[sid])
         n = {'headers': 0, 'formula cells': 0, 'cleared ranges': 0}
@@ -372,6 +398,14 @@ def build_plan(tabs, titles, vals):
                                        'cell': {'userEnteredFormat': {'numberFormat': NF[k]}}, 'fields': 'userEnteredFormat.numberFormat'}})
         fmt.append({'updateDimensionProperties': {'range': {'sheetId': sid, 'dimension': 'COLUMNS', 'startIndex': 22, 'endIndex': 26},
                                                   'properties': {'hiddenByUser': True}, 'fields': 'hiddenByUser'}})
+    for c, k in REJ_NF.items():
+        ci = W.col_index(c)
+        fmt.append({'repeatCell': {'range': {'sheetId': 108, 'startRowIndex': 1, 'endRowIndex': 200, 'startColumnIndex': ci,
+                                             'endColumnIndex': ci + 1},
+                                   'cell': {'userEnteredFormat': {'numberFormat': NF[k], 'wrapStrategy': 'WRAP'}},
+                                   'fields': 'userEnteredFormat.numberFormat,userEnteredFormat.wrapStrategy'}})
+    fmt.append({'updateDimensionProperties': {'range': {'sheetId': 108, 'dimension': 'COLUMNS', 'startIndex': 25, 'endIndex': 26},
+                                              'properties': {'hiddenByUser': True}, 'fields': 'hiddenByUser'}})
     for (r0, r1, c0, c1), k in (((1, 100, 8, 9), 'pct1'), ((1, 3, 17, 18), 'pct1'), ((1, 2, 18, 19), 'pct1'), ((3, 4, 17, 19), 'int')):
         fmt.append({'repeatCell': {'range': {'sheetId': 7, 'startRowIndex': r0, 'endRowIndex': r1, 'startColumnIndex': c0,
                                              'endColumnIndex': c1},
@@ -459,7 +493,7 @@ def check(plan):
 def horizon_refs():
     """Formulas on the five tabs that still name a horizon tab."""
     left = []
-    for t, rg in (('Data', 'A1:BF300'), ('List', 'A1:Z200'), ('Watchlist', 'A1:Z200'), ('Allocation', 'A1:Z100'),
+    for t, rg in (('Data', 'A1:BG300'), ('List', 'A1:Z200'), ('Watchlist', 'A1:Z200'), ('Allocation', 'A1:Z100'),
                   ('Holdings', 'A1:Z100')):
         v, = W.sheet_get([f'{t}!{rg}'], 'FORMULA')
         for i, row in enumerate(v):

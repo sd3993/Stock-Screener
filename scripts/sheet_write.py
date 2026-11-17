@@ -7,8 +7,8 @@ listing inputs: each company's agreed analysis (thesis.py's agreed(): the highes
   --only overview first), the run quarter, runs/verdict_history.csv. --hold SYM: an S9 "hold": only a verdict-history
   row ("markers held, results <run quarter>"), copied from the company's last row.
 listing writes, per company: its Data row (found by ticker in A2:A300, else the first empty row; none: "NO FREE ROW",
-  that company skipped, exit 3) in A:T, W:AC, BB, BC and BF (columns in DATA in the script; never U, V, which are S14's):
-  A:J and W:AC, BC, BF the identity, figures and notes; BB "Y" when rerating_evidence is non-blank, else "N";
+  that company skipped, exit 3) in A:T, W:AC, BB, BC and BF:BI (columns in DATA in the script; never U, V, which are S14's):
+  A:J and W:AC, BC, BF the identity, figures and notes; BG the moat verdict (None/Narrow/Wide); BH reject_points, one "- " line each; BI revisit_if.trigger plus " (by <by>)"; BB "Y" when rerating_evidence is non-blank, else "N";
   K the status capitalised (List / Watch / Reject / Hold / Exit);
   L visible_until; M years; N eps_end_base; O eps_end_bear; P exit_pe; Q watch.waiting_for plus " (by <due>)" when the
   watch has a due date; R watch.evidence_so_far; S watch.next_check (Q:S blank without a watch); T "Urgent: <event>,
@@ -46,7 +46,7 @@ from config import run_dir, shared_path
 
 DATA_FIRST, DATA_LAST = 2, 300
 DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'W',
-        'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'BB', 'BC', 'BF']
+        'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'BB', 'BC', 'BF', 'BG', 'BH', 'BI']
 TOPUP = ['U', 'V']   # Data top-up columns, written by allocation
 VH_FIELDS = ['date', 'quarter_folder', 'sym', 'results_used', 'verdict', 'reason']
 HOLD_FIRST, HOLD_LAST = 2, 100
@@ -117,7 +117,15 @@ def data_row(a, ov, run_q):
         'W': num_or_blank(a.get('dividend_per_share_per_year')), 'X': a.get('evidence_quality') or '',
         'Y': a.get('nonneg_overall') or '', 'Z': '; '.join(map(str, a.get('bent_rules') or [])), 'AA': a.get('thesis') or '',
         'AB': kill, 'AC': a.get('_file', ''), 'BB': 'Y' if str(a.get('rerating_evidence') or '').strip() else 'N',
-        'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BF': a.get('discovery_stage') or ''}
+        'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BF': a.get('discovery_stage') or '',
+        'BG': str((a.get('moat') or {}).get('verdict') or '').capitalize(),
+        'BH': '\n'.join(f'- {p}' for p in (a.get('reject_points') or [])), 'BI': revisit(a.get('revisit_if'))}
+
+
+def revisit(r):
+    """Data BI: the revisit trigger, with ' (by <date>)' when dated."""
+    r = r or {}
+    return ' '.join(x for x in (str(r.get('trigger') or ''), f"(by {r['by']})" if r.get('by') else '') if x)
 
 
 def row_ranges(tab, row, cells):
