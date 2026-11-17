@@ -7,9 +7,11 @@
      no_pe or no_5y_pe. These lengths are screening yardsticks only: the stock's own visible-until date and projection
      length (2-7 years) are set later, in the analysis;
  (b) earnings evidence (the earnings evidence rule): E1 acceleration, E2 re-rating candidate (a quality business at a P/E below its own range with growth intact), E3 sustained growth, E4 turnaround;
- (c) flags from the screener figures; only clear failures are rejected here, near-misses go to the gate.
+ (c) flags from the screener figures; only clear failures are rejected here, near-misses go to the gate;
+ (d) REIT/InvIT reject: the word REIT or InvIT in the name, or the word Trust with no promoter holding (a company
+     named "... Trust" has one).
 """
-import csv, json, os, sys
+import csv, json, os, re, sys
 if __name__ == '__main__' and {'-h', '--help'} & set(sys.argv[1:]):
     print(__doc__)
     sys.exit(0)
@@ -85,7 +87,8 @@ for s in sorted(set(U) | holds):
     nm = (r['name'] or '').lower()
     if r['held']:
         r['triage'], r['reason'] = 'holding', 'held: goes straight to S7'
-    elif 'reit' in nm or 'invit' in nm or ' trust' in nm:
+    elif re.search(r'\b(reit|invit)\b', nm) or (re.search(r'\btrust\b', nm) and r['prom'] is None):
+        # a trust unit has no promoter holding; a company named "... Trust" (e.g. Master Trust) has one
         r['triage'], r['reason'] = 'reject', 'REIT/InvIT'
     elif pledge is not None and pledge > 25:
         r['triage'], r['reason'] = 'reject', f'promoter pledge {pledge}% (pledge rule)'
