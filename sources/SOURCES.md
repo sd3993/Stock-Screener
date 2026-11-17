@@ -14,7 +14,7 @@ How to reach each source, and what has already been found about each, so no sess
 | The documents themselves (results, ARs, transcripts, governance) | exchange PDFs | `scr_docs.py`; text via `pdf_text.py` |
 | BSE-only companies, documents NSE lacks | BSE | `bse_fetch.py` + `bse_fetch.js` in a browser (`/sources/exchanges.md`) |
 | Long price, P/E, EPS, market cap history (about 2005 onward, incl. merged/delisted) | screener public chart API | `mb_history.py` |
-| Stored price for the sheet (S14) | screener page | `scr_company.py --only overview` |
+| Stored price for the sheet (S12) | screener page | `scr_company.py --only overview` |
 
 ## Source references
 
@@ -22,5 +22,3 @@ How to reach each source, and what has already been found about each, so no sess
 - [`exchanges.md`](exchanges.md) — Direct exchange access (NSE, BSE) for filings and history the main source lacks.
 - [`kite.md`](kite.md) — Brokerage account access for holdings, read-only.
 - [`sheet.md`](sheet.md) — The outcome store: spreadsheet access, layout and write ownership.
-- [`ar_statements.md`](ar_statements.md) — Old annual reports as a source of statements older than the main source covers.
-- [`tapetide.md`](tapetide.md) — Usage reference for the Tapetide API, for manual use at the user's request.

@@ -5,10 +5,9 @@ Every recheck meets the standards in `/principles/recheck_rules.md`. Working dir
 | Work | Checklist |
 |---|---|
 | Sector map (S5) | `s5r_sector_recheck.md` |
-| Sector playbook (S7) | `s6_playbook.md` (S7R) |
-| Gate, per batch (S8) | `s8r_gate_recheck.md` |
-| Analysis (S13) | `s13r_analysis_recheck.md` |
-| Allocation (S15) | `s15r_allocation_recheck.md` |
+| Gate, per batch (S6) | `s6r_gate_recheck.md` |
+| Analysis (S11) | `s11r_analysis_recheck.md` |
+| Allocation (S13) | `s13r_allocation_recheck.md` |
 
 ## How to check
 1. Read the step file the work was done under (and everything it says to read), `/principles/recheck_rules.md`, your checklist file, then the work file.
@@ -22,7 +21,7 @@ Write the corrected work as your output file, in the same format as the work fil
 - `recheck_log`: one entry per change {item, old, new, evidence (document and page)};
 - `contrary_search`: one entry per claim checked {claim, searched_for, where, found, result: "confirmed" / "contradicted" / "unresolved"};
 - `unresolved`: conflicts needing a deepest-tier judgement {item, side_a, side_b, sources};
-- `verdict_changed`: true if any decision, horizon, stage, marker, non-negotiable status, rank, proposed note or action changed;
+- `verdict_changed`: true if any decision, status, visible-until date, stage, marker, non-negotiable status, rank, proposed note or action changed;
 - `learnings`: each gap the instructions, the fetch list or the rules should prevent next time {where: step file / checklist / `/workflow/fetch_learnings.md` / `/principles/investing_rules.md` sector note, what, evidence}. Don't edit those files yourself.
 Downloads go into `data/companies/<SYM>/<FYyyQn>/` and are recorded in that company's `index.json` as `/principles/data_rules.md` describes.
 
@@ -31,5 +30,5 @@ Reply with: items checked, changes made (one line each), contrary searches (conf
 ## For the orchestrator
 - Run the rechecks `/principles/recheck_rules.md` allows, one after the other, each on the previous one's output.
 - Tier: as in `/workflow/WORKFLOW.md`. Anything a recheck leaves `unresolved` goes to a deepest-tier subagent with both sides and their sources, before the next recheck.
-- After each recheck, apply its learnings (fetch gaps into `/workflow/s12_fetch.md` or `/principles/data_rules.md`, sector notes into `/principles/investing_rules.md`, process gaps into the step or checklist file) before the next company; tell the user about those that alter an agreed outcome.
+- After each recheck, apply its learnings (fetch gaps into `/workflow/s10_fetch.md` or `/principles/data_rules.md`, sector-note proposals to the user, process gaps into the step or checklist file) before the next company; tell the user about those that alter an agreed outcome.
 - Keep each company's contrary searches: append them to `data/companies/<SYM>/search_log.json` (date, quarter, step, claim, searched_for, where, found, result), so later rechecks and quarters see what was already looked for.
