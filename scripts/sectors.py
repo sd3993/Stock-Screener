@@ -21,7 +21,9 @@ clusters -> <run>/sector_clusters.csv: per industry label over the universe: n_u
   p is 0 or 1), the holdings in it (a holding outside universe.csv is listed and flagged), queued symbols; companies
   without a label under "(no label)"; sorted by z, highest first.
 stage -> <run>/sector_stage.csv: per industry label with 5+ universe companies (full mode), and per sector of
-  --sectors (industries plus overrides; a company overridden into a sector counts only there):
+  --sectors (industries plus overrides; a company overridden into a sector counts only there; an emerging entry
+  with no such members takes its participants instead, as a proxy, also counted in their main sectors; its row
+  then suggests no stage (unknown), since their prices move on their main businesses):
   pe_now = median current P/E over members with P/E > 0 (full: universe.csv "Price to Earning"; --stage-only: each
     member's overview.json "Stock P/E", which syms --stage-only keeps fresh);
   pe_pct = percentile of pe_now among pe_hist, the label's median chart P/E (history.json "Price to Earning", last
@@ -43,7 +45,7 @@ stage -> <run>/sector_stage.csv: per industry label with 5+ universe companies (
 ---- order (S5 after S5R; S6R with --from-gate) ----
 Maps every queued company and holding to a sector of the map, queues the emerging entries' companies, and reorders the
 gate batches not yet run, tailwind sectors first.
-Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides, emerging), triage.csv (queued =
+Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides, emerging, participants), triage.csv (queued =
   triage "gate"; name, headroom, triage, reason), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json
   (S3), gate/bNN.json (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`); industry
   labels from data/companies/<SYM>/scr/overview.json.
@@ -52,13 +54,15 @@ Sector of a company: an `overrides` entry first, an emerging entry before the ot
   sector whose `industries` holds its label (two sectors: the lower rank number wins, ambiguous), else "other" (rank =
   highest + 1); --from-gate: the gate file's sector wins (source gate). A gate sector that is neither in sectors.json
   nor "other" stops the script (listed), writing nothing.
-Emerging names: every `overrides` company of an entry with "emerging": true joins the queue even when triage did not
+Emerging names: every `overrides` company (an emerging company) and every `participants` company (an established
+  company with an emerging business) of an entry with "emerging": true joins the queue even when triage did not
   queue it (triage not_queued, including no positive P/E, or a return-math reject). Not added: a holding; a company in
   a batch that has run; a company triage rejected for anything but return math (REIT/InvIT, promoter pledge, cash
   conversion), which is also taken out of a pending batch it sits in. A company absent from triage.csv is added (no
   headroom: last within its sector). Printed: the emerging names added, those absent from triage.csv, and those
   blocked, each with the reason. Overrides of an entry not marked emerging add no company to the queue: they only map
-  companies queued or held.
+  companies queued or held. Participants never map a company to the emerging entry: their sector is their main
+  business's (an override or label there).
 Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous)
   for every holding, queued company and emerging name added; gate_batches.json rebuilt: batches already run (a
   gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (holdings
@@ -178,6 +182,10 @@ def sector_members(sectors, pool):
             if lab and lab in (s.get('industries') or []):
                 out[s['id']].append(sym)
                 break
+    for s in sectors:  # an emerging entry with participants only: they stand in, so stage and score can price it
+        if s.get('emerging') is True and not out[s['id']] and s.get('participants'):
+            out[s['id']] = sorted(s['participants'])
+            print(f'NOTE {s["id"]}: no members; its participants stand in ({" ".join(out[s["id"]])})')
     for w in warn:
         print('WARNING', w)
     return out
@@ -451,6 +459,13 @@ def cmd_stage(a):
     for r in rows:
         r['stage_suggested'], r['reason'] = suggest(r['pe_pct'], r['ret_1y'], rt, r['inst_chg_4q'], it,
                                                     r['listings_24m'], r['issues_12m'], r['n'])
+    proxy = {x['id'] for x in sectors if x.get('emerging') is True and x.get('participants')
+             and mem.get(x['id']) == sorted(x['participants'])}
+    for r in rows:
+        if r['kind'] == 'sector' and r['id'] in proxy:
+            r['stage_suggested'] = 'unknown'
+            r['reason'] = ('participants only: their prices move on their main businesses, so no stage is suggested; '
+                           'judge the emerging business from its own filings')
     fields = ['kind', 'id', 'n', 'pe_now', 'pe_now_n', 'pe_hist_q', 'pe_hist_med', 'pe_pct', 'ret_1y', 'ret_n', 'inst_chg_4q',
               'inst_cov', 'listings_24m', 'listing_cov', 'issues_12m', 'issue_cov', 'stage_suggested', 'reason']
     out = os.path.join(run, 'sector_stage.csv')
@@ -548,12 +563,12 @@ def cmd_order(a):
             ran.add(int(m.group(1)))
     keep = {k: v for k, v in old['batches'].items() if int(k) in ran}
     done = {s for v in keep.values() for s in v}
-    # emerging names: every override of an emerging entry, unless held, already gated or hard-rejected by triage
+    # emerging names: every override or participant of an emerging entry, unless held, already gated or hard-rejected by triage
     em_add, em_absent, em_blocked = [], [], []
     for sec in secs:
         if not emerging(sec):
             continue
-        for sym in sec.get('overrides') or {}:
+        for sym in list(sec.get('overrides') or {}) + list(sec.get('participants') or {}):
             if sym in em_add or any(sym == b[0] for b in em_blocked):
                 continue
             why = ('held' if sym in held else 'in a batch that has run' if sym in done
