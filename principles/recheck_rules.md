@@ -6,10 +6,9 @@ Standards all rechecks of judgement work share. How a recheck runs: `/workflow/r
 | Work | How many rechecks |
 |---|---|
 | Sector map (S5) | 1; a 2nd only if the 1st changed a rank, stage or marker state |
-| Sector playbook (S7) | 1; a 2nd only if the 1st changed a proposed note |
-| Gate, per batch (S8) | 1; a 2nd only if the 1st changed a decision |
-| Analysis (S13) | 2; a 3rd if the 2nd still changes the verdict |
-| Allocation (S15) | 2; a 3rd if the 2nd still changes an action |
+| Gate, per batch (S6) | 1; a 2nd only if the 1st changed a decision |
+| Analysis (S11) | 2; a 3rd if the 2nd still changes the verdict |
+| Allocation (S13) | 2; a 3rd if the 2nd still changes an action |
 
 - **Cap:** if the last allowed recheck still changes a verdict, flag it to the user; never go past 3.
 

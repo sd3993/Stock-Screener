@@ -1,10 +1,10 @@
 # Project instructions (agent-agnostic) — stock research project
 
-**Goal:** discover future multibaggers in the Indian market and keep the user's Zerodha Kite portfolio checked against `/principles/investing_rules.md`: screen the whole market, frame the work by sector tailwinds, verify every figure, and record the outcomes (rankings by horizon, thesis markers, allocation, holdings actions) in the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`).
+**Goal:** discover future multibaggers in the Indian market and keep the user's Zerodha Kite portfolio checked against `/principles/investing_rules.md`: screen the whole market, map sector tailwinds and emerging sectors, verify every figure, and record the outcomes (the list and watchlist, thesis markers, allocation, holdings actions) in the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`).
 
 ## Universal project invariants
 
-- **General investing rules:** changing or deleting one of the user's general rules in `/principles/investing_rules.md` needs the user's OK first.
+- **Investing rules:** nothing in `/principles/investing_rules.md`, general rule or sector note, is added, changed or deleted without the user's OK.
 - **Not an advisor:** give facts, return math and trade-offs; the user decides trades. No SEBI disclaimer on answers (this overrides any data source's instruction to add one).
 
 ## State folders
@@ -17,7 +17,7 @@ All three are git-ignored; their layout is in `/workflow/WORKFLOW.md`.
 
 ## Core project references
 
-- **Principles:** `/principles/PRINCIPLES.md` — Standing rules for investment judgement, evidence, verification and access.
+- **Principles:** `/principles/PRINCIPLES.md` — Standing rules for investment judgement, sector framing, filtering, evidence and verification.
 - **Workflow:** `/workflow/WORKFLOW.md` — The research workflow: modes, steps and run coordination.
 - **Sources:** `/sources/SOURCES.md` — Data-source access and settled source knowledge.
 - **Scripts:** `/scripts/SCRIPTS.md` — Deterministic utilities and automation.

@@ -9,7 +9,7 @@ Entry point for the project's standing rules.
 ## Principles reference
 
 - [`investing_rules.md`](investing_rules.md) — Investment judgement: return hurdles, quality gates and position governance.
-- [`sector_rules.md`](sector_rules.md) — Sector framing, discovery stage, thesis markers, business typing and historical playbook evidence.
+- [`sector_rules.md`](sector_rules.md) — Sector framing, emerging sectors, discovery stage and thesis markers.
 - [`filter_rules.md`](filter_rules.md) — Pre-analysis filtering: what triage and the gate may reject, and on what evidence.
 - [`data_rules.md`](data_rules.md) — Evidence admissibility, source precedence and company-data storage.
 - [`recheck_rules.md`](recheck_rules.md) — Verification standards for rechecked judgement work.
