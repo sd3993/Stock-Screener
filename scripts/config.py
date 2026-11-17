@@ -37,17 +37,17 @@ def company_runs_dir(sym=''):
 
 
 def thesis_path(sym):
-    """A company's current thesis markers (S14 thesis.py register; S11 thesis.py check)."""
+    """A company's current thesis markers (S12 thesis.py register; S9 thesis.py check)."""
     return os.path.join(company_runs_dir(sym), 'thesis.json')
 
 
 def marker_history_path(sym):
-    """A company's marker-check history: every S11 check appended."""
+    """A company's marker-check history: every S9 check appended."""
     return os.path.join(company_runs_dir(sym), 'marker_checks.csv')
 
 
 def analysis_dir(sym, results_quarter):
-    """A company's deep analysis and its rechecks (S13): one folder per results quarter the analysis used (FYyyQn)."""
+    """A company's deep analysis and its rechecks (S11): one folder per results quarter the analysis used (FYyyQn)."""
     return os.path.join(company_runs_dir(sym), results_quarter)
 
 
@@ -59,26 +59,16 @@ def analysis_dirs(sym):
                   if re.match(r'^FY\d{2}Q[1-4]$', x) and os.path.isdir(os.path.join(d, x)))
 
 
-# One folder per company: documents in quarter subfolders, Tapetide answers in api/, index/facts at the top.
+# One folder per company: documents in quarter subfolders, screener answers in scr/, index/facts at the top.
 COMPANIES_DIR = os.path.join('data', 'companies')
-MARKET_DIR = os.path.join('data', 'market')  # market-wide answers
-CALL_LOG = os.path.join('data', 'calls.csv')
-
-def api_path(sym, name):
-    return os.path.join(MARKET_DIR, name + '.json') if sym in ('', '_market') else os.path.join(COMPANIES_DIR, sym, 'api', name + '.json')
 
 
 PLAYBOOK_DIR = os.path.join('data', 'playbook')
 
 def playbook_dir():
-    # The playbook base data (market-wide history kept for the sector playbooks, workflow/s6_playbook.md): the
-    # PLAYBOOK_DATA environment variable (a folder path) if set, else data/playbook.
+    # The folder of the market-wide price and valuation history that S4 reads: the PLAYBOOK_DATA environment variable
+    # (a folder path) if set, else data/playbook.
     h = os.environ.get('PLAYBOOK_DATA') or PLAYBOOK_DIR
     if not os.path.isdir(h):
-        raise SystemExit(f'no playbook base data folder: {h} (the playbook base data: workflow/s6_playbook.md)')
+        raise SystemExit(f'no market-wide history folder: {h} (set PLAYBOOK_DATA, or create data/playbook)')
     return h
-
-
-def playbook_sector_dir(sector):
-    """A sector's playbook (S6-S7): episodes.csv, data.md, playbook.md, notes_proposed.md."""
-    return os.path.join(os.environ.get('PLAYBOOK_DATA') or PLAYBOOK_DIR, 'sectors', sector)

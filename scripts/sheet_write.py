@@ -1,28 +1,40 @@
-"""S14 and S16 by script: writes agreed analyses and allocation decisions into the Google Sheet through the gws
+"""S12 and S14 by script: writes agreed analyses and allocation decisions into the Google Sheet through the gws
 CLI (RAW values), reads every written cell back and compares it. Layout: sources/sheet.md.
-  python -I scripts/sheet_write.py listing SYM... [--hold SYM...] [--dry-run]     (S14, workflow/s14_listing.md)
-  python -I scripts/sheet_write.py allocation [--dry-run]                         (S16, workflow/s15_allocation.md)
+  python -I scripts/sheet_write.py listing SYM... [--hold SYM...] [--dry-run]     (S12, workflow/s12_listing.md)
+  python -I scripts/sheet_write.py allocation [--dry-run]                         (S14, workflow/s13_allocation.md)
 listing inputs: each company's agreed analysis (thesis.py's agreed(): the highest recheck<N>.json in its newest
   runs/companies/<SYM>/<FYyyQn>/ folder), its scr/overview.json (stored price, name, NSE/BSE code; run scr_company.py
-  --only overview first), the run quarter, runs/verdict_history.csv. --hold SYM: an S11 "hold": only a verdict-history
+  --only overview first), the run quarter, runs/verdict_history.csv. --hold SYM: an S9 "hold": only a verdict-history
   row ("markers held, results <run quarter>"), copied from the company's last row.
 listing writes, per company: its Data row (found by ticker in A2:A300, else the first empty row; none: "NO FREE ROW",
-  that company skipped) in A:AC, BB:BC and BE:BF (columns in DATA in the script); then once for the batch: the Data Flags tab
-  (A2:G) rewritten with the listed tickers' old rows replaced by their analyses' data flags, sorted by ticker; the
-  pending tab (its name in Data!BA1, A2:E) with each listed company added when its results_used is before the run
-  quarter and removed otherwise; one runs/verdict_history.csv row per company (the reason: the analysis's what_changed
-  line, else first listing / changed from the previous verdict / unchanged on newer results).
-allocation inputs: <run>/allocation/recheck<N>.json (highest N; the S15 format in workflow/s15_allocation.md) and
+  that company skipped, exit 3) in A:T, W:AC, BB, BC and BF (columns in DATA in the script; never U, V, which are S14's):
+  A:J and W:AC, BC, BF the identity, figures and notes; BB "Y" when rerating_evidence is non-blank, else "N";
+  K the status capitalised (List / Watch / Reject / Hold / Exit);
+  L visible_until; M years; N eps_end_base; O eps_end_bear; P exit_pe; Q watch.waiting_for plus " (by <due>)" when the
+  watch has a due date; R watch.evidence_so_far; S watch.next_check (Q:S blank without a watch); T "Urgent: <event>,
+  <event_date>" when exit_call.urgent is true, "Not urgent" when false, blank without an exit_call. Then once for the
+  batch: the Data Flags tab (A2:G) rewritten with the listed tickers' old rows replaced by their analyses' data flags,
+  sorted by ticker; the pending tab (its name in Data!BA1, A2:E) with each listed company added when its results_used is
+  before the run quarter and removed otherwise; one runs/verdict_history.csv row per company, verdict "<status>, visible
+  until <visible_until> (<years>y), <discovery_stage>, non-negotiables <nonneg_overall>", reason the analysis's
+  what_changed line ("first listing" for a company with no earlier row). A company that has an earlier verdict-history
+  row but a blank what_changed is refused: written nowhere (no Data, flags, pending or history row), printed as
+  "NO WHAT-CHANGED LINE: <sym>"; the others are still handled and the script exits 5 (5 wins over 3).
+allocation inputs: <run>/allocation/recheck<N>.json (highest N; the S13 format in workflow/s13_allocation.md) and
   <run>/holdings.csv. Writes Holdings F (status) and M (notes) on each holding's row (found by ticker in Z); clears the
   written columns of sold rows (Qty 0: B, C, D, F, M, N, O, P, Q, V, Z; never deletes a row); rewrites the Allocation
-  block rows 2-100, columns B, C, D, E, H, I, N, Z (rows past the last position cleared); checks the Holdings data
-  columns C (qty) and D (avg cost) against <run>/holdings.csv and reports any difference (exit 4), writing neither.
+  block rows 2-100, columns B, C, D, E, H, I (trim_above, a weight), N, Z (rows past the last position cleared); rewrites
+  Data U2:V300 as one block: U top_up.waiting_for and V top_up.next_check on the row of each ticker whose allocation row
+  has a top_up, every other row blank (stale top-ups disappear); checks the Holdings data columns C (qty) and D (avg
+  cost) against <run>/holdings.csv and reports any difference (exit 4), writing neither.
 Safety: every written column is checked against the formula columns listed in sources/sheet.md;
-  one in the map stops the script before any write. Writes go in one values.batchUpdate per company (Data) and one per
-  tab block, so a failure never leaves half a row. After writing, every written range is read back and compared cell
+  one in the map stops the script before any write. Writes go per company (Data) and per tab block, each through
+  wf_lib.sheet_put, which splits a write into values.batchUpdate calls of at most ~20 KB of command line at range or
+  row boundaries (a row is never split). After writing, every written range is read back and compared cell
   by cell (numbers as numbers, text exactly); a difference is rewritten once, then the script fails (exit 4) naming
   the cells. gws missing or an auth error: exit 2, nothing written after the failing call.
---dry-run: reads the sheet (no writes) and saves the exact write plan (every range and its values, plus the read-back
+--dry-run: reads the sheet (no writes) and saves the exact write plan (every range and its values, the gws calls they
+  split into with each call's body size, plus the read-back
   expectations) to <run>/sheet_plan_<listing|allocation>_<time>.json, and prints a summary. The plan is what a light-tier
   subagent would apply if the script can't run.
 """
@@ -32,8 +44,9 @@ import wf_lib as W
 from config import run_dir, shared_path
 
 DATA_FIRST, DATA_LAST = 2, 300
-DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-        'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'BB', 'BC', 'BE', 'BF']
+DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'W',
+        'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'BB', 'BC', 'BF']
+TOPUP = ['U', 'V']   # Data top-up columns, written by allocation
 VH_FIELDS = ['date', 'quarter_folder', 'sym', 'results_used', 'verdict', 'reason']
 HOLD_FIRST, HOLD_LAST = 2, 100
 SOLD_CLEAR = ['B', 'C', 'D', 'F', 'M', 'N', 'O', 'P', 'Q', 'V', 'Z']
@@ -83,9 +96,11 @@ def num_or_blank(x):
 
 def data_row(a, ov, run_q):
     """The Data row's written cells {column: value} for one agreed analysis."""
-    hz, holds = a.get('horizon'), a.get('horizon_holds', True) is not False
-    flag = lambda h: 'Y' if (h == hz and holds) else 'N'
-    part = lambda h, k: num_or_blank((a.get(h) or {}).get(k))
+    w, x = a.get('watch') or {}, a.get('exit_call')
+    st = str(a.get('status') or '')
+    exitc = '' if not x else (f"Urgent: {x.get('event') or ''}, {x.get('event_date') or ''}" if x.get('urgent') is True
+                              else 'Not urgent' if x.get('urgent') is False else '')
+    wait = (f"{w.get('waiting_for') or ''}" + (f" (by {w['due']})" if w.get('due') else '')) if w else ''
     nse, bse = (ov or {}).get('nse_code'), (ov or {}).get('bse_code')
     code = nse or bse or a['sym']
     kill = ' '.join(x for x in (str(a.get('kill_condition') or ''), f"Review: {a['review_date']}" if a.get('review_date') else '') if x)
@@ -95,13 +110,13 @@ def data_row(a, ov, run_q):
         'E': a.get('sector') or '', 'F': a.get('results_used') or '', 'G': a.get('analysed_on') or '',
         'H': num_or_blank((ov or {}).get('current_price')), 'I': num_or_blank(a.get('eps_ttm_normalised')),
         'J': num_or_blank(a.get('eps_y1_base')),
-        'K': flag('short'), 'L': part('short', 'eps_y2_base'), 'M': part('short', 'eps_y2_bear'), 'N': part('short', 'exit_pe'),
-        'O': flag('medium'), 'P': part('medium', 'eps_y5_base'), 'Q': part('medium', 'eps_y5_bear'), 'R': part('medium', 'exit_pe'),
-        'S': flag('long'), 'T': part('long', 'eps_y7_base'), 'U': part('long', 'eps_y7_bear'), 'V': part('long', 'exit_pe'),
+        'K': st[:1].upper() + st[1:], 'L': a.get('visible_until') or '', 'M': num_or_blank(a.get('years')),
+        'N': num_or_blank(a.get('eps_end_base')), 'O': num_or_blank(a.get('eps_end_bear')), 'P': num_or_blank(a.get('exit_pe')),
+        'Q': wait, 'R': w.get('evidence_so_far') or '', 'S': w.get('next_check') or '', 'T': exitc,
         'W': num_or_blank(a.get('dividend_per_share_per_year')), 'X': a.get('evidence_quality') or '',
         'Y': a.get('nonneg_overall') or '', 'Z': '; '.join(map(str, a.get('bent_rules') or [])), 'AA': a.get('thesis') or '',
-        'AB': kill, 'AC': a.get('_file', ''), 'BB': '' if holds else (hz or ''),
-        'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BE': hz or '', 'BF': a.get('discovery_stage') or ''}
+        'AB': kill, 'AC': a.get('_file', ''), 'BB': 'Y' if str(a.get('rerating_evidence') or '').strip() else 'N',
+        'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BF': a.get('discovery_stage') or ''}
 
 
 def row_ranges(tab, row, cells):
@@ -147,7 +162,10 @@ def apply(plan, dry, kind, run, extra=None):
     """Write the plan in one batch, read back, rewrite once, fail on a second difference; or save it (--dry-run)."""
     if dry:
         p = os.path.join(run, f'sheet_plan_{kind}_{dt.datetime.now(IST):%Y%m%d_%H%M%S}.json')
+        calls = [{'ranges': [r for r, _ in c], 'body_chars': len(json.dumps(
+            {'valueInputOption': 'RAW', 'data': [{'range': r, 'values': v} for r, v in c]}))} for c in W.put_chunks(plan)]
         W.write_json(p, {'kind': kind, 'value_input_option': 'RAW', 'writes': [{'range': r, 'values': v} for r, v in plan],
+                         'gws_calls': calls,
                          'read_back': 'read every range with valueRenderOption UNFORMATTED_VALUE and compare cell by cell',
                          **(extra or {})})
         return p
@@ -192,6 +210,11 @@ def cmd_listing(a):
         vh_rows.append({'date': today, 'quarter_folder': os.path.basename(os.path.normpath(run)), 'sym': s,
                         'results_used': prev[-1]['results_used'], 'verdict': prev[-1]['verdict'], 'reason': f'markers held, results {rq}'})
     plans, report = [], []
+    # a company listed before needs the analysis's what_changed line: without it, it is written nowhere
+    refused = [s for s in ana if any(x['sym'] == s for x in vh) and not str(ana[s].get('what_changed') or '').strip()]
+    for s in refused:
+        ana.pop(s)
+        report.append(f'NO WHAT-CHANGED LINE: {s} (listed before; its agreed analysis has no what_changed); not written')
     if ana:
         tick, ba1, flags = W.sheet_get(['Data!A2:A300', 'Data!BA1', "'Data Flags'!A2:G500"])
         pend_name = ba1[0][0] if ba1 and ba1[0] else ''
@@ -216,11 +239,9 @@ def cmd_listing(a):
                 r = free.pop(0)
             plans.append((s, row_ranges('Data', r, data_row(an, ov, rq))))
             report.append(f'{s}: Data row {r}')
-            prev = [x for x in vh if x['sym'] == s]
-            verdict = (f"{an.get('horizon')}{'' if an.get('horizon_holds', True) is not False else ' (horizon test fails)'}, "
+            verdict = (f"{an.get('status')}, visible until {an.get('visible_until')} ({an.get('years')}y), "
                        f"{an.get('discovery_stage')}, non-negotiables {an.get('nonneg_overall')}")
-            reason = an.get('what_changed') or ('first listing' if not prev else f"changed from: {prev[-1]['verdict']}" if prev[-1]['verdict'] != verdict
-                      else f"unchanged on results {an.get('results_used')} ({an['_file']})")
+            reason = str(an.get('what_changed') or '').strip() or 'first listing'   # refused above when an earlier row exists
             vh_rows.append({'date': today, 'quarter_folder': os.path.basename(os.path.normpath(run)), 'sym': s,
                             'results_used': an.get('results_used'), 'verdict': verdict, 'reason': reason})
         for s in nofree:  # not listed: its flags, pending row and verdict wait for a free row
@@ -272,7 +293,7 @@ def cmd_listing(a):
         print(x)
     print(f'{len(ana)} listed, {len(a.hold or [])} hold rows; ' + (f'DRY RUN, plans: {saved}' if a.dry_run else
                                                                     f'written and read back; {len(vh_rows)} verdict-history rows'))
-    return 3 if any(x.startswith('NO FREE ROW') for x in report) else 0
+    return 5 if refused else 3 if any(x.startswith('NO FREE ROW') for x in report) else 0
 
 
 def cmd_allocation(a):
@@ -280,6 +301,7 @@ def cmd_allocation(a):
     fc = formula_cols()
     check_map('Holdings', ['F', 'M'] + SOLD_CLEAR, fc)
     check_map('Allocation', ALLOC_COLS, fc)
+    check_map('Data', TOPUP, fc)
     files = sorted(((int(m.group(1)), f) for f in glob.glob(os.path.join(run, 'allocation', 'recheck*.json'))
                     if (m := re.search(r'recheck(\d+)\.json$', f))))
     if not files:
@@ -288,7 +310,7 @@ def cmd_allocation(a):
     hold_dec, alloc = d.get('holdings') or [], d.get('allocation') or []
     if len(alloc) > HOLD_LAST - 1:
         raise Fail(f'{len(alloc)} allocation rows: more than rows 2-{HOLD_LAST}', 1)
-    v, = W.sheet_get([f'Holdings!A{HOLD_FIRST}:Z{HOLD_LAST}'])
+    v, tick = W.sheet_get([f'Holdings!A{HOLD_FIRST}:Z{HOLD_LAST}', f'Data!A{DATA_FIRST}:A{DATA_LAST}'])
     rows = {}
     for i, r in enumerate(v):
         z = r[25] if len(r) > 25 else ''
@@ -312,8 +334,19 @@ def cmd_allocation(a):
         x = alloc[i] if i < len(alloc) else {}
         cells = {'B': x.get('name', ''), 'C': x.get('action', ''), 'D': num_or_blank(x.get('target_weight')) if x else '',
                  'E': num_or_blank(x.get('target_value')) if x else '', 'H': num_or_blank(x.get('buy_below')) if x else '',
-                 'I': num_or_blank(x.get('sell_above')) if x else '', 'N': x.get('notes', ''), 'Z': x.get('sym', '')}
+                 'I': num_or_blank(x.get('trim_above')) if x else '', 'N': x.get('notes', ''), 'Z': x.get('sym', '')}
         plan += row_ranges('Allocation', r, cells)
+    # Data U:V (top-up) for rows 2-300 in one write: a top_up on the ticker's row, every other row blank
+    tops = {str(x.get('sym')): x['top_up'] for x in alloc if x.get('top_up')}
+    data_rows = {str(row[0]): DATA_FIRST + i for i, row in enumerate(tick) if row and str(row[0]).strip()}
+    uv = [['', ''] for _ in range(DATA_LAST - DATA_FIRST + 1)]
+    for s, t in tops.items():
+        if s not in data_rows:
+            notes.append(f'top-up for {s}: no Data row (list it in S12 first); not written')
+            continue
+        uv[data_rows[s] - DATA_FIRST] = [t.get('waiting_for') or '', t.get('next_check') or '']
+    plan.append((f'Data!{TOPUP[0]}{DATA_FIRST}:{TOPUP[-1]}{DATA_LAST}', uv))
+    notes.append(f'Data U:V top-ups: {sum(1 for r in uv if r != ["", ""])} rows set, the rest blank')
     # the Holdings data columns (kite_holdings.py's) against <run>/holdings.csv: reported, never written here
     hp = os.path.join(run, 'holdings.csv')
     mism = []
@@ -335,11 +368,11 @@ def cmd_allocation(a):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest='cmd', required=True, help='the mode; <mode> --help for its own help')
-    p = sp.add_parser('listing', help='agreed analyses into the Data tab and related tabs (S14)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('listing', help='agreed analyses into the Data tab and related tabs (S12)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('syms', nargs='*', help='companies to list (give SYMs, --hold SYMs or both)')
-    p.add_argument('--hold', nargs='*', default=[], help='S11 "hold" companies: only a verdict-history row')
+    p.add_argument('--hold', nargs='*', default=[], help='S9 "hold" companies: only a verdict-history row')
     p.add_argument('--dry-run', action='store_true', help='read the sheet, save the write plan, write nothing')
-    p = sp.add_parser('allocation', help='allocation decisions into the Holdings and Allocation tabs (S16)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('allocation', help='allocation decisions into the Holdings and Allocation tabs (S14)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--dry-run', action='store_true', help='read the sheet, save the write plan, write nothing')
     a = ap.parse_args()
     if a.cmd == 'listing' and not (a.syms or a.hold):

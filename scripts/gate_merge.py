@@ -1,4 +1,6 @@
-"""S8R: writes <run>/gate/decisions.csv from each batch's latest file (bNN_rc2 > bNN_rc1 > bNN)."""
+"""S6R: writes <run>/gate/decisions.csv from each batch's latest file (bNN_rc2 > bNN_rc1 > bNN).
+Columns: sym, decision, batch, stage (rcN or gate), est_cagr, years (the gate entry's years field; blank when absent),
+floor_failed, why. Prints the NEXT/REJECT counts and the batches not yet rechecked."""
 import csv, glob, json, os, re, sys
 if __name__ == '__main__' and {'-h', '--help'} & set(sys.argv[1:]):
     print(__doc__)
@@ -18,7 +20,7 @@ for b, (rc, fn) in sorted(latest.items()):
     d = json.load(open(fn, encoding='utf-8'))
     for e in (d['entries'] if isinstance(d, dict) else d):
         rows.append({'sym': e['sym'], 'decision': e['decision'], 'batch': b, 'stage': f'rc{rc}' if rc else 'gate',
-                     'est_cagr': e.get('est_cagr'), 'horizon': e.get('horizon', e.get('bucket')), 'floor_failed': e.get('floor_failed'), 'why': e.get('why')})
+                     'est_cagr': e.get('est_cagr'), 'years': e.get('years'), 'floor_failed': e.get('floor_failed'), 'why': e.get('why')})
 with open(os.path.join(g, 'decisions.csv'), 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, fieldnames=list(rows[0]) if rows else ['sym'])
     w.writeheader()

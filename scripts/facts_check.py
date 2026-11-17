@@ -1,14 +1,13 @@
-"""S12 check: compares a company's facts.json (figures read from its filings) with every cached data source:
-screener.in answers in data/companies/<SYM>/scr/ (basis as requested in the call) and old Tapetide answers in api/
-where a legacy cache exists (fundamentals, else financials; Tapetide is not used now). Writes facts_check.json beside facts.json. Read-only on everything else.
+"""S10 check: compares a company's facts.json (figures read from its filings) with the cached screener.in answers in
+data/companies/<SYM>/scr/ (basis as requested in the call). Writes facts_check.json beside facts.json. Read-only on everything else.
 usage: python scripts/facts_check.py SYM
 """
-import datetime as dt, json, os, sys
+import json, os, sys
 if __name__ == '__main__' and {'-h', '--help'} & set(sys.argv[1:]):
     print(__doc__)
     sys.exit(0)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import COMPANIES_DIR as FILINGS_DIR, api_path
+from config import COMPANIES_DIR as FILINGS_DIR
 sym = sys.argv[1]
 d = os.path.join(FILINGS_DIR, sym)
 fp = os.path.join(d, 'facts.json')
@@ -33,45 +32,7 @@ def from_screener():
             bases.add(env['args'].get('financial_type') or data.get('financial_type') or 'consolidated')
     return out, bases
 
-def from_tapetide():
-    env = load(api_path(sym, 'fundamentals'))
-    rows = (env or {}).get('data', {}).get('data') if env else None
-    rows = [r for page in rows for r in page['data']] if rows and isinstance(rows[0], dict) and 'data' in rows[0] else rows
-    out, bases = {}, set()
-    lab = {'revenue': 'sales', 'net_profit': 'net profit', 'profit_before_tax': 'profit before tax', 'eps': 'eps in rs',
-           'cash_from_operations': 'cash from operating activity', 'borrowings': 'borrowings'}
-    for r in rows or []:
-        if r.get('metric') in lab and r.get('value') is not None:
-            sec = 'quarterly' if r['period_type'] == 'quarter' else {'cash_from_operations': 'cash_flow',
-                                                                     'borrowings': 'balance_sheet'}.get(r['metric'], 'profit_loss')
-            out.setdefault(sec, {}).setdefault(lab[r['metric']], {})[dt.date.fromisoformat(r['period_end']).strftime('%b %Y')] = r['value']
-            bases.add(r.get('basis'))
-    if not out:  # older caches: /financials sections (basis not stated)
-        def walk(o):
-            if isinstance(o, dict):
-                if 'section' in o and isinstance(o.get('data'), dict):
-                    out[o['section']] = {k.strip().lower(): v for k, v in o['data'].items() if isinstance(v, dict)}
-                for v in o.values():
-                    walk(v)
-            elif isinstance(o, list):
-                for v in o:
-                    walk(v)
-        walk((load(api_path(sym, 'financials')) or {}).get('data'))
-        bases.add('unstated')
-    sh = (load(api_path(sym, 'shareholding')) or {}).get('data')
-    def find(o):
-        if isinstance(o, dict):
-            if isinstance(o.get('data'), dict) and 'Promoters' in o['data']:
-                out.setdefault('shareholding', {})['promoters'] = o['data']['Promoters']
-            for v in o.values():
-                find(v)
-        elif isinstance(o, list):
-            for v in o:
-                find(v)
-    find(sh)
-    return out, bases
-
-SOURCES = {name: f() for name, f in (('screener', from_screener), ('tapetide', from_tapetide))}
+SOURCES = {name: f() for name, f in (('screener', from_screener),)}
 SOURCES = {k: v for k, v in SOURCES.items() if v[0]}
 QMAP = {'revenue': ('quarterly', 'sales'), 'pat': ('quarterly', 'net profit'), 'pbt': ('quarterly', 'profit before tax'),
         'eps': ('quarterly', 'eps in rs')}
@@ -88,7 +49,7 @@ def cmp(kind, period, field, fv, sec, lab, note=''):
             missing.append(f'{kind} {period} {field} [{src}]: facts={fv} source={tv}')
             continue
         diff = abs(fv - tv) / max(abs(fv), abs(tv), 1e-9) * 100
-        # screener and Tapetide round to whole crore: a gap under 0.5 cr is rounding
+        # screener rounds to whole crore: a gap under 0.5 cr is rounding
         rows.append({'kind': kind, 'period': period, 'field': field, 'source': src, 'facts': fv, 'value': tv,
                      'diff_pct': round(diff, 2), 'flag': diff > 2 and abs(fv - tv) > 0.5, 'note': note})
 

@@ -1,18 +1,16 @@
 """Everything computed per sector, from saved files only (no network, no model): S4 sector numbers, S5 sector order and
-sector calls, S6 playbook episodes. One subcommand each:
+sector calls. One subcommand each:
   python -I scripts/sectors.py syms --out FILE [--stage-only] [--sectors FILE] [--history FILE]   (S4)    
   python -I scripts/sectors.py clusters                                                          (S4)    
   python -I scripts/sectors.py stage [--sectors FILE] [--stage-only]                             (S4)      
-  python -I scripts/sectors.py stage-test [--thresholds 80,30,60] [--out FILE]   (the stage rule on the base data)
-  python -I scripts/sectors.py order [--from-gate]                                               (S5, S8R)
+  python -I scripts/sectors.py order [--from-gate]                                               (S5, S6R)
   python -I scripts/sectors.py log | score [--out FILE]                                          (S5: sector calls)
-  python -I scripts/sectors.py episodes <sector id> [--horizon medium] [--min-companies 5] [--sectors FILE]  (S6)
 Each part's inputs, outputs and rules follow in its section below.
 
 ---- S4 (workflow/s4_sector_numbers.md) ----
 Inputs: the run folder (config.py): universe.csv (S2), triage.csv (S3; queued = triage "gate"), holdings.csv (S1; else
-  data/kite/holdings.csv); data/companies/<SYM>/scr/: overview.json (industry label = last element of `sectors`, as
-  mb_sector_test.py), history.json (chart price and P/E), shareholding.json, announcements.json.
+  data/kite/holdings.csv); data/companies/<SYM>/scr/: overview.json (industry label = last element of `sectors`),
+  history.json (chart price and P/E), shareholding.json, announcements.json.
 syms: queued companies and holdings without overview.json, or without a shareholding.json whose newest quarter is the
   run quarter (one symbol per line, for scr_company.py --only overview,shareholding). --stage-only (recheck): instead the
   members of the sectors in <run>/sectors.json whose overview.json is older than 14 days (their current price and P/E
@@ -39,33 +37,40 @@ stage -> <run>/sector_stage.csv: per industry label with 5+ universe companies (
     listings_24m + issues_12m >= max(3, 10% of members), or inst_chg_4q in the top fifth of labels); undiscovered if
     pe_pct <= 30 and ret_1y <= 0 and inst_chg_4q <= 0 (or blank) and listings_24m <= 1; early if pe_pct <= 60 and
     (ret_1y > 0 or inst_chg_4q > 0); else recognised; pe_pct blank -> unknown, with the reason.
-  It describes how priced-in a sector is (sizing, the re-rating case); data/playbook/stage_test.md shows it did not
+  It describes how priced-in a sector is (sizing, the re-rating case); tested on past March starts, it did not
   predict later winner rates, so it is not a signal for picking sectors.
-stage-test -> data/playbook/stage_test.md: the same rule on past March starts of the playbook base data (outcomes.csv:
-  pe0, px_ret1, the first price per company; inst_chg_1y from market_features_full.csv where present), against each
-  label's later winner rate (mb_sector_test.py's winner()) and median price multiple, 2006-15 and 2016+ separately.
 
----- order (S5 after S5R; S8R with --from-gate) ----
-Maps every queued company and holding to a sector of the map and reorders the gate batches not yet run, tailwind sectors first.
-Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides), triage.csv (queued = triage "gate";
-  name, headroom), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json (S3), gate/bNN.json (batches
-  already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`); industry labels from
-  data/companies/<SYM>/scr/overview.json.
-Sector of a company: an `overrides` entry first (two sectors overriding the same company: the lower rank number, listed
-  as ambiguous), else the sector whose `industries` holds its label (two sectors: the lower rank number wins, ambiguous),
-  else "other" (rank = highest + 1); --from-gate: the gate file's sector wins (source gate). A gate sector that is
-  neither in sectors.json nor "other" stops the script (listed), writing nothing.
-Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/label/gate/other, ambiguous);
-  gate_batches.json rebuilt: batches already run (a gate/bNN.json exists) keep their number and content; every other
-  queued company (holdings never) goes into batches of 10 ordered by sector rank, then triage headroom (highest first),
-  numbered after the last run batch; the old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes.
+---- order (S5 after S5R; S6R with --from-gate) ----
+Maps every queued company and holding to a sector of the map, queues the emerging entries' companies, and reorders the
+gate batches not yet run, tailwind sectors first.
+Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides, emerging), triage.csv (queued =
+  triage "gate"; name, headroom, triage, reason), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json
+  (S3), gate/bNN.json (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`); industry
+  labels from data/companies/<SYM>/scr/overview.json.
+Sector of a company: an `overrides` entry first, an emerging entry before the others (source emerging, else override;
+  several entries overriding the same company: the lower rank number among those, listed as ambiguous), else the
+  sector whose `industries` holds its label (two sectors: the lower rank number wins, ambiguous), else "other" (rank =
+  highest + 1); --from-gate: the gate file's sector wins (source gate). A gate sector that is neither in sectors.json
+  nor "other" stops the script (listed), writing nothing.
+Emerging names: every `overrides` company of an entry with "emerging": true joins the queue even when triage did not
+  queue it (triage not_queued, including no positive P/E, or a return-math reject). Not added: a holding; a company in
+  a batch that has run; a company triage rejected for anything but return math (REIT/InvIT, promoter pledge, cash
+  conversion), which is also taken out of a pending batch it sits in. A company absent from triage.csv is added (no
+  headroom: last within its sector). Printed: the emerging names added, those absent from triage.csv, and those
+  blocked, each with the reason. Overrides of an entry not marked emerging add no company to the queue: they only map
+  companies queued or held.
+Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous)
+  for every holding, queued company and emerging name added; gate_batches.json rebuilt: batches already run (a
+  gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (holdings
+  never) goes into batches of 10 ordered by sector rank, then triage headroom (highest first), numbered after the last
+  run batch; the old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes.
   Safe to re-run: nothing changes when nothing changed.
 
 ---- log, score (S5: sector calls) ----
 log: for each sector in <run>/sectors.json whose call differs from its last logged row in runs/sector_calls.csv (kind,
-  stage, horizon, start, end, capture, industries, and each marker's id, op, threshold, event and due), or that has no
-  row yet, appends: call_id (<sector id>-<call_date>), date, run, sector, name, kind, stage, horizon, start, end, capture,
-  rank, industries, overrides, markers (JSON), members (JSON: the universe companies in the sector at the call, as
+  emerging, stage, start, end, capture, industries, and each marker's id, op, threshold, event and due), or that has no
+  row yet, appends: call_id (<sector id>-<call_date>), date, run, sector, name, kind, emerging (true/false), stage, start,
+  end, capture, rank, industries, overrides, markers (JSON), members (JSON: the universe companies in the sector at the call, as
   stage counts them, for the later return), supersedes (the sector's previous call_id), note ("possible rename
   of <old id>" when a new id has the same industries as a logged id missing from the map). An unchanged call is not
   logged again, so re-running is safe. Each marker state in sectors.json (state, state_date, state_evidence) is appended
@@ -76,34 +81,12 @@ score: every logged call 6+ months old: its markers held / broken / pending (due
   over the same period, at 6, 12 and 24 months where reached (chart prices, history.json); blank with the reason when
   no member has prices. Whether the stage proved right is not judged here. Summary: calls scored, share with every due
   marker held, median excess return of tailwind calls against "none" calls, by stage. Writes <run>/sector_calls_score.md.
-
----- episodes (S6.0, workflow/s6_playbook.md) ----
-Inputs: the sector's industries and overrides (<run>/sectors.json, or --sectors); data/playbook/outcomes.csv,
-  market_features_full.csv, market_winners_disc.csv / market_winners_test.csv (mb_sample.py's artefact checks of winner
-  windows); industry labels from data/companies/<SYM>/scr/overview.json; history.json for delisted members.
-Members at a start date: companies whose label is in the sector's industries (or in its overrides) with start market
-  cap >= 50 cr. Start dates: every March (as mb_sector_test.py). Winner: mb_sector_test.py's winner() for the horizon.
-  Market rate: mb_sector_test.py's base rate (labelled companies in labels of 5+ at that date), so it matches the
-  "base rate" column of sector_test.md.
-Episode: a run of consecutive March starts where the sector's winner rate >= 1.5x the market's with --min-companies+
-  members whose window has ended (one date alone is an episode too, flagged short).
-Per episode, every member at its first start: start features (market_features_full.csv row at sym/start), price and
-  market-cap multiples over the horizon's window, the peak multiple, and the class: captured (a winner), fell_back
-  (reached the horizon's multiple at its peak, then gave back more than half from the peak by the window end), lagged
-  (neither); a member whose prices stop inside the window (delisted, merged) takes its last price, marked "delisted";
-  artefact: the winner window's fails from market_winners_*.csv, else "price multiple > 2x market-cap multiple" when so.
-  The sector's median P/E (outcomes.csv pe0, point in time) and median price index (start = 100) per quarter-end, from
-  the episode's first start to 3 years after its last.
-Outputs: data/playbook/sectors/<sector>/episodes.csv and data.md (episodes with dates and rates, members per class, for
-  every numeric start feature the median among captured against lagged with the ratio and sample sizes, and the P/E and
-  price path table). A sector with no episode gets a data.md saying so (exit 0). Re-running rewrites both files.
 """
-import argparse, bisect, csv, datetime as dt, glob, json, math, os, re, statistics as st, sys
+import argparse, bisect, datetime as dt, glob, json, math, os, re, statistics as st, sys
 from collections import Counter, defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wf_lib as W
-import mb_sector_test as MS
-from config import playbook_dir, playbook_sector_dir, run_dir, run_path, shared_path
+from config import run_dir, run_path, shared_path
 
 MIN_LABEL, MIN_AT_DATE, MIN_QE, QE_YEARS = 5, 3, 20, 10
 ISSUE_RE = re.compile(r'QIP|qualified institution|preferential|private placement', re.I)
@@ -478,144 +461,7 @@ def cmd_stage(a):
     return 0
 
 
-# ---------- stage-test ----------
-def cmd_stage_test(a):
-    global CROWD_PCT, UND_PCT, EARLY_PCT
-    D = playbook_dir()
-    if a.thresholds:  # sensitivity runs: crowded,undiscovered,early P/E percentile lines
-        CROWD_PCT, UND_PCT, EARLY_PCT = (float(x) for x in a.thresholds.split(','))
-    rows = W.read_csv(os.path.join(D, 'outcomes.csv'))
-    first = {}
-    for r in rows:
-        first[r['sym']] = min(first.get(r['sym'], r['start']), r['start'])
-    inst = {}
-    with open(os.path.join(D, 'market_features_full.csv'), encoding='utf-8') as fh:
-        for r in csv.DictReader(fh):
-            if r['inst_chg_1y'] != '':
-                inst[(r['sym'], r['as_of'])] = float(r['inst_chg_1y'])
-    # label x quarter-end median P/E (point-in-time pe0), every quarter-end, members with mc0 >= floor
-    byq = defaultdict(lambda: defaultdict(list))
-    for r in rows:
-        lab = W.industry(r['sym'])
-        pe, mc = W.fnum(r['pe0']), W.fnum(r['mc0'])
-        if lab and pe and pe > 0 and (mc or 0) >= MS.FLOOR:
-            byq[lab][r['start']].append(pe)
-    qmed = {L: {d: st.median(v) for d, v in q.items() if len(v) >= MIN_AT_DATE} for L, q in byq.items()}
-    starts = sorted({r['start'] for r in rows if r['start'][5:7] == '03'})
-    first_start = min(r['start'] for r in rows)
-    res = defaultdict(lambda: defaultdict(lambda: [0, 0, []]))  # (hz, period) -> stage -> [n, winners, multiples]
-    dist, labstage = defaultdict(Counter), {}
-    bydate = defaultdict(lambda: defaultdict(lambda: [0, 0, []]))  # (hz, date) -> stage -> [n, winners, multiples]
-    for d in starts:
-        mem = defaultdict(list)
-        for r in rows:
-            if r['start'] != d or (W.fnum(r['mc0']) or 0) < MS.FLOOR:
-                continue
-            lab = W.industry(r['sym'])
-            if lab:
-                mem[lab].append(r)
-        mem = {L: v for L, v in mem.items() if len(v) >= MIN_LABEL}
-        allret = med([W.fnum(r['px_ret1']) for v in mem.values() for r in v])
-        per = {}
-        for L, v in mem.items():
-            hist = [x for dd, x in qmed.get(L, {}).items() if dd < d and dd >= f'{int(d[:4]) - QE_YEARS}{d[4:]}']
-            pes = [W.fnum(r['pe0']) for r in v if W.fnum(r['pe0']) and W.fnum(r['pe0']) > 0]
-            pe_now = med(pes)
-            rets = [W.fnum(r['px_ret1']) for r in v if W.fnum(r['px_ret1']) is not None]
-            ret = (med(rets) - allret) * 100 if rets and allret is not None else None
-            ins = [inst[(r['sym'], d)] for r in v if (r['sym'], d) in inst]
-            per[L] = {'pe_pct': pct_rank(pe_now, hist) if pe_now and len(hist) >= MIN_QE else None, 'ret': ret,
-                      'inst': med(ins) if len(ins) >= 3 else None,
-                      'listings': sum(1 for r in v if first[r['sym']] > first_start and
-                                      (dt.date.fromisoformat(d) - dt.date.fromisoformat(first[r['sym']])).days <= 730) if d >= '2008' else None,
-                      'n': len(v)}
-        rt, it = top_fifth([x['ret'] for x in per.values()]), top_fifth([x['inst'] for x in per.values()])
-        for L, x in per.items():
-            sg, _ = suggest(x['pe_pct'], x['ret'], rt, x['inst'], it, x['listings'], 0, x['n'])
-            dist[d][sg] += 1
-            labstage[(L, d)] = sg
-            if sg == 'unknown':
-                continue
-            period = 'disc' if d < '2016' else 'test'
-            for hz in MS.H:
-                win = MS.H[hz][2][0]
-                for r in mem[L]:
-                    w = MS.winner(r, hz)
-                    if w is None:
-                        continue
-                    m = W.fnum(r.get('px_' + win))
-                    for key in (sg, 'all'):
-                        for c in (res[(hz, period)][key], bydate[(hz, d)][key]) + \
-                                ((res[(hz, period + '_ex2020')][key],) if d != '2020-03-31' else ()):
-                            c[0] += 1
-                            c[1] += w
-                            if m is not None:
-                                c[2].append(m)
-    out = ['# Discovery-stage rule tested on the playbook base data',
-           '', f'Rule as in `sectors.py stage` (crowded: P/E percentile >= {CROWD_PCT} plus price strength, supply or institutional '
-           f'buying; undiscovered: <= {UND_PCT}, weak price, no buying, <= 1 listing; early: <= {EARLY_PCT}; else recognised). ' +
-           f'Per industry label (today\'s labels) with {MIN_LABEL}+ companies of start market cap >= {MS.FLOOR:.0f} cr, at March starts. '
-           f'P/E: median point-in-time P/E (outcomes.csv pe0) against the label\'s own quarter-end medians over the previous '
-           f'{QE_YEARS} years ({MIN_QE}+ quarter-ends needed, so the first usable start is about 2011). Price strength: median '
-           f'1-year price return minus the median of all labels. Listings: first price in the last 24 months (from 2008). '
-           f'Institutional change: market_features_full.csv inst_chg_1y where 3+ members have it (coverage below 10% of rows '
-           f'before 2024, so mostly blank, which the rule treats as no buying). Issues (QIPs, preferential): no past data, left out.',
-           '', 'Winner: `mb_sector_test.py` winner() (short 2x in 2y, medium 3x in 5y, long 10x in 7y or 10y; market cap must reach '
-           'half the multiple). "All" = every company in a label with a stage on the same dates (the base rate).', '']
-    for hz in MS.H:
-        out += [f'## {hz}', '', '| period | stage | company-starts | winner rate | vs base | median price multiple | vs base median |'
-                ' dates above base |', '|---|---|---|---|---|---|---|---|']
-        for period, nm in (('disc', '2006-2015'), ('test', '2016+'), ('test_ex2020', '2016+ without 2020-03')):
-            R = res[(hz, period)]
-            b = R.get('all')
-            if not b or not b[0]:
-                out.append(f'| {nm} | - | 0 | - | - | - | - | - |')
-                continue
-            br, bm = b[1] / b[0], med(b[2])
-            for sg in ('undiscovered', 'early', 'recognised', 'crowded', 'all'):
-                c = R.get(sg)
-                if not c or not c[0]:
-                    out.append(f'| {nm} | {sg} | 0 | - | - | - | - | - |')
-                    continue
-                m = med(c[2])
-                # consistency: dates (with 20+ company-starts in this stage) where its winner rate beat that date's base
-                ds = [(x[sg][1] / x[sg][0] > x['all'][1] / x['all'][0]) for (h, d), x in bydate.items() if h == hz and
-                      x.get(sg) and x[sg][0] >= 20 and ((d < '2016') == (period == 'disc')) and
-                      not (period == 'test_ex2020' and d == '2020-03-31')]
-                mm = f'{m:.2f} | {m / bm:.2f}x' if m and bm else '- | -'
-                out.append(f'| {nm} | {sg} | {c[0]} | {c[1] / c[0]:.1%} | {c[1] / c[0] / br:.2f}x | {mm} | '
-                           f'{sum(ds)}/{len(ds)} |')
-        out.append('')
-    out += ['## Stage counts per start (labels)', '', '| start | undiscovered | early | recognised | crowded | unknown |', '|---|---|---|---|---|---|']
-    for d in sorted(dist):
-        c = dist[d]
-        out.append(f'| {d} | ' + ' | '.join(str(c.get(s, 0)) for s in ('undiscovered', 'early', 'recognised', 'crowded', 'unknown')) + ' |')
-    same = [labstage[(L, d)] == labstage.get((L, f'{int(d[:4]) + 1}{d[4:]}')) for (L, d), s in labstage.items()
-            if s != 'unknown' and labstage.get((L, f'{int(d[:4]) + 1}{d[4:]}'), 'unknown') != 'unknown']
-    out += ['', f'Stability: a label keeps its stage from one March to the next in {sum(same) / len(same):.0%} of {len(same)} cases.' if same else '']
-    out += ['', '## Reading (written 10 Nov 2026 from the run with lines 80/30/60; re-read it when the tables change)',
-            '- The pooled 2016+ lift of undiscovered and early labels comes mostly from one start, March 2020 (the crash low, '
-            'when 64 of 76 labels sat in those two stages and nearly everything rebounded). Without it the lift shrinks to '
-            'about 1.1-1.4x and, date by date, an undiscovered or early label beat its own date\'s base rate on only about '
-            'half the dates (2-4 of 4-7), which is what chance gives.',
-            '- Crowded labels did worse than the base on most of the pooled figures (about 0.6-0.9x for short and medium), '
-            'but beat the base on 3 of 8 dates (2016+) and 2 of 4 (2006-15): a weak tendency, not a dependable one.',
-            '- Long-horizon winners (10x) show no pattern by stage.',
-            '- Sensitivity: lines 70/40/60 and 75/35/65 change the group sizes and lifts only slightly, so the lines were '
-            'not tuned; 80/30/60 is kept. Groups are uneven by construction (recognised is about half of all label-dates, '
-            'undiscovered about a tenth), and a label keeps its stage from one year to the next only about 45% of the time.',
-            '- Conclusion: like the other backward-looking industry numbers (`sector_test.md`), the stage did not reliably '
-            'predict which industries produced winners. Use it only to describe how priced-in a sector is (sizing, how much '
-            're-rating a thesis may assume, the position size and count rule), never to pick or rank sectors.']
-    path = a.out or os.path.join(D, 'stage_test.md')
-    W.write_text(path, '\n'.join(out) + '\n')
-    sys.stdout.reconfigure(encoding='utf-8')
-    print('\n'.join(out))
-    print(f'-> {path}')
-    return 0
-
-
-# ---------- order (S5, S8R) ----------
+# ---------- order (S5, S6R) ----------
 BATCH = 10  # gate batch size
 OF_FIELDS = ['sym', 'name', 'held', 'industry', 'sector', 'rank', 'source', 'ambiguous']
 
@@ -634,14 +480,29 @@ def load_map(run):
     return sorted(secs, key=lambda s: s['rank'])
 
 
+def emerging(s):
+    """Whether a sectors.json entry is marked emerging ("emerging": true)."""
+    return s.get('emerging') is True
+
+
+def blocking_reject(r):
+    """The triage reject that keeps an emerging name out of the queue (REIT/InvIT, pledge, cash conversion), or None.
+    A return-math reject (math dead) does not block: an emerging name's growth is not in its trailing figures."""
+    if (r or {}).get('triage') != 'reject' or (r.get('math') == 'dead' and r.get('reason', '').startswith('return math')):
+        return None
+    return r.get('reason') or 'triage reject'
+
+
 def assign(sym, secs, other_rank, gate_sector=None):
     """(sector, rank, source, ambiguous)."""
     by_id = {s['id']: s for s in secs}
     if gate_sector:
         return gate_sector, by_id[gate_sector]['rank'] if gate_sector in by_id else other_rank, 'gate', ''
     ov = [s for s in secs if sym in (s.get('overrides') or {})]
+    ov.sort(key=lambda s: not emerging(s))  # stable: an emerging entry first, then by rank
     if ov:
-        return ov[0]['id'], ov[0]['rank'], 'override', ' '.join(s['id'] for s in ov) if len(ov) > 1 else ''
+        return (ov[0]['id'], ov[0]['rank'], 'emerging' if emerging(ov[0]) else 'override',
+                ' '.join(s['id'] for s in ov) if len(ov) > 1 else '')
     lab = W.industry(sym)
     hit = [s for s in secs if lab and lab in (s.get('industries') or [])]
     if hit:
@@ -677,14 +538,7 @@ def cmd_order(a):
                     unknown.append(f'{sym}: {sec}')
         if unknown:
             W.fail(f'gate files name sectors not in sectors.json: {unknown} (fix the gate file or add the sector)')
-    rows = []
-    for sym in list(dict.fromkeys(held + queued)):
-        sec, rank, src, amb = assign(sym, secs, other_rank, gate_sec.get(sym))
-        rows.append({'sym': sym, 'name': (tri.get(sym) or {}).get('name', ''), 'held': sym in held,
-                     'industry': W.industry(sym) or '', 'sector': sec, 'rank': rank, 'source': src, 'ambiguous': amb})
-    rows.sort(key=lambda r: (not r['held'], r['rank'], r['sym']))
-    W.write_csv(os.path.join(run, 'sector_of.tsv'), OF_FIELDS, rows, delimiter='\t')
-    # gate batches
+    # batches already run
     bp = os.path.join(run, 'gate_batches.json')
     old = W.read_json(bp) if os.path.exists(bp) else {'batches': {}}
     ran = set()
@@ -694,9 +548,35 @@ def cmd_order(a):
             ran.add(int(m.group(1)))
     keep = {k: v for k, v in old['batches'].items() if int(k) in ran}
     done = {s for v in keep.values() for s in v}
+    # emerging names: every override of an emerging entry, unless held, already gated or hard-rejected by triage
+    em_add, em_absent, em_blocked = [], [], []
+    for sec in secs:
+        if not emerging(sec):
+            continue
+        for sym in sec.get('overrides') or {}:
+            if sym in em_add or any(sym == b[0] for b in em_blocked):
+                continue
+            why = ('held' if sym in held else 'in a batch that has run' if sym in done
+                   else blocking_reject(tri[sym]) if sym in tri else None)
+            if why:
+                em_blocked.append((sym, sec['id'], why))
+                continue
+            em_add.append(sym)
+            if sym not in tri:
+                em_absent.append(sym)
+    em_new = [s for s in em_add if s not in queued]  # added beyond triage's queue
+    hard = {s for s, _, why in em_blocked if why not in ('held', 'in a batch that has run')}
+    rows = []
+    for sym in list(dict.fromkeys(held + queued + em_new)):
+        sec, rank, src, amb = assign(sym, secs, other_rank, gate_sec.get(sym))
+        rows.append({'sym': sym, 'name': (tri.get(sym) or {}).get('name', ''), 'held': sym in held,
+                     'industry': W.industry(sym) or '', 'sector': sec, 'rank': rank, 'source': src, 'ambiguous': amb})
+    rows.sort(key=lambda r: (not r['held'], r['rank'], r['sym']))
+    W.write_csv(os.path.join(run, 'sector_of.tsv'), OF_FIELDS, rows, delimiter='\t')
+    # gate batches
     pending = [s for k, v in sorted(old['batches'].items(), key=lambda x: int(x[0])) if int(k) not in ran for s in v]
-    pending += [s for s in queued if s not in pending]
-    pending = [s for s in dict.fromkeys(pending) if s not in done and s not in held]
+    pending += [s for s in queued + em_new if s not in pending]
+    pending = [s for s in dict.fromkeys(pending) if s not in done and s not in held and s not in hard]
     info = {r['sym']: r for r in rows}
     head = lambda s: W.fnum((tri.get(s) or {}).get('headroom'))
     pending.sort(key=lambda s: ((info[s]['rank'] if s in info else assign(s, secs, other_rank)[1]),
@@ -719,31 +599,40 @@ def cmd_order(a):
           f'{"from gate " + str(len(gate_sec)) + "; " if a.from_gate else ""}'
           f'gate batches: {len(keep)} run kept, {len(new["batches"]) - len(keep)} rebuilt ({len(pending)} companies)'
           f'{"" if changed else "; unchanged, nothing rewritten"}')
+    print(f'emerging names: {len(em_add)} in the queue, {len(em_new)} of them added beyond the triage queue '
+          f'({" ".join(em_new) or "none"}); absent from triage.csv: {" ".join(em_absent) or "none"}; blocked: {len(em_blocked)}')
+    for s, sid, why in em_blocked:
+        print(f'  blocked {s} ({sid}): {why}')
     return 0
 
 
 # ---------- log, score (S5: sector calls) ----------
 CALLS = shared_path('sector_calls.csv')
 STATES = shared_path('sector_marker_states.csv')
-CALL_FIELDS = ['call_id', 'date', 'run', 'sector', 'name', 'kind', 'stage', 'horizon', 'start', 'end', 'capture', 'rank',
+CALL_FIELDS = ['call_id', 'date', 'run', 'sector', 'name', 'kind', 'emerging', 'stage', 'start', 'end', 'capture', 'rank',
           'industries', 'overrides', 'markers', 'members', 'supersedes', 'note']
 SFIELDS = ['call_id', 'marker', 'date', 'state', 'evidence']
 MK = ('id', 'op', 'threshold', 'event', 'due')
 
 
-def sig(kind, stage, horizon, start, end, capture, industries, markers):
-    return json.dumps([kind, stage, horizon, start, end, capture, sorted(industries or []),
+def sig(kind, em, stage, start, end, capture, industries, markers):
+    return json.dumps([kind, em, stage, start, end, capture, sorted(industries or []),
                        sorted([[m.get(k) for k in MK] for m in markers or []], key=lambda x: str(x[0]))], sort_keys=True, default=str)
 
 
 def row_sig(r):
-    return sig(r['kind'], r['stage'], r['horizon'], r['start'], r['end'], r['capture'], json.loads(r['industries'] or '[]'),
+    return sig(r['kind'], r['emerging'], r['stage'], r['start'], r['end'], r['capture'], json.loads(r['industries'] or '[]'),
                json.loads(r['markers'] or '[]'))
+
+
+def em_text(s):
+    """The logged emerging field: 'true' or 'false'."""
+    return 'true' if emerging(s) else 'false'
 
 
 def sec_sig(s):
     f = lambda k: '' if s.get(k) is None else str(s.get(k))
-    return sig(f('kind'), f('stage'), f('horizon'), f('start'), f('end'), f('capture'), s.get('industries'),
+    return sig(f('kind'), em_text(s), f('stage'), f('start'), f('end'), f('capture'), s.get('industries'),
                [{k: m.get(k) for k in MK} for m in s.get('markers') or []])
 
 
@@ -786,7 +675,7 @@ def cmd_log(a):
                    sorted(json.loads(r['industries'] or '[]')) == sorted(s.get('industries') or [])]
             note = f'possible rename of {", ".join(ren)}' if ren else ''
         new.append({'call_id': cid, 'date': date, 'run': os.path.basename(os.path.normpath(run)), 'sector': s['id'],
-                    'name': s.get('name', ''), 'kind': s.get('kind', ''), 'stage': s.get('stage', ''), 'horizon': s.get('horizon', ''),
+                    'name': s.get('name', ''), 'kind': s.get('kind', ''), 'emerging': em_text(s), 'stage': s.get('stage', ''),
                     'start': s.get('start', ''), 'end': s.get('end', ''), 'capture': s.get('capture', ''), 'rank': s.get('rank', ''),
                     'industries': json.dumps(s.get('industries') or [], ensure_ascii=False),
                     'overrides': json.dumps(sorted(s.get('overrides') or {}), ensure_ascii=False),
@@ -897,191 +786,6 @@ def cmd_score(a):
     return 0
 
 
-# ---------- episodes (S6) ----------
-RATE_X = 1.5
-
-
-def f(x):
-    return W.fnum(x)
-
-
-def cmd_episodes(a):
-    sp = a.sectors or os.path.join(run_dir(), 'sectors.json')
-    if not os.path.exists(sp):
-        W.fail(f'{sp} missing')
-    sec = next((s for s in W.read_json(sp).get('sectors') or [] if s.get('id') == a.sector), None)
-    if not sec:
-        W.fail(f'sector {a.sector!r} not in {sp}')
-    inds, over = set(sec.get('industries') or []), set(sec.get('overrides') or {})
-    if not inds and not over:
-        W.fail(f'sector {a.sector}: no industries or overrides')
-    D = playbook_dir()
-    yrs, thr, wins = MS.H[a.horizon]
-    rows = W.read_csv(os.path.join(D, 'outcomes.csv'))
-    by_key = {(r['sym'], r['start']): r for r in rows}
-    insec = lambda s: s in over or (W.industry(s) in inds)
-    # per March start: sector members and the market base rate (mb_sector_test.py's definition)
-    dates = defaultdict(list)
-    for r in rows:
-        if r['start'][5:7] != '03' or (f(r['mc0']) or 0) < MS.FLOOR:
-            continue
-        dates[r['start']].append(r)
-    rates = []
-    for d in sorted(dates):
-        lab = defaultdict(list)
-        for r in dates[d]:
-            L = W.industry(r['sym'])
-            w = MS.winner(r, a.horizon)
-            if L and w is not None:
-                lab[L].append(w)
-        base = [w for v in lab.values() if len(v) >= MS.MIN_N for w in v]
-        mem = [r for r in dates[d] if insec(r['sym'])]
-        ended = [MS.winner(r, a.horizon) for r in mem]
-        ended = [w for w in ended if w is not None]
-        rates.append({'start': d, 'members': len(mem), 'ended': len(ended), 'sector_rate': sum(ended) / len(ended) if ended else None,
-                      'market_rate': sum(base) / len(base) if base else None, 'rows': mem})
-    hot = [x for x in rates if x['sector_rate'] is not None and x['market_rate'] and x['ended'] >= a.min_companies
-           and x['sector_rate'] >= RATE_X * x['market_rate']]
-    episodes, cur = [], []
-    for x in hot:
-        if cur and int(x['start'][:4]) != int(cur[-1]['start'][:4]) + 1:
-            episodes.append(cur)
-            cur = []
-        cur.append(x)
-    if cur:
-        episodes.append(cur)
-    out_dir = playbook_sector_dir(a.sector)
-    os.makedirs(out_dir, exist_ok=True)
-    head = [f'# Playbook data: {sec.get("name", a.sector)} ({a.sector}), {a.horizon} horizon ({thr:g}x in {"/".join(wins)})', '',
-            f'Industries: {", ".join(sorted(inds)) or "-"}; overrides: {", ".join(sorted(over)) or "-"}. Members: start market cap '
-            f'>= {MS.FLOOR:.0f} cr. Episode: consecutive March starts with the sector\'s winner rate >= {RATE_X}x the market\'s '
-            f'(mb_sector_test.py base rate) and {a.min_companies}+ members with an ended window. Labels are today\'s; the '
-            f'base data is mostly companies still listed (caveats: principles/sector_rules.md).', '',
-            '## Winner rate by start', '', '| start | members | window ended | sector rate | market rate | episode |', '|---|---|---|---|---|---|']
-    ep_of = {x['start']: i + 1 for i, e in enumerate(episodes) for x in e}
-    for x in rates:
-        if x['members']:
-            sr = f"{x['sector_rate']:.1%}" if x['sector_rate'] is not None else '-'
-            mr = f"{x['market_rate']:.1%}" if x['market_rate'] is not None else '-'
-            head.append(f"| {x['start']} | {x['members']} | {x['ended']} | {sr} | {mr} | {ep_of.get(x['start'], '')} |")
-    head.append('')
-    if not episodes:
-        W.write_text(os.path.join(out_dir, 'data.md'), '\n'.join(head + ['No episode: the sector\'s winner rate never reached '
-                                                                           f'{RATE_X}x the market\'s with {a.min_companies}+ members.', '']))
-        W.write_csv(os.path.join(out_dir, 'episodes.csv'), ['episode'], [])
-        print(f'{a.sector}: no episode ({sum(1 for x in rates if x["members"])} start dates with members) -> {out_dir}')
-        return 0
-    # artefact checks of winner windows (mb_sample.py, through mb_patterns.py)
-    art = {}
-    for fn in ('market_winners_disc.csv', 'market_winners_test.csv'):
-        p = os.path.join(D, fn)
-        if os.path.exists(p):
-            for r in W.read_csv(p):
-                if r.get('fails'):
-                    art[(r['sym'], r['horizon'], r['start'])] = r['fails']
-    # features at each episode start
-    need = {(r['sym'], e[0]['start']) for e in episodes for r in e[0]['rows']}
-    feats, fcols = {}, []
-    with open(os.path.join(D, 'market_features_full.csv'), encoding='utf-8') as fh:
-        rd = csv.DictReader(fh)
-        fcols = [c for c in rd.fieldnames if c not in ('sym', 'as_of')]
-        for r in rd:
-            if (r['sym'], r['as_of']) in need:
-                feats[(r['sym'], r['as_of'])] = r
-    hist_cache = {}
-
-    def last_price(sym, start):
-        """(multiple at the last price, last date) for a member whose prices stop inside the window."""
-        if sym not in hist_cache:
-            h = W.scr(sym, 'history') or {}
-            hist_cache[sym] = W.series(((h.get('price') or {}).get('datasets') or {}).get('Price'))
-        px = hist_cache[sym]
-        s0 = dt.date.fromisoformat(start)
-        before = [v for t, v in px if t <= s0]
-        if not px or not before or not before[-1]:
-            return None, None
-        return px[-1][1] / before[-1], px[-1][0]
-    out_rows, md = [], []
-    today = dt.date.today()
-    numeric = [c for c in fcols if any(f(r.get(c)) is not None for r in feats.values())]
-    for i, e in enumerate(episodes, 1):
-        st0, st1 = e[0]['start'], e[-1]['start']
-        for r in e[0]['rows']:
-            w = MS.winner(r, a.horizon)
-            px = max((f(r['px_' + x]) for x in wins if f(r['px_' + x]) is not None), default=None)
-            win = next((x for x in wins if f(r['px_' + x]) is not None and f(r['px_' + x]) == px), wins[0])
-            mc, pk = f(r['mc_' + win]), f(r['pxpeak_' + win])
-            note = []
-            if w is None:
-                end = W.add_years(dt.date.fromisoformat(st0), int(win[:-1]))
-                if end <= today:
-                    m, last = last_price(r['sym'], st0)
-                    if m is not None and last < end:
-                        px, note = m, [f'delisted: last price {last}']
-                        w = px >= thr
-                    elif m is not None:
-                        note.append(f'no price at the window end {end} (a gap in the series), not judged')
-                    else:
-                        note.append('no prices to judge the window')
-                else:
-                    note.append('window still open')
-            if px is not None and pk is not None and pk >= thr and not w and px / pk < 0.5:
-                cls = 'fell_back'
-            elif w is None:
-                cls = 'open'
-            else:
-                cls = 'captured' if w else 'lagged'
-            fa = art.get((r['sym'], a.horizon, st0))
-            if fa:
-                note.append('artefact: ' + fa)
-            elif cls in ('captured', 'fell_back') and px is not None and mc and px > 2 * mc:  # as mb_sample.py warns
-                note.append(f'artefact? price {px:.1f}x vs market cap {mc:.1f}x')
-            row = {'episode': i, 'start': st0, 'episode_start': st0, 'episode_end': st1, 'short': len(e) == 1, 'sym': r['sym'],
-                   'industry': W.industry(r['sym']) or '', 'override': r['sym'] in over, 'mc0': r['mc0'], 'px_mult': px,
-                   'mc_mult': mc, 'peak_mult': pk, 'class': cls, 'note': '; '.join(note)}
-            row.update({c: (feats.get((r['sym'], st0)) or {}).get(c, '') for c in numeric})
-            out_rows.append(row)
-        # summary per episode
-        er = [x for x in out_rows if x['episode'] == i]
-        cnt = lambda c: [x['sym'] for x in er if x['class'] == c]
-        md += [f'## Episode {i}: {st0} to {st1}' + (' (short: one start date)' if len(e) == 1 else ''), '',
-               '| start | sector rate | market rate | members |', '|---|---|---|---|']
-        md += [f"| {x['start']} | {x['sector_rate']:.1%} | {x['market_rate']:.1%} | {x['ended']} |" for x in e]
-        md += ['', f'Members at {st0}: captured {len(cnt("captured"))} ({", ".join(cnt("captured"))}); fell back {len(cnt("fell_back"))} '
-               f'({", ".join(cnt("fell_back"))}); lagged {len(cnt("lagged"))}; open or unjudged {len(cnt("open"))}.']
-        flagged = [f"{x['sym']} ({x['note']})" for x in er if x['note']]
-        if flagged:
-            md.append('Notes: ' + '; '.join(flagged))
-        md += ['', '| start feature | captured median (n) | lagged median (n) | ratio |', '|---|---|---|---|']
-        for c in numeric:
-            cv = [f(x[c]) for x in er if x['class'] == 'captured' and f(x[c]) is not None]
-            lv = [f(x[c]) for x in er if x['class'] == 'lagged' and f(x[c]) is not None]
-            if not cv and not lv:
-                continue
-            cm, lm = med(cv), med(lv)
-            ratio = f'{cm / lm:.2f}' if cm is not None and lm not in (None, 0) else '-'
-            md.append(f'| {c} | {"-" if cm is None else round(cm, 3)} ({len(cv)}) | {"-" if lm is None else round(lm, 3)} ({len(lv)}) | {ratio} |')
-        # P/E and price path per quarter-end
-        syms = [r['sym'] for r in e[0]['rows']]
-        p0 = {s: f(by_key[(s, st0)]['px0']) for s in syms}
-        qe, endq = dt.date.fromisoformat(st0), W.add_years(dt.date.fromisoformat(st1), 3)
-        md += ['', '| quarter-end | median P/E (n) | median price index (n) |', '|---|---|---|']
-        while qe <= min(endq, today):
-            k = qe.isoformat()
-            pes = [f(by_key[(s, k)]['pe0']) for s in syms if (s, k) in by_key and f(by_key[(s, k)]['pe0']) and f(by_key[(s, k)]['pe0']) > 0]
-            idx = [f(by_key[(s, k)]['px0']) / p0[s] * 100 for s in syms if (s, k) in by_key and p0.get(s) and f(by_key[(s, k)]['px0'])]
-            md.append(f'| {k} | {"-" if not pes else round(st.median(pes), 1)} ({len(pes)}) | {"-" if not idx else round(st.median(idx))} ({len(idx)}) |')
-            qe = W.month_end(qe.year + (qe.month + 3 > 12), (qe.month + 3 - 1) % 12 + 1)
-        md.append('')
-    fields = ['episode', 'start', 'episode_start', 'episode_end', 'short', 'sym', 'industry', 'override', 'mc0', 'px_mult', 'mc_mult',
-              'peak_mult', 'class', 'note'] + numeric
-    W.write_csv(os.path.join(out_dir, 'episodes.csv'), fields, out_rows)
-    W.write_text(os.path.join(out_dir, 'data.md'), '\n'.join(head + md))
-    print(f'{a.sector}: {len(episodes)} episodes ({", ".join(e[0]["start"][:4] + "-" + e[-1]["start"][:4] for e in episodes)}), '
-          f'{len(out_rows)} member rows, classes {dict((c, sum(x["class"] == c for x in out_rows)) for c in ("captured", "fell_back", "lagged", "open"))} -> {out_dir}')
-    return 0
-
-
 def doc_part(head):
     """A mode's --help: the docstring's usage lines plus its '---- <head>' section."""
     parts = __doc__.split('\n---- ')
@@ -1100,22 +804,14 @@ def main():
     p = sp.add_parser('stage', help='<run>/sector_stage.csv (S4)', description=doc_part('S4'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--sectors', help='sectors file: also rows per sector of it')
     p.add_argument('--stage-only', action='store_true', help='recheck: only the sectors (needs --sectors)')
-    p = sp.add_parser('stage-test', help='the stage rule on the playbook base data', description=doc_part('S4'), formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--thresholds', help='crowded,undiscovered,early percentile lines (default 80,30,60)')
-    p.add_argument('--out', help='default: stage_test.md in the playbook base data folder')
-    p = sp.add_parser('order', help='sector of each company, gate batches reordered (S5, S8R)', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--from-gate', action='store_true', help="the gate file's sector wins (S8R)")
+    p = sp.add_parser('order', help='sector of each company, gate batches reordered (S5, S6R)', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument('--from-gate', action='store_true', help="the gate file's sector wins (S6R)")
     sp.add_parser('log', help='log changed sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p = sp.add_parser('score', help='score logged sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out', help='default: <run>/sector_calls_score.md')
-    p = sp.add_parser('episodes', help="a sector's playbook episodes (S6)", description=doc_part('episodes'), formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('sector', help='the sector id')
-    p.add_argument('--horizon', default='medium', choices=list(MS.H), help='default: %(default)s')
-    p.add_argument('--min-companies', type=int, default=5, help='members needed per start (default: %(default)s)')
-    p.add_argument('--sectors', help='the sectors file (default: <run>/sectors.json)')
     a = ap.parse_args()
-    return {'syms': cmd_syms, 'clusters': cmd_clusters, 'stage': cmd_stage, 'stage-test': cmd_stage_test, 'order': cmd_order,
-            'log': cmd_log, 'score': cmd_score, 'episodes': cmd_episodes}[a.cmd](a)
+    return {'syms': cmd_syms, 'clusters': cmd_clusters, 'stage': cmd_stage, 'order': cmd_order,
+            'log': cmd_log, 'score': cmd_score}[a.cmd](a)
 
 
 if __name__ == '__main__':

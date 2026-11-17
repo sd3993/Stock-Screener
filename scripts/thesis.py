@@ -1,29 +1,51 @@
-"""A company's thesis markers: S14 registers them from the agreed analysis; S11 checks them every quarter.
-  python -I scripts/thesis.py register [SYM...]                    (S14)
-  python -I scripts/thesis.py check <SYM>... | --all | --sectors   (S11)
+"""A company's thesis markers: S12 registers them from the agreed analysis; S9 checks them every quarter.
+  python -I scripts/thesis.py register [SYM...]                    (S12)
+  python -I scripts/thesis.py check <SYM>... | --all | --sectors   (S9)
 
 ---- register ----
 Inputs: the company's newest analysis folder (config.analysis_dirs: runs/companies/<SYM>/<FYyyQn>/, named after the
   results quarter the analysis used) and in it the highest recheck<N>.json (the agreed analysis; only main.json:
-  refused, its rechecks aren't done); data/companies/<SYM>/index.json (basis); the run's sectors.json (sector marker ids).
-  Without SYMs: every company in runs/companies/ with an analysis folder.
+  refused, its rechecks aren't done); data/companies/<SYM>/index.json (basis); the run's sectors.json (each sector's
+  marker ids). Without SYMs: every company in runs/companies/ with an analysis folder.
+The analysis: status (list, watch, hold, exit or reject), visible_until (YYYY-MM-DD), years (the projection length, an
+  integer 2-7), optional watch {waiting_for, due, evidence_so_far, next_check}, optional exit_call {urgent, event,
+  event_date, why}, analysed_on, results_used, discovery_stage, sector, markers [{id, level, on, text, metric, op,
+  threshold, event, due, by, check, source, sector_marker_id}]; a marker's on is revenue, visibility or other.
 Output: the thesis file (config.thesis_path: runs/companies/<SYM>/thesis.json): {sym, run, analysed_on, results_used,
-  horizon, horizon_holds, stage (the analysis's discovery_stage), sector, basis, source (the analysis file), registered,
-  markers, history: [earlier versions]}. Written only when the analysis is newer than the file's (analysed_on, then the
-  analysis file); the previous content moves into history. The same analysis again: no change.
+  status, visible_until, years, watch and exit_call (when the analysis has them), stage (the analysis's discovery_stage),
+  sector, basis, source (the analysis file), registered, markers, history: [earlier versions]}. Written only when the
+  analysis is newer than the file's (analysed_on, then the analysis file); the previous content moves into history. The
+  same analysis again: no change. Status reject is written too (markers as given, possibly none), so later runs know the
+  company was rejected.
 Checks (any failure: that company is not written, its problems are listed, exit 1; the analysis goes back to its
-  recheck): 4-6 markers; at least 3 company-level; at least 1 sector-level whose sector_marker_id is a marker of a sector
-  in sectors.json; every "script" company marker's metric in METRICS in the script; a valid op (>=, >, <=, <, between with
-  [lo, hi]) and a numeric threshold wherever an op is given; a valid due date (YYYY-MM-DD) on every marker; an event
-  marker names its event; basis consolidated/standalone in index.json; horizon short/medium/long; results_used FYyyQn.
+  recheck):
+  every status: status list/watch/hold/exit/reject; analysed_on given; results_used FYyyQn.
+  status other than reject: basis consolidated/standalone in index.json; visible_until a valid YYYY-MM-DD date; years an
+    integer from 2 to 7; 4-6 markers; at least 3 company-level; every marker's on revenue, visibility or other; at least
+    2 markers on revenue or visibility; a company-level "script" marker on revenue uses the metric sales_yoy_ttm (revenue
+    markers are judged over the trailing four quarters; sector-level markers are exempt); every
+    marker's level company/sector and check script/manual; every "script" company marker's metric in METRICS in the
+    script; a valid op (>=, >, <=, <, between with [lo, hi]) and a numeric threshold wherever an op is given; a valid due
+    date (YYYY-MM-DD) on every marker; an event marker names its event.
+  sector-level markers (status other than reject): when the analysis's sector is the id of a sectors.json entry with at
+    least one marker, at least 1 sector-level marker is needed and every sector-level marker's sector_marker_id must be a
+    marker id of that same sector; when the sector is not in sectors.json, is "other", or its entry has no markers (or
+    there is no sectors.json), none is needed and any sector-level marker is refused (sector has no map entry with
+    markers).
+  status watch: a watch object with a non-empty waiting_for and a valid due date (YYYY-MM-DD).
+  status exit: an exit_call object with urgent true or false; when urgent is true, a non-empty event and a valid
+    event_date (YYYY-MM-DD).
+  status reject: no basis, marker, visible_until or years checks.
 
 ---- check ----
-Inputs: the thesis (config.thesis_path: sym, run, analysed_on, results_used, horizon, stage, sector, basis, markers
-  [{id, level, text, metric, op, threshold, event, due, by, check, source, sector_marker_id}]); <run>/sectors.json
+Companies whose thesis has status reject are skipped (not checked, no rows; the number skipped is printed); a company
+  with no thesis file is still checked (action re-analyse).
+Inputs: the thesis (config.thesis_path: sym, run, analysed_on, results_used, status, watch, stage, sector, basis, markers
+  [{id, level, on, text, metric, op, threshold, event, due, by, check, source, sector_marker_id}]); <run>/sectors.json
   (sector marker states); data/companies/<SYM>/scr/ (quarterly, profit_loss, cash_flow, balance_sheet, ratios on the
   thesis's basis: consolidated = <name>.json, standalone = <name>_standalone.json; shareholding, shp_history,
   pledge_nse, announcements, corporate_actions); facts.json `marker_inputs` {marker id: {value, unit, period, document,
-  page, met}} (a filed figure read by S12; it takes precedence over the computed one).
+  page, met}} (a filed figure read by S10; it takes precedence over the computed one).
 Supported metrics (check "script"; % metrics in percent, "near" within 2 points for them):
   sales_yoy_q, pat_yoy_q   newest declared quarter vs the same quarter a year earlier (%; blank when the base <= 0)
   sales_yoy_ttm, pat_yoy_ttm   last 4 quarters vs the 4 before (%)
@@ -47,8 +69,12 @@ States: broken (the comparison fails; an event past due recorded as not met), ne
   can't be computed: never passed silently). op is >=, >, <=, < or between (threshold [lo, hi]).
 Integrity: announcements after analysed_on whose headline or category matches INTEGRITY in the script -> integrity review.
 Half-yearly: the newest declared quarter is 2+ quarters after results_used -> re-analyse.
+Watch: status watch whose watch.next_check (when present and a valid date), else watch.due, is on or before today ->
+  re-analyse (watch: awaited evidence due); otherwise the markers decide as for any thesis.
+Sector: a thesis whose sector is "other", is not in sectors.json, or whose entry has no markers is normal and not
+  flagged; only a sector-level marker whose sector or sector_marker_id isn't in sectors.json is (no-data -> verify).
 Action, first that applies: integrity review > re-analyse (a broken marker, the sector's marker broken in sectors.json,
-  no thesis, half-yearly due) > verify (near, due-manual, no-data) > hold.
+  no thesis, half-yearly due, watch evidence due) > verify (near, due-manual, no-data) > hold.
 --sectors: each "script" marker of each sector in sectors.json, as the median over the sector's companies in
   sector_of.tsv (basis from index.json, else consolidated where saved), plus pe_pct and ret_1y from sector_stage.csv;
   rows with sym = <sector id>, no action row.
@@ -215,7 +241,7 @@ def compute(metric, c, thesis, facts, rq):
         g = lambda k: (bs.get(k) or [None])[-1]
         eq = (g('Equity Capital') or 0) + (g('Reserves') or 0) if g('Reserves') is not None else None
         debt = g('Borrowings')
-        # facts.json (S12): annual {period: {cash_and_liquid: {value, basis, ...}}} for the balance sheet's year and basis
+        # facts.json (S10): annual {period: {cash_and_liquid: {value, basis, ...}}} for the balance sheet's year and basis
         f = (((facts or {}).get('annual') or {}).get(by[-1]) or {}).get('cash_and_liquid') or {}
         cash = W.fnum(f.get('value')) if f.get('basis') in (None, c.basis) else None
         if debt is None or not eq or eq <= 0:
@@ -350,8 +376,11 @@ def check_company(sym, run, today, sectors):
             reasons['verify'].append(f"marker {r['marker']} {r['state']}")
     if sec and any(sm.get('state') == 'broken' for sm in smk.values()):
         reasons['re-analyse'].append(f"sector {sec['id']} marker broken")
-    if th.get('sector') and not sec:
-        reasons['verify'].append(f"sector {th.get('sector')} not in sectors.json")
+    if th.get('status') == 'watch':
+        w = th.get('watch') or {}
+        nc = w.get('next_check') if is_date(w.get('next_check')) else w.get('due')
+        if is_date(nc) and dt.date.fromisoformat(str(nc)) <= today:
+            reasons['re-analyse'].append(f"watch: awaited evidence due {nc} ({w.get('waiting_for') or ''})")
     # half-yearly
     nq = c.newest() if c.q else None
     if not nq:  # the other basis may still show the newest declared quarter
@@ -422,7 +451,10 @@ def check_sectors(run, today, sectors):
 
 
 # ---------- register ----------
-KEEP = ('sym', 'run', 'analysed_on', 'results_used', 'horizon', 'horizon_holds', 'stage', 'sector', 'basis', 'source', 'registered', 'markers')
+KEEP = ('sym', 'run', 'analysed_on', 'results_used', 'status', 'visible_until', 'years', 'watch', 'exit_call', 'stage', 'sector',
+        'basis', 'source', 'registered', 'markers')
+STATUSES = ('list', 'watch', 'hold', 'exit', 'reject')
+ON = ('revenue', 'visibility', 'other')
 
 
 def agreed(sym):
@@ -438,7 +470,58 @@ def agreed(sym):
     return (max(files)[1], '') if files else (None, f'no recheck<N>.json in {dirs[-1]} (only main.json, or nothing): not agreed yet')
 
 
-def validate(a, basis, marker_ids):
+def is_date(x):
+    try:
+        dt.date.fromisoformat(str(x))
+        return True
+    except ValueError:
+        return False
+
+
+def validate(a, basis, sectors):
+    """Problems with an agreed analysis; sectors: the run's sectors.json 'sectors' list."""
+    p = []
+    status = a.get('status')
+    if status not in STATUSES:
+        p.append(f'status {status!r} ({"/".join(STATUSES)})')
+    if status != 'reject':
+        p += validate_markers(a, sectors)
+        if not is_date(a.get('visible_until')):
+            p.append(f'visible_until {a.get("visible_until")!r} not YYYY-MM-DD')
+        y = a.get('years')
+        if not (isinstance(y, int) and not isinstance(y, bool) and 2 <= y <= 7):
+            p.append(f'years {y!r} (an integer from 2 to 7)')
+    if status == 'watch':
+        w = a.get('watch')
+        if not isinstance(w, dict):
+            p.append('status watch without a watch object')
+        else:
+            if not str(w.get('waiting_for') or '').strip():
+                p.append('watch: waiting_for missing')
+            if not is_date(w.get('due')):
+                p.append(f'watch: due {w.get("due")!r} not YYYY-MM-DD')
+    if status == 'exit':
+        x = a.get('exit_call')
+        if not isinstance(x, dict):
+            p.append('status exit without an exit_call object')
+        elif not isinstance(x.get('urgent'), bool):
+            p.append(f'exit_call: urgent {x.get("urgent")!r} (true/false)')
+        elif x['urgent']:
+            if not str(x.get('event') or '').strip():
+                p.append('exit_call: urgent without its event')
+            if not is_date(x.get('event_date')):
+                p.append(f'exit_call: event_date {x.get("event_date")!r} not YYYY-MM-DD')
+    if status != 'reject' and basis not in ('consolidated', 'standalone'):
+        p.append(f'basis {basis!r} in index.json (consolidated/standalone needed)')
+    for k in ('analysed_on', 'results_used'):
+        if not a.get(k):
+            p.append(f'{k} missing')
+    if a.get('results_used') and not W.QRE.match(str(a['results_used'])):
+        p.append(f'results_used {a["results_used"]!r} not FYyyQn')
+    return p
+
+
+def validate_markers(a, sectors):
     p = []
     ms = a.get('markers') or []
     if not 4 <= len(ms) <= 6:
@@ -447,15 +530,29 @@ def validate(a, basis, marker_ids):
     sect = [m for m in ms if m.get('level') == 'sector']
     if len(comp) < 3:
         p.append(f'{len(comp)} company-level markers (3+ needed)')
-    if not sect:
-        p.append('no sector-level marker')
-    for m in sect:
-        if str(m.get('sector_marker_id')) not in marker_ids:
-            p.append(f'marker {m.get("id")}: sector_marker_id {m.get("sector_marker_id")!r} not a marker in sectors.json')
+    rv = [m for m in ms if m.get('on') in ('revenue', 'visibility')]
+    if len(rv) < 2:
+        p.append(f'{len(rv)} markers on revenue or visibility (2+ needed)')
+    sid = a.get('sector')
+    sec = next((s for s in sectors if sid != 'other' and s.get('id') == sid and s.get('markers')), None)
+    if sec:
+        ids = {str(m.get('id')) for m in sec['markers']}
+        if not sect:
+            p.append(f'no sector-level marker (sector {sid} has markers in sectors.json)')
+        for m in sect:
+            if str(m.get('sector_marker_id')) not in ids:
+                p.append(f'marker {m.get("id")}: sector_marker_id {m.get("sector_marker_id")!r} not a marker of sector {sid} in sectors.json')
+    else:
+        for m in sect:
+            p.append(f'marker {m.get("id")}: sector-level marker, but sector {sid!r} has no map entry with markers')
     for m in ms:
         i = m.get('id')
         if m.get('level') not in ('company', 'sector'):
             p.append(f'marker {i}: level {m.get("level")!r} (company/sector)')
+        if m.get('on') not in ON:
+            p.append(f'marker {i}: on {m.get("on")!r} (revenue/visibility/other)')
+        if m.get('on') == 'revenue' and m.get('level') == 'company' and m.get('check') == 'script' and m.get('metric') != 'sales_yoy_ttm':
+            p.append(f'marker {i}: revenue marker uses {m.get("metric")!r}: revenue markers are judged over the trailing four quarters (sales_yoy_ttm)')
         if m.get('check') not in ('script', 'manual'):
             p.append(f'marker {i}: check {m.get("check")!r} (script/manual)')
         if m.get('check') == 'script' and m.get('level') == 'company' and m.get('metric') not in METRICS:
@@ -475,29 +572,17 @@ def validate(a, basis, marker_ids):
             dt.date.fromisoformat(str(m.get('due')))
         except ValueError:
             p.append(f'marker {i}: due {m.get("due")!r} not YYYY-MM-DD')
-    if basis not in ('consolidated', 'standalone'):
-        p.append(f'basis {basis!r} in index.json (consolidated/standalone needed)')
-    if a.get('horizon') not in ('short', 'medium', 'long'):
-        p.append(f'horizon {a.get("horizon")!r}')
-    for k in ('analysed_on', 'results_used'):
-        if not a.get(k):
-            p.append(f'{k} missing')
-    if a.get('results_used') and not W.QRE.match(str(a['results_used'])):
-        p.append(f'results_used {a["results_used"]!r} not FYyyQn')
     return p
-
-
 
 
 def cmd_register(a):
     run = run_dir()
     mp = os.path.join(run, 'sectors.json')
-    marker_ids = set()
+    sectors = []
     if os.path.exists(mp):
-        for s in W.read_json(mp).get('sectors') or []:
-            marker_ids |= {str(m.get('id')) for m in s.get('markers') or []}
+        sectors = W.read_json(mp).get('sectors') or []
     else:
-        print(f'note: no {mp}: sector markers cannot be matched')
+        print(f'note: no {mp}: no sector has a map entry, so sector-level markers are refused')
     root = company_runs_dir()
     syms = a.syms or sorted(x for x in (os.listdir(root) if os.path.isdir(root) else ()) if analysis_dirs(x))
     if not syms:
@@ -517,7 +602,7 @@ def cmd_register(a):
             basis = W.read_json(os.path.join(COMPANIES_DIR, sym, 'index.json')).get('basis')
         except (OSError, ValueError):
             basis = None
-        p = validate(an, basis, marker_ids)
+        p = validate(an, basis, sectors)
         if p:
             problems[sym] = p
             continue
@@ -531,10 +616,11 @@ def cmd_register(a):
             same.append(f'{sym} (thesis newer than {src})')
             continue
         new = {'sym': sym, 'run': os.path.basename(os.path.normpath(run)), 'analysed_on': an.get('analysed_on'),
-               'results_used': an.get('results_used'), 'horizon': an.get('horizon'), 'horizon_holds': an.get('horizon_holds', True),
+               'results_used': an.get('results_used'), 'status': an.get('status'), 'visible_until': an.get('visible_until'),
+               'years': an.get('years'), **{k: an[k] for k in ('watch', 'exit_call') if an.get(k) is not None},
                'stage': an.get('discovery_stage'), 'sector': an.get('sector'), 'basis': basis, 'source': src,
-               'registered': dt.date.today().isoformat(), 'markers': an.get('markers'),
-               'history': ((old or {}).get('history') or []) + ([{k: old.get(k) for k in KEEP}] if old else [])}
+               'registered': dt.date.today().isoformat(), 'markers': an.get('markers') or [],
+               'history': ((old or {}).get('history') or []) + ([{k: old.get(k) for k in KEEP if k in old}] if old else [])}
         W.write_json(tp, new)
         written.append(sym)
     print(f'{len(written)} theses written {written or ""}; {len(same)} unchanged {same or ""}; {len(problems)} refused')
@@ -544,6 +630,13 @@ def cmd_register(a):
 
 
 # ---------- check (main) ----------
+def thesis_status(sym):
+    try:
+        return W.read_json(thesis_path(sym)).get('status')
+    except (OSError, ValueError, AttributeError):
+        return None
+
+
 def cmd_check(a):
     run, today = run_dir(), dt.date.today()
     if not (a.syms or a.all or a.sectors):
@@ -560,6 +653,11 @@ def cmd_check(a):
     syms = list(a.syms)
     if a.all:
         syms += sorted(os.path.basename(os.path.dirname(p)) for p in glob.glob(thesis_path('*')))
+    syms = list(dict.fromkeys(syms))
+    rejected = [s for s in syms if thesis_status(s) == 'reject']
+    syms = [s for s in syms if s not in rejected]
+    if rejected:
+        print(f'{len(rejected)} companies skipped (thesis status reject): {rejected}')
     new = []
     for s in dict.fromkeys(syms):
         new += check_company(s, run, today, sectors)
@@ -591,11 +689,11 @@ def doc_part(head):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest='cmd', required=True, help='the mode; <mode> --help for its own help')
-    p = sp.add_parser('register', help='register thesis markers from the agreed analysis (S14)', description=doc_part('register'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('register', help='register thesis markers from the agreed analysis (S12)', description=doc_part('register'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('syms', nargs='*', help='symbols (default: every company in runs/companies/ with an analysis folder)')
-    p = sp.add_parser('check', help='check thesis markers (S11)', description=doc_part('check'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('check', help='check thesis markers (S9)', description=doc_part('check'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('syms', nargs='*', help='symbols to check (give symbols, --all or --sectors)')
-    p.add_argument('--all', action='store_true', help='every company with a thesis file')
+    p.add_argument('--all', action='store_true', help='every company with a thesis file (status reject skipped)')
     p.add_argument('--sectors', action='store_true', help="each sector's script markers (see above)")
     a = ap.parse_args()
     return cmd_register(a) if a.cmd == 'register' else cmd_check(a)

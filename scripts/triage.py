@@ -1,8 +1,12 @@
 """S3: scores every company in <run>/universe.csv (and every holding) and writes <run>/triage.csv and
 <run>/gate_batches.json. See workflow/s3_triage.md for what it decides.
- (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per horizon (short 2y, medium 5y, long 7y) at
-     exit P/E = min(own 5y median P/E, 30), with dividends, vs growth VISIBLE in trailing data (conservative, optimistic);
- (b) earnings evidence (the earnings evidence rule): E1 acceleration, E2 stalwart rebound, E3 sustained growth, E4 turnaround;
+ (a) return math: EPS growth REQUIRED for the 25% CAGR hurdle per projection length (2y, 5y, 7y; growth capped at 60, 40,
+     35%) at exit P/E = min(own 5y median P/E, 30), with dividends, vs growth VISIBLE in trailing data (conservative,
+     optimistic). triage.csv: g2y_req, g5y_req, g7y_req (required growth per length); math: the lengths that pass, as
+     2y:strong / 2y:plausible (likewise 5y, 7y), else near, dead (every length fails by more than 5 points of growth),
+     no_pe or no_5y_pe. These lengths are screening yardsticks only: the stock's own visible-until date and projection
+     length (2-7 years) are set later, in the analysis;
+ (b) earnings evidence (the earnings evidence rule): E1 acceleration, E2 re-rating candidate (a quality business at a P/E below its own range with growth intact), E3 sustained growth, E4 turnaround;
  (c) flags from the screener figures; only clear failures are rejected here, near-misses go to the gate.
 """
 import csv, json, os, sys
@@ -13,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import run_dir
 base = run_dir()
 HURDLE, MARGIN, BATCH = 0.25, 5, 10
-CAPS = (('short', 2, 60), ('medium', 5, 40), ('long', 7, 35))
+CAPS = (('2y', 2, 60), ('5y', 5, 40), ('7y', 7, 35))
 
 def num(x):
     try:
@@ -80,7 +84,7 @@ for s in sorted(set(U) | holds):
     r['flags'] = '; '.join(flags)
     nm = (r['name'] or '').lower()
     if r['held']:
-        r['triage'], r['reason'] = 'holding', 'held: goes straight to S9'
+        r['triage'], r['reason'] = 'holding', 'held: goes straight to S7'
     elif 'reit' in nm or 'invit' in nm or ' trust' in nm:
         r['triage'], r['reason'] = 'reject', 'REIT/InvIT'
     elif pledge is not None and pledge > 25:
@@ -88,7 +92,7 @@ for s in sorted(set(U) | holds):
     elif c2 is not None and c5 is not None and c2 < 0.3 and c5 < 0.3:
         r['triage'], r['reason'] = 'reject', f'cash conversion 2y {c2}, 5y {c5} (cash conversion rule)'
     elif r['math'] == 'dead':
-        r['triage'], r['reason'] = 'reject', f"return math fails every horizon by more than {MARGIN} points of growth"
+        r['triage'], r['reason'] = 'reject', f"return math fails every projection length by more than {MARGIN} points of growth"
     elif r['math'] == 'no_pe':
         r['triage'], r['reason'] = 'not_queued', 'no positive P/E'
     elif r['hits'] or (r['evidence'] and r['math'] not in ('near',)):

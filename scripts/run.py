@@ -1,4 +1,4 @@
-"""A run's own bookkeeping: setup (S1), the company list (S9), the pending check (after each S14).
+"""A run's own bookkeeping: setup (S1), the company list (S7), the pending check (after each S12).
   python -I scripts/run.py setup <FYyyQn> --mode full|recheck [--suffix _full] [--no-sheet] [--sheet-only]
   python -I scripts/run.py list [--mode full|recheck]      (default mode: the first line of <run>/progress.md)
   python -I scripts/run.py pending [<run folder>]
@@ -16,23 +16,25 @@ Refuses: a quarter name that isn't FYyyQn (n 1-4) or hasn't ended; a run folder 
   stopped half-way) is completed. gws unavailable or failing: the local part stands, a line starting "SHEET NOT UPDATED"
   is printed, exit 0; --sheet-only redoes just the sheet step for an existing run.
 
----- list (workflow/s9_company_list.md) ----
+---- list (workflow/s7_company_list.md) ----
 Inputs (run folder, config.py): holdings.csv (S1); sector_of.tsv (S5 sectors.py order; recheck: copied from the last
-  full run); full: gate/decisions.csv (gate_merge.py; NEXT rows); recheck: every company with a thesis
-  (config.thesis_path: horizon, sector), the sheet's Data tab tickers (Data!A2:A300 through gws) as a cross-check when
-  the sheet can be read, sectors.json marker states.
-Full: every holding plus every gate NEXT; order: holdings, then sector rank (lowest first), then the gate's est_cagr
-  (highest first); why "holding" / "gate NEXT, sector <id> rank <n>"; horizon: the thesis's (holdings) or the gate's.
-Recheck: every holding, every company with a thesis and any Data-tab ticker without one; horizon from its thesis; order: holdings, then companies whose sector
-  has a broken marker in sectors.json, then sector rank; why "holding" / "listed" / "sector <id> marker broken", plus
+  full run); full: gate/decisions.csv (gate_merge.py; NEXT rows, their est_cagr and years); the theses
+  (config.thesis_path: years, status, sector); recheck: every company with a thesis, the sheet's Data tab tickers
+  (Data!A2:A300 through gws) as a cross-check when the sheet can be read, sectors.json marker states.
+Full: every holding plus every gate NEXT; order: holdings, then gate NEXT rows by the gate's est_cagr (highest first; a
+  missing est_cagr sorts last), ties by sector rank (lowest first), then sym; why "holding" / "gate NEXT, sector <id>
+  rank <n>"; years: the thesis's (holdings) or decisions.csv's (gate NEXT rows).
+Recheck: every holding, every company with a thesis and any Data-tab ticker without one, except a company not held whose
+  thesis has status reject (left out); years from its thesis; order: holdings, then companies whose sector has a broken
+  marker in sectors.json, then sector rank, then sym; why "holding" / "listed" / "sector <id> marker broken", plus
   "no thesis: re-analyse" when the thesis file is missing.
-Outputs: <run>/company_list.csv (sym, name, held, sector, sector_rank, horizon, order, why); a status.csv row per company
-  (phase S10, state queued) unless it has one. Re-running rewrites the list and adds no duplicate status rows.
+Outputs: <run>/company_list.csv (sym, name, held, sector, sector_rank, years, order, why); a status.csv row per company
+  (phase S8, state queued) unless it has one. Re-running rewrites the list and adds no duplicate status rows.
 Stops (exit 1, nothing written) on a NEXT or holding with no sector_of.tsv row (listed). An unreadable sheet in recheck
   mode prints "SHEET NOT READ" and the list comes from the theses and holdings alone.
 
 ---- pending ----
-Lists the companies in <run>/company_list.csv that haven't finished S14 (status.csv phase S14, state done) and prints
+Lists the companies in <run>/company_list.csv that haven't finished S12 (status.csv phase S12, state done) and prints
   PENDING: <n>.
 """
 import argparse, datetime as dt, glob, os, re, shutil, subprocess, sys
@@ -42,7 +44,7 @@ from config import all_runs, company_runs_dir, run_dir, run_path, thesis_path
 
 SCRIPTS = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(SCRIPTS, 'config.py')
-STATUS_HEADER = 'sym,phase,state,stage,loops_to_s10,results_used,updated,note\n'
+STATUS_HEADER = 'sym,phase,state,stage,loops_to_s8,results_used,updated,note\n'
 COPY = ('sector_map.md', 'sectors.json', 'sector_of.tsv')
 PENDING_ID, PENDING_RE = 105, re.compile(r'^Pending .* results$')
 PENDING_HEADER = ['Ticker', 'Name', 'Latest declared quarter', 'Results due by', 'Notes']
@@ -171,8 +173,13 @@ def cmd_setup(a):
 
 
 # ---------- list ----------
-LIST_FIELDS = ['sym', 'name', 'held', 'sector', 'sector_rank', 'horizon', 'order', 'why']
-SFIELDS = ['sym', 'phase', 'state', 'stage', 'loops_to_s10', 'results_used', 'updated', 'note']
+LIST_FIELDS = ['sym', 'name', 'held', 'sector', 'sector_rank', 'years', 'order', 'why']
+SFIELDS = ['sym', 'phase', 'state', 'stage', 'loops_to_s8', 'results_used', 'updated', 'note']
+
+
+def full_key(est_cagr, rank, sym, other_rank):
+    """Full-mode sort key of a gate NEXT row: est_cagr highest first (missing last), then sector rank, then sym."""
+    return (1, 1 if est_cagr is None else 0, -(est_cagr or 0), other_rank if rank is None else rank, sym)
 
 
 def cmd_list(a):
@@ -209,7 +216,7 @@ def cmd_list(a):
     if mode == 'full':
         dp = os.path.join(run, 'gate', 'decisions.csv')
         if not os.path.exists(dp):
-            W.fail(f'{dp} missing: run gate_merge.py after the last S8R')
+            W.fail(f'{dp} missing: run gate_merge.py after the last S6R')
         nxt = [r for r in W.read_csv(dp) if r.get('decision') == 'NEXT']
         for s in hold:
             if s not in sec:
@@ -222,15 +229,15 @@ def cmd_list(a):
         for s in hold:
             t = thesis(s)
             rows.append({'sym': s, 'held': True, 'sector': sec[s]['sector'], 'sector_rank': W.fnum(sec[s]['rank']),
-                         'horizon': (t or {}).get('horizon', ''), 'why': 'holding', 'k': (0, 0, 0)})
+                         'years': (t or {}).get('years', ''), 'why': 'holding', 'k': (0,)})
         for r in nxt:
             s = r['sym']
             if s in hold:
                 continue
             rk = W.fnum(sec[s]['rank'])
-            rows.append({'sym': s, 'held': False, 'sector': sec[s]['sector'], 'sector_rank': rk, 'horizon': r.get('horizon') or '',
+            rows.append({'sym': s, 'held': False, 'sector': sec[s]['sector'], 'sector_rank': rk, 'years': r.get('years') or '',
                          'why': f"gate NEXT, sector {sec[s]['sector']} rank {sec[s]['rank']}",
-                         'k': (1, rk, -(W.fnum(r.get('est_cagr')) or -99))})
+                         'k': full_key(W.fnum(r.get('est_cagr')), rk, s, other_rank)})
     else:
         # every company with a thesis (runs/companies/), plus the sheet's Data tab as a cross-check when readable
         root = company_runs_dir()
@@ -253,6 +260,8 @@ def cmd_list(a):
                     broken.add(s['id'])
         for s in dict.fromkeys(list(hold) + listed):
             t = thesis(s)
+            if s not in hold and (t or {}).get('status') == 'reject':
+                continue
             sector = (sec.get(s) or {}).get('sector') or (t or {}).get('sector') or 'other'
             rk = W.fnum((sec.get(s) or {}).get('rank')) or other_rank
             why = ['holding' if s in hold else 'listed']
@@ -260,7 +269,7 @@ def cmd_list(a):
                 why.append(f'sector {sector} marker broken')
             if not t:
                 why.append('no thesis: re-analyse')
-            rows.append({'sym': s, 'held': s in hold, 'sector': sector, 'sector_rank': rk, 'horizon': (t or {}).get('horizon', ''),
+            rows.append({'sym': s, 'held': s in hold, 'sector': sector, 'sector_rank': rk, 'years': (t or {}).get('years', ''),
                          'why': '; '.join(why), 'k': (0 if s in hold else 1 if sector in broken else 2, rk, s)})
     rows.sort(key=lambda r: r['k'])
     for i, r in enumerate(rows, 1):
@@ -270,7 +279,7 @@ def cmd_list(a):
     stp = os.path.join(run, 'status.csv')
     have = {r['sym'] for r in W.read_csv(stp)} if os.path.exists(stp) else set()
     now = dt.datetime.now(IST).strftime('%Y-%m-%d %H:%M')
-    add = [{'sym': r['sym'], 'phase': 'S10', 'state': 'queued', 'updated': now} for r in rows if r['sym'] not in have]
+    add = [{'sym': r['sym'], 'phase': 'S8', 'state': 'queued', 'updated': now} for r in rows if r['sym'] not in have]
     if add:
         W.append_csv(stp, SFIELDS, add)
     print(f'{mode}: {len(rows)} companies ({sum(r["held"] for r in rows)} holdings) -> {os.path.join(run, "company_list.csv")}; '
@@ -283,14 +292,14 @@ def cmd_pending(a):
     run = a.run or run_dir()
     cp = os.path.join(run, 'company_list.csv')
     if not os.path.exists(cp):
-        W.fail(f'{cp} missing: run S9 (run.py list) first')
+        W.fail(f'{cp} missing: run S7 (run.py list) first')
     companies = [r['sym'] for r in W.read_csv(cp)]
     sp = os.path.join(run, 'status.csv')
     status = {r['sym']: r for r in W.read_csv(sp)} if os.path.exists(sp) else {}
     pending = []
     for s in companies:
         r = status.get(s)
-        if not r or not (r['phase'] == 'S14' and r['state'] == 'done'):
+        if not r or not (r['phase'] == 'S12' and r['state'] == 'done'):
             pending.append((s, r['phase'] if r else '-', r['state'] if r else 'not started', r.get('stage', '') if r else ''))
     for s, phase, state, stage in pending:
         print(f'{s}\t{phase}\t{state}\t{stage}')
@@ -313,9 +322,9 @@ def main():
     p.add_argument('--suffix', default='', choices=['', '_full'], help="folder name suffix (default: none)")
     p.add_argument('--no-sheet', action='store_true', help='skip the sheet step')
     p.add_argument('--sheet-only', action='store_true', help='only the sheet step, for an existing run')
-    p = sp.add_parser('list', help='write the company list (S9)', description=doc_part('list'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('list', help='write the company list (S7)', description=doc_part('list'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--mode', choices=['full', 'recheck'], help='default: the first line of <run>/progress.md')
-    p = sp.add_parser('pending', help='list companies not done with S14', description=doc_part('pending'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('pending', help='list companies not done with S12', description=doc_part('pending'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('run', nargs='?', help='run folder (default: the current run, config.py)')
     a = ap.parse_args()
     return {'setup': cmd_setup, 'list': cmd_list, 'pending': cmd_pending}[a.cmd](a)

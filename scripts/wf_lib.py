@@ -3,21 +3,73 @@
 # quarter names (FYyyQn: Indian fiscal year, Q1 = Apr-Jun ... Q4 = Jan-Mar, FY27 ends Mar 2027), and the sheet through
 # the gws CLI (kite_holdings.py's gws(), sheet_get() and SHEET; its GWS_EXE override serves tests too).
 # Standard library only, so every script that imports it can run with python -I.
-import csv, datetime as dt, io, json, os, re, sys
+import calendar, csv, datetime as dt, io, json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import COMPANIES_DIR, run_dir  # noqa: E402,F401
-from mb_features import add_years, fnum, load, month_end, parse_period, series  # noqa: E402,F401
 
 RUN_RE = re.compile(r'^FY(\d{2})Q([1-4])(_full)?$')
 QRE = re.compile(r'^FY(\d{2})Q([1-4])$')
 MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+MON_NUM = {m: i for i, m in enumerate(calendar.month_abbr) if m}  # 'Jan' -> 1
 
 
 def fail(msg, code=1):
     """Print a clear error line and exit non-zero."""
     print(f'ERROR: {msg}', file=sys.stderr, flush=True)
     sys.exit(code)
+
+
+# ---------- values and dates ----------
+def fnum(x):
+    """A float, or None (blank, text, NaN)."""
+    try:
+        v = float(x)
+        return v if v == v else None
+    except (TypeError, ValueError):
+        return None
+
+
+def load(path):
+    """The `data` of a saved JSON answer, or None when the file is missing or not JSON."""
+    try:
+        with open(path, encoding='utf-8') as fh:
+            return json.load(fh).get('data')
+    except (OSError, ValueError):
+        return None
+
+
+def series(pairs):
+    """Chart points [[iso date, value], ...] -> sorted [(date, float)], skipping points without a number."""
+    out = []
+    for p in pairs or []:
+        try:
+            v = float(p[1])
+            out.append((dt.date.fromisoformat(p[0]), v))
+        except (TypeError, ValueError, IndexError):
+            pass
+    return sorted(out)
+
+
+def month_end(y, m):
+    return dt.date(y, m, calendar.monthrange(y, m)[1])
+
+
+def add_years(d, n):
+    """The same day n years on (29 Feb -> 28 Feb)."""
+    try:
+        return d.replace(year=d.year + n)
+    except ValueError:
+        return d.replace(year=d.year + n, day=28)
+
+
+def parse_period(lbl):
+    """'Mar 2015' / 'Mar 2015 15m' / '31-MAR-2026' -> (date, months)."""
+    p = lbl.replace('-', ' ').split()
+    if len(p) >= 3 and p[0].isdigit():  # 31 MAR 2026
+        return month_end(int(p[2]), MON_NUM[p[1].title()]), 12
+    months = int(p[2][:-1]) if len(p) > 2 and p[2].endswith('m') else 12
+    return month_end(int(p[1]), MON_NUM[p[0][:3].title()]), months
 
 
 # ---------- quarters ----------
@@ -116,7 +168,7 @@ _labels = {}
 
 
 def industry(sym):
-    """The industry label (the last, narrowest element of overview.json `sectors`, as mb_sector_test.py), or None."""
+    """The industry label (the last, narrowest element of overview.json `sectors`), or None."""
     if sym not in _labels:
         s = [x for x in ((scr(sym, 'overview') or {}).get('sectors') or []) if x]
         _labels[sym] = s[-1] if s else None
@@ -156,11 +208,49 @@ def sheet_get(ranges, render='UNFORMATTED_VALUE'):
     return gws_mod().sheet_get(ranges, render)
 
 
-def sheet_put(data):
-    """data: [(range with tab, [[...]])], RAW so tickers, codes and dates stay as sent."""
+PUT_LIMIT = 20000  # characters of JSON body per gws call (the Windows command line holds 32767)
+
+
+def put_chunks(data, limit=PUT_LIMIT):
+    """[(range, [[...]])] -> calls, each a list of (range, values) whose JSON stays under limit; a range too big for one
+    call is split at row boundaries (ranges 'Tab!A2:B300'), so no row is ever split across calls."""
+    pieces = []
+    for a, v in data:
+        if len(json.dumps({'range': a, 'values': v})) <= limit:
+            pieces.append((a, v))
+            continue
+        m = re.match(r'^(.*)!([A-Z]+)(\d+):([A-Z]+)(\d+)$', a)
+        if not m:
+            raise ValueError(f'range {a} is over {limit} characters and not splittable by rows')
+        tab, c0, r0, c1 = m.group(1), m.group(2), int(m.group(3)), m.group(4)
+        i = 0
+        while i < len(v):
+            j, s = i, 200
+            while j < len(v) and (j == i or s + len(json.dumps(v[j])) + 2 < limit):
+                s += len(json.dumps(v[j])) + 2
+                j += 1
+            pieces.append((f'{tab}!{c0}{r0 + i}:{c1}{r0 + j - 1}', v[i:j]))
+            i = j
+    calls, cur, size = [], [], 0
+    for a, v in pieces:
+        n = len(json.dumps({'range': a, 'values': v})) + 2
+        if cur and size + n > limit - 100:
+            calls.append(cur)
+            cur, size = [], 0
+        cur.append((a, v))
+        size += n
+    if cur:
+        calls.append(cur)
+    return calls
+
+
+def sheet_put(data, option='RAW'):
+    """data: [(range with tab, [[...]])], RAW (default) so tickers, codes and dates stay as sent; USER_ENTERED for
+    formulas. Sent in as many values.batchUpdate calls as put_chunks() needs."""
     k = gws_mod()
-    body = {'valueInputOption': 'RAW', 'data': [{'range': a, 'values': v} for a, v in data]}
-    return k.gws('sheets', 'spreadsheets', 'values', 'batchUpdate', '--params', json.dumps({'spreadsheetId': k.SHEET}), body=body)
+    for part in put_chunks(data):
+        body = {'valueInputOption': option, 'data': [{'range': a, 'values': v} for a, v in part]}
+        k.gws('sheets', 'spreadsheets', 'values', 'batchUpdate', '--params', json.dumps({'spreadsheetId': k.SHEET}), body=body)
 
 
 def sheet_clear(ranges):
