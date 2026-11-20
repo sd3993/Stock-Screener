@@ -15,8 +15,8 @@ Single entry point for the deterministic scripts under `scripts/`: which script 
 | [`run.py`](run.py) | Starting a run, listing its companies, checking what is pending | S1, S7, after S12 |
 | [`screens.py`](screens.py) | Running the market screens and the whole-market sweep; building the universe | S2 |
 | [`triage.py`](triage.py) | Scoring the universe and cutting gate batches | S3 |
-| [`sectors.py`](sectors.py) | Any per-sector computation: sector numbers, order and emerging queue, call log | S4, S5, S6R |
-| [`gate_merge.py`](gate_merge.py) | Merging the gate decisions after the batches | S6R |
+| [`sectors.py`](sectors.py) | Any per-sector computation: sector numbers, focus order and emerging queue, upcoming-theme watches, call log | S4, S5, S6R |
+| [`gate_merge.py`](gate_merge.py) | Merging the gate decisions after the batches, and their price watches | S6R |
 | [`scr_company.py`](scr_company.py) | Fetching one company's screener data (public mode) | S4, S6, S8, S11, S12 |
 | [`scr_docs.py`](scr_docs.py) | Downloading a company's filings listed in its saved screener answers | S8 |
 | [`scr_tool.py`](scr_tool.py) | Any single screener tool call saved to a file | S2 (through `screens.py`), ad hoc |

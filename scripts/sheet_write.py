@@ -1,6 +1,6 @@
 """S12 and S14 by script: writes agreed analyses and allocation decisions into the Google Sheet through the gws
 CLI (RAW values), reads every written cell back and compares it. Layout: sources/sheet.md.
-  python -I scripts/sheet_write.py listing SYM... [--hold SYM...] [--dry-run]     (S12, workflow/s12_listing.md)
+  python -I scripts/sheet_write.py listing SYM... [--hold SYM...] [--watch SYM...] [--dry-run]   (S12, workflow/s12_listing.md)
   python -I scripts/sheet_write.py allocation [--dry-run]                         (S14, workflow/s13_allocation.md)
 listing inputs: each company's agreed analysis (thesis.py's agreed(): the highest recheck<N>.json in its newest
   runs/companies/<SYM>/<FYyyQn>/ folder), its scr/overview.json (stored price, name, NSE/BSE code; run scr_company.py
@@ -20,6 +20,16 @@ listing writes, per company: its Data row (found by ticker in A2:A300, else the 
   what_changed line ("first listing" for a company with no earlier row). A company that has an earlier verdict-history
   row but a blank what_changed is refused: written nowhere (no Data, flags, pending or history row), printed as
   "NO WHAT-CHANGED LINE: <sym>"; the others are still handled and the script exits 5 (5 wins over 3).
+--watch SYM: a company on watch with no analysis yet (a gate WATCH's price watch, or an upcoming theme's watch):
+  runs/companies/<SYM>/<FYyyQn>/watch.json from the newest quarter folder holding one (written by gate_merge.py or
+  sectors.py themes). An agreed analysis (recheck<N>.json) in that folder or a later one wins: the watch is skipped,
+  printed. No watch.json: exit 1, nothing written. Its Data row (found or placed as above): A:D the identity, E sector,
+  F results_used, G analysed_on, H the stored price, K "Watch", Q waiting_for plus " (by <due>)" when due is set, R
+  evidence_so_far, S next_check, AA "Analysis pending: price watch, buy below Rs <buy_below>" or "Analysis pending:
+  theme watch (<theme name>)", AC the watch.json path, every other written column blank (a stale analysis value is
+  cleared). Its verdict-history row: verdict "watch (<kind> watch, analysis pending)", reason "first listing" when the
+  company has no earlier row, else "<kind> watch from <source>". The what_changed refusal does not apply; watch
+  companies get no Data Flags or pending-tab change.
 allocation inputs: <run>/allocation/recheck<N>.json (highest N; the S13 format in workflow/s13_allocation.md) and
   <run>/holdings.csv. Writes Holdings F (status) and M (notes, followed by "| Swap candidate: <SYM> (base-case CAGR
   +<gap> pts): <why>" when the holding has a swap) on each holding's row (found by ticker in Z); clears the
@@ -42,7 +52,7 @@ Safety: every written column is checked against the formula columns listed in so
 import argparse, datetime as dt, glob, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wf_lib as W
-from config import run_dir, shared_path
+from config import analysis_dirs, company_runs_dir, run_dir, shared_path
 
 DATA_FIRST, DATA_LAST = 2, 300
 DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
@@ -120,6 +130,46 @@ def data_row(a, ov, run_q):
         'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BF': a.get('discovery_stage') or '',
         'BG': str((a.get('moat') or {}).get('verdict') or '').capitalize(),
         'BH': '\n'.join(f'- {p}' for p in (a.get('reject_points') or [])), 'BI': revisit(a.get('revisit_if'))}
+
+
+def money(x):
+    v = W.fnum(x)
+    return '' if v is None else f'{v:,.0f}' if v.is_integer() else f'{v:,.2f}'
+
+
+def watch_row(w, ov, run_q, path):
+    """The Data row's written cells for a watch.json (no analysis yet): identity, sector, results_used, analysed_on,
+    stored price, K "Watch", Q:S from its watch, AA the pending note, AC its path; every other written column blank."""
+    kind = w.get('kind') or ''
+    note = (f"Analysis pending: price watch, buy below Rs {money(w.get('buy_below'))}" if kind == 'price' and money(w.get('buy_below'))
+            else 'Analysis pending: price watch' if kind == 'price'
+            else f"Analysis pending: theme watch ({(w.get('theme') or {}).get('name') or ''})")
+    cells = data_row({'sym': w['sym'], 'name': w.get('name'), 'sector': w.get('sector'), 'results_used': w.get('results_used'),
+                      'analysed_on': w.get('analysed_on'), 'status': 'watch', 'watch': w.get('watch') or {},
+                      'thesis': note, '_file': path}, ov, run_q)
+    cells['BB'] = ''  # data_row's "N" means "no re-rating evidence", an analysis's finding; a watch has none yet
+    return cells
+
+
+def load_watch(sym):
+    """(watch, path, '') from the company's newest runs/companies/<SYM>/<FYyyQn>/ folder holding a watch.json, or
+    (None, None, why); why starts with 'analysis' when an agreed analysis (recheck<N>.json) in that folder or a later
+    one wins."""
+    dirs = analysis_dirs(sym)
+    wd = [d for d in dirs if os.path.exists(os.path.join(d, 'watch.json'))]
+    if not wd:
+        return None, None, f'no watch.json in {company_runs_dir(sym)}/<FYyyQn>/'
+    later = dirs[dirs.index(wd[-1]):]
+    ag = [d for d in later if any(re.match(r'recheck\d+\.json$', os.path.basename(f)) for f in glob.glob(os.path.join(d, 'recheck*.json')))]
+    if ag:
+        return None, None, f'analysis: the agreed analysis in {ag[-1]} wins over {os.path.join(wd[-1], "watch.json")}'
+    p = os.path.join(wd[-1], 'watch.json')
+    try:
+        w = W.read_json(p)
+    except ValueError as e:
+        return None, None, f'{p}: not JSON ({e})'
+    w.setdefault('sym', sym)
+    return w, p.replace('\\', '/'), ''
 
 
 def revisit(r):
@@ -208,6 +258,20 @@ def cmd_listing(a):
         ana[s] = d
     if skipped:
         raise Fail('no agreed analysis: ' + '; '.join(skipped), 1)
+    watches, wnotes, wmiss = {}, [], []
+    for s in a.watch or []:
+        if s in ana:
+            wnotes.append(f'{s}: watch skipped (listed from its agreed analysis in this call)')
+            continue
+        w, p, why = load_watch(s)
+        if why.startswith('analysis'):
+            wnotes.append(f'{s}: watch skipped ({why[len("analysis: "):]})')
+        elif not w:
+            wmiss.append(f'{s}: {why}')
+        else:
+            watches[s] = (w, p)
+    if wmiss:
+        raise Fail('no watch to list: ' + '; '.join(wmiss), 1)
     vh_path = shared_path('verdict_history.csv')
     vh = W.read_csv(vh_path) if os.path.exists(vh_path) else []
     today = dt.date.today().isoformat()
@@ -218,19 +282,20 @@ def cmd_listing(a):
             raise Fail(f'--hold {s}: no earlier verdict-history row to carry forward', 1)
         vh_rows.append({'date': today, 'quarter_folder': os.path.basename(os.path.normpath(run)), 'sym': s,
                         'results_used': prev[-1]['results_used'], 'verdict': prev[-1]['verdict'], 'reason': f'markers held, results {rq}'})
-    plans, report = [], []
+    plans, report = [], list(wnotes)
     # a company listed before needs the analysis's what_changed line: without it, it is written nowhere
     refused = [s for s in ana if any(x['sym'] == s for x in vh) and not str(ana[s].get('what_changed') or '').strip()]
     for s in refused:
         ana.pop(s)
         report.append(f'NO WHAT-CHANGED LINE: {s} (listed before; its agreed analysis has no what_changed); not written')
-    if ana:
+    if ana or watches:
         tick, ba1, flags = W.sheet_get(['Data!A2:A300', 'Data!BA1', "'Data Flags'!A2:G500"])
-        pend_name = ba1[0][0] if ba1 and ba1[0] else ''
-        if not re.match(r'^Pending .* results$', str(pend_name)):
-            raise Fail(f'Data!BA1 holds {pend_name!r}, not a pending tab name: run run.py setup --sheet-only', 1)
-        pq = W.quote_tab(pend_name)
-        pend, = W.sheet_get([f'{pq}!A2:E500'])
+        if ana:
+            pend_name = ba1[0][0] if ba1 and ba1[0] else ''
+            if not re.match(r'^Pending .* results$', str(pend_name)):
+                raise Fail(f'Data!BA1 holds {pend_name!r}, not a pending tab name: run run.py setup --sheet-only', 1)
+            pq = W.quote_tab(pend_name)
+            pend, = W.sheet_get([f'{pq}!A2:E500'])
         rows = {str(r[0]): DATA_FIRST + i for i, r in enumerate(tick) if r and str(r[0]).strip()}
         used = set(rows.values())
         free = [r for r in range(DATA_FIRST, DATA_LAST + 1) if r not in used]
@@ -253,8 +318,27 @@ def cmd_listing(a):
             reason = str(an.get('what_changed') or '').strip() or 'first listing'   # refused above when an earlier row exists
             vh_rows.append({'date': today, 'quarter_folder': os.path.basename(os.path.normpath(run)), 'sym': s,
                             'results_used': an.get('results_used'), 'verdict': verdict, 'reason': reason})
+        for s, (w, wp) in watches.items():  # a watch: its Data row and a verdict-history row; no flags, no pending row
+            ov = W.scr(s, 'overview')
+            if ov is None:
+                report.append(f'{s}: no scr/overview.json: stored price, name and code missing (run scr_company.py --only overview)')
+            r = rows.get(s)
+            if r is None:
+                if not free:
+                    report.append(f'NO FREE ROW for {s} (Data rows {DATA_FIRST}-{DATA_LAST} full); not written')
+                    nofree.append(s)
+                    continue
+                r = free.pop(0)
+            plans.append((s, row_ranges('Data', r, watch_row(w, ov, rq, wp))))
+            kind = w.get('kind') or ''
+            report.append(f'{s}: Data row {r} ({kind} watch from {wp})')
+            vh_rows.append({'date': today, 'quarter_folder': os.path.basename(os.path.normpath(run)), 'sym': s,
+                            'results_used': w.get('results_used'), 'verdict': f'watch ({kind} watch, analysis pending)',
+                            'reason': f"{kind} watch from {w.get('source') or wp}" if any(x['sym'] == s for x in vh) else 'first listing'})
         for s in nofree:  # not listed: its flags, pending row and verdict wait for a free row
-            ana.pop(s)
+            ana.pop(s, None)
+            watches.pop(s, None)
+    if ana:
         # Data Flags: drop the listed tickers' rows, add theirs, sort by ticker, rewrite A2:G (blank rows past the end)
         keep = [r + [''] * (7 - len(r)) for r in flags if r and str(r[0]) not in ana]
         for s, an in ana.items():
@@ -300,7 +384,7 @@ def cmd_listing(a):
         W.append_csv(vh_path, VH_FIELDS, vh_rows)
     for x in report:
         print(x)
-    print(f'{len(ana)} listed, {len(a.hold or [])} hold rows; ' + (f'DRY RUN, plans: {saved}' if a.dry_run else
+    print(f'{len(ana)} listed, {len(watches)} watch rows, {len(a.hold or [])} hold rows; ' + (f'DRY RUN, plans: {saved}' if a.dry_run else
                                                                     f'written and read back; {len(vh_rows)} verdict-history rows'))
     return 5 if refused else 3 if any(x.startswith('NO FREE ROW') for x in report) else 0
 
@@ -383,14 +467,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest='cmd', required=True, help='the mode; <mode> --help for its own help')
     p = sp.add_parser('listing', help='agreed analyses into the Data tab and related tabs (S12)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('syms', nargs='*', help='companies to list (give SYMs, --hold SYMs or both)')
+    p.add_argument('syms', nargs='*', help='companies to list (give SYMs, --hold SYMs, --watch SYMs or several)')
     p.add_argument('--hold', nargs='*', default=[], help='S9 "hold" companies: only a verdict-history row')
+    p.add_argument('--watch', nargs='*', default=[], help='companies with a watch.json and no agreed analysis yet: a Watch row')
     p.add_argument('--dry-run', action='store_true', help='read the sheet, save the write plan, write nothing')
     p = sp.add_parser('allocation', help='allocation decisions into the Holdings and Allocation tabs (S14)', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--dry-run', action='store_true', help='read the sheet, save the write plan, write nothing')
     a = ap.parse_args()
-    if a.cmd == 'listing' and not (a.syms or a.hold):
-        W.fail('give the companies to list, or --hold SYM...')
+    if a.cmd == 'listing' and not (a.syms or a.hold or a.watch):
+        W.fail('give the companies to list, or --hold SYM... or --watch SYM...')
     try:
         return cmd_listing(a) if a.cmd == 'listing' else cmd_allocation(a)
     except Fail as e:

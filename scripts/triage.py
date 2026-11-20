@@ -6,7 +6,7 @@
      2y:strong / 2y:plausible (likewise 5y, 7y), else near, dead (every length fails by more than 5 points of growth),
      no_pe or no_5y_pe. These lengths are screening yardsticks only: the stock's own visible-until date and projection
      length (2-7 years) are set later, in the analysis;
- (b) earnings evidence (the earnings evidence rule): E1 acceleration, E2 re-rating candidate (a quality business at a P/E below its own range with growth intact), E3 sustained growth, E4 turnaround;
+ (b) earnings evidence (the earnings evidence rule): E1 acceleration, E2 re-rating candidate (a quality business at a P/E below its own range with growth intact), E3 sustained growth (3-year sales and profit growth both 20%+, whatever the latest quarter: either period is enough, and the gate explains the weaker one), E4 turnaround;
  (c) flags from the screener figures; only clear failures are rejected here, near-misses go to the gate;
  (d) REIT/InvIT reject: the word REIT or InvIT in the name, or the word Trust with no promoter holding (a company
      named "... Trust" has one).
@@ -71,7 +71,7 @@ for s in sorted(set(U) | holds):
     E = []
     if (qpg or -1) >= 25 and (qsg or -1) >= 20: E.append('E1')
     if (roce or 0) >= 20 and pe and h5 and pe <= 0.8 * h5 and (qsg or -1) >= 0 and (sg3 or -1) >= 8: E.append('E2')
-    if min(sg3 if sg3 is not None else -1, pg3 if pg3 is not None else -1) >= 20 and (qsg or -1) >= 15 and (qpg or -1) >= 0: E.append('E3')
+    if min(sg3 if sg3 is not None else -1, pg3 if pg3 is not None else -1) >= 20: E.append('E3')  # long-term alone: a weak latest quarter is the gate's to explain (either period)
     if (qpg or -1) >= 40 and (qsg or -1) >= 15 and (pg3 if pg3 is not None else 0) < 10: E.append('E4')
     r['evidence'] = '+'.join(E)
     # flags (information for the gate) and clear rejects

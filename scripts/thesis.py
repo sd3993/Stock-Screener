@@ -4,7 +4,7 @@
 
 ---- register ----
 Inputs: the company's newest analysis folder (config.analysis_dirs: runs/companies/<SYM>/<FYyyQn>/, named after the
-  results quarter the analysis used) and in it the highest recheck<N>.json (the agreed analysis; only main.json:
+  results quarter the analysis used; a folder holding only a price or theme watch.json is skipped) and in it the highest recheck<N>.json (the agreed analysis; only main.json:
   refused, its rechecks aren't done); data/companies/<SYM>/index.json (basis); the run's sectors.json (each sector's
   marker ids). Without SYMs: every company in runs/companies/ with an analysis folder.
 The analysis: status (list, watch, hold, exit or reject), visible_until (YYYY-MM-DD), years (the projection length, an
@@ -457,9 +457,17 @@ STATUSES = ('list', 'watch', 'hold', 'exit', 'reject')
 ON = ('revenue', 'visibility', 'other')
 
 
+def analysed_dirs(sym):
+    """The company's analysis folders that hold an analysis (main.json or recheck<N>.json), oldest first: a folder
+    holding only a price or theme watch.json (no analysis yet) is not one."""
+    return [d for d in analysis_dirs(sym)
+            if os.path.exists(os.path.join(d, 'main.json')) or glob.glob(os.path.join(d, 'recheck*.json'))]
+
+
 def agreed(sym):
-    """The agreed analysis: the highest recheck<N>.json in the company's newest analysis folder."""
-    dirs = analysis_dirs(sym)
+    """The agreed analysis: the highest recheck<N>.json in the company's newest analysis folder (a watch-only folder
+    is skipped)."""
+    dirs = analysed_dirs(sym)
     if not dirs:
         return None, 'no analysis folder'
     files = []
@@ -584,7 +592,7 @@ def cmd_register(a):
     else:
         print(f'note: no {mp}: no sector has a map entry, so sector-level markers are refused')
     root = company_runs_dir()
-    syms = a.syms or sorted(x for x in (os.listdir(root) if os.path.isdir(root) else ()) if analysis_dirs(x))
+    syms = a.syms or sorted(x for x in (os.listdir(root) if os.path.isdir(root) else ()) if analysed_dirs(x))
     if not syms:
         W.fail(f'no analyses in {root}')
     written, same, problems = [], [], {}

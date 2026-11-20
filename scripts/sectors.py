@@ -3,7 +3,8 @@ sector calls. One subcommand each:
   python -I scripts/sectors.py syms --out FILE [--stage-only] [--sectors FILE] [--history FILE]   (S4)    
   python -I scripts/sectors.py clusters                                                          (S4)    
   python -I scripts/sectors.py stage [--sectors FILE] [--stage-only]                             (S4)      
-  python -I scripts/sectors.py order [--from-gate]                                               (S5, S6R)
+  python -I scripts/sectors.py order [--from-gate] [--all | --release N] [--dry-run] [--sectors FILE]  (S5, S6R)
+  python -I scripts/sectors.py themes [--dry-run] [--sectors FILE]                               (S5)
   python -I scripts/sectors.py log | score [--out FILE]                                          (S5: sector calls)
 Each part's inputs, outputs and rules follow in its section below.
 
@@ -42,14 +43,17 @@ stage -> <run>/sector_stage.csv: per industry label with 5+ universe companies (
   It describes how priced-in a sector is (sizing, the re-rating case); tested on past March starts, it did not
   predict later winner rates, so it is not a signal for picking sectors.
 
----- order (S5 after S5R; S6R with --from-gate) ----
-Maps every queued company and holding to a sector of the map, queues the emerging entries' companies, and reorders the
-gate batches not yet run, tailwind sectors first.
-Inputs (run folder, config.py): sectors.json (S5: id, rank, industries, overrides, emerging, participants), triage.csv (queued =
-  triage "gate"; name, headroom, triage, reason), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json
-  (S3), gate/bNN.json (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`), overridden
-  by a `sector` field on the company's entry in its batch's latest gate/bNN_rcN.json (a recheck's correction); industry
-  labels from data/companies/<SYM>/scr/overview.json.
+---- order (S5 after S5R; S6R with --from-gate), themes ----
+order maps every queued company and holding to a sector of the map, gives each a focus value, queues the emerging
+entries' companies and the focus sectors' suppliers, and rebuilds the gate batches not yet run: the sector focus only.
+Inputs (run folder, config.py): sectors.json (S5, or --sectors FILE: as_of; per entry id, rank, kind, stage, end,
+  industries, overrides, emerging, participants, suppliers), triage.csv (queued = triage "gate"; name, headroom,
+  evidence, triage, reason), holdings.csv (S1; else data/kite/holdings.csv), gate_batches.json (S3), gate/bNN.json
+  (batches already run), with --from-gate gate/<SYM>.json (the gate's confirmed `sector`), overridden by a `sector`
+  field on the company's entry in its batch's latest gate/bNN_rcN.json (a recheck's correction); industry labels from
+  data/companies/<SYM>/scr/overview.json.
+Focus sectors: entries whose kind is neither "none" nor blank and whose `end` ("YYYY-MM": the month's last day, or
+  "YYYY-MM-DD") is on or after as_of (sectors.json; else today) + 3 years. An entry with no parsable end is not focus.
 Sector of a company: an `overrides` entry first, an emerging entry before the others (source emerging, else override;
   several entries overriding the same company: the lower rank number among those, listed as ambiguous), else the
   sector whose `industries` holds its label (two sectors: the lower rank number wins, ambiguous), else "other" (rank =
@@ -60,17 +64,49 @@ Emerging names: every `overrides` company (an emerging company) and every `parti
   queue it (triage not_queued, including no positive P/E, or a return-math reject). Not added: a holding; a company in
   a batch that has run; a company triage rejected for anything but return math (REIT/InvIT, promoter pledge, cash
   conversion), which is also taken out of a pending batch it sits in. A company absent from triage.csv is added (no
-  headroom: last within its sector). Printed: the emerging names added, those absent from triage.csv, and those
-  blocked, each with the reason. Overrides of an entry not marked emerging add no company to the queue: they only map
-  companies queued or held. Participants never map a company to the emerging entry: their sector is their main
+  headroom: last within its group). Overrides of an entry not marked emerging add no company to the queue: they only
+  map companies queued or held. Participants never map a company to the emerging entry: their sector is their main
   business's (an override or label there).
-Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous)
-  for every holding, queued company and emerging name added; gate_batches.json rebuilt: batches already run (a
-  gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (a name
-  in a batch not yet run that triage no longer queues is dropped; holdings
-  never) goes into batches of 5 ordered by sector rank, then triage headroom (highest first), numbered after the last
-  run batch; the old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes.
-  Safe to re-run: nothing changes when nothing changed.
+Suppliers: the companies of a focus entry's `suppliers` ({SYM: {...}}) join the queue as emerging names do (same
+  blocks); their sector stays their main business's (as above); suppliers of a non-focus entry are ignored.
+Focus value of each company, the first that applies: held (a holding); focus (its sector is a focus sector); emerging
+  (an emerging name added above); supplier (a supplier added above); reserve_released (a reserve company listed in
+  <run>/reserve_released.txt); reserve (queued by triage, none of the above, with any of E1-E4 in its triage evidence:
+  any one is enough); out (every other company triage queued).
+Reserve release: reserve companies stay out of the batches until released. --release N appends the next N unreleased
+  reserve companies (not in a batch that has run), highest triage headroom first, then symbol, to
+  <run>/reserve_released.txt (one symbol per line; created if missing), then builds the batches. The file only grows;
+  a listed name that is no longer reserve takes its current focus value (focus, out, ...). With --dry-run, --release
+  prints what it would append and writes nothing. --release cannot be combined with --all.
+Pending batches (the batches not yet run; batches already run keep their number and content): the companies whose
+  focus value is focus, emerging, supplier or reserve_released (never a holding, a name in a batch that has run, a
+  hard-blocked name, or a name triage no longer queues); "reserve" and "out" companies are left out. Order: focus,
+  emerging and supplier companies first, by (an entry of stage "crowded" after the others, the entry's rank, triage
+  headroom highest first, symbol), the entry being the company's own sector (a supplier: the best-ranked focus entry
+  listing it; an emerging participant: its main business's sector, so "other" sorts it last); then the released
+  reserve companies in reserve_released.txt's order. Batches of 5, numbered after the last run batch.
+  --all: no focus cut (the old order): every queued company, emerging name and supplier, by sector rank, then
+  headroom (highest first), then symbol.
+Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous,
+  focus) for every holding, queued company, emerging name and supplier added; gate_batches.json rebuilt as above; the
+  old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes. --dry-run writes neither. Printed: the
+  focus sectors (id, rank, kind, stage, end) and the others with why (kind none / end too soon / no parsable end),
+  the sectors mapped, the counts by focus value, the pending companies and batches, the out and reserve counts (and
+  how many of each the cut took out of the batches not yet run), the names released this time, the next 5
+  reserve names with their headroom and how many reserve remain unreleased, the emerging names and suppliers added, absent from triage.csv
+  or blocked (each with the reason). Safe to re-run: nothing changes when nothing changed. sectors.json's top-level
+  "upcoming" list is ignored by order.
+themes: for each company with "material": true in a theme of sectors.json "upcoming" ([{id, name, problem, markers,
+  companies: {SYM: {link, material, evidence}}}]) that is not held and not in any gate batch (run or pending, as order
+  computes it with the focus cut, without --from-gate), writes runs/companies/<SYM>/<run quarter>/watch.json: {sym,
+  name (triage.csv, else overview.json), sector (as order assigns it), kind "theme", status "watch", analysed_on
+  (today), results_used (the run quarter), theme {id, name}, watch {waiting_for "theme <name>: <the first unmet
+  marker's text>" (or "theme markers"), evidence_so_far (the company's link; evidence), next_check and due (the
+  earliest due date among the unmet markers, else blank)}, buy_below null, note "analysis pending", source
+  "sectors.json upcoming <id>"}. A marker is a string or {text|event|id, due, state}; it is met only with state held
+  or met. An existing theme watch.json is overwritten; one of any other kind (a gate's price watch) never is; a
+  company material in two themes gets the first. Prints each file written and each company skipped with why.
+  --dry-run writes nothing.
 
 ---- log, score (S5: sector calls) ----
 log: for each sector in <run>/sectors.json whose call differs from its last logged row in runs/sector_calls.csv (kind,
@@ -92,7 +128,7 @@ import argparse, bisect, datetime as dt, glob, json, math, os, re, statistics as
 from collections import Counter, defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wf_lib as W
-from config import run_dir, run_path, shared_path
+from config import analysis_dir, run_dir, run_path, shared_path
 
 MIN_LABEL, MIN_AT_DATE, MIN_QE, QE_YEARS = 5, 3, 20, 10
 ISSUE_RE = re.compile(r'QIP|qualified institution|preferential|private placement', re.I)
@@ -478,28 +514,65 @@ def cmd_stage(a):
     return 0
 
 
-# ---------- order (S5, S6R) ----------
+# ---------- order (S5, S6R), themes ----------
 BATCH = 5  # gate batch size
-OF_FIELDS = ['sym', 'name', 'held', 'industry', 'sector', 'rank', 'source', 'ambiguous']
+OF_FIELDS = ['sym', 'name', 'held', 'industry', 'sector', 'rank', 'source', 'ambiguous', 'focus']
+FOCUS_YEARS = 3  # a focus sector's tailwind runs at least this many years past the map's as_of
+QUEUE_FOCUS = ('focus', 'emerging', 'supplier', 'reserve_released')  # the focus values that go into the pending batches
 
 
-def load_map(run):
-    p = os.path.join(run, 'sectors.json')
+def load_map(run, path=None):
+    """(sectors sorted by rank, the whole sectors.json document)."""
+    p = path or os.path.join(run, 'sectors.json')
     if not os.path.exists(p):
         W.fail(f'{p} missing: S5 writes it first')
     try:
-        secs = W.read_json(p).get('sectors') or []
+        doc = W.read_json(p)
     except ValueError as e:
         W.fail(f'{p}: not JSON ({e})')
+    secs = doc.get('sectors') or []
     bad = [s.get('id') for s in secs if not s.get('id') or not isinstance(s.get('rank'), (int, float))]
     if bad:
         W.fail(f'{p}: sectors without an id or a numeric rank: {bad}')
-    return sorted(secs, key=lambda s: s['rank'])
+    return sorted(secs, key=lambda s: s['rank']), doc
 
 
 def emerging(s):
     """Whether a sectors.json entry is marked emerging ("emerging": true)."""
     return s.get('emerging') is True
+
+
+def end_date(x):
+    """A sector's `end`: "YYYY-MM" (the month's last day) or "YYYY-MM-DD" -> date, else None."""
+    m = re.match(r'^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$', str(x or '').strip())
+    if not m:
+        return None
+    try:
+        y, mo = int(m.group(1)), int(m.group(2))
+        return dt.date(y, mo, int(m.group(3))) if m.group(3) else W.month_end(y, mo)
+    except ValueError:
+        return None
+
+
+def focus_sectors(secs, doc):
+    """({id: entry} of the focus sectors, [(entry, why not)] of the others, as_of, cutoff)."""
+    try:
+        as_of = dt.date.fromisoformat(str(doc.get('as_of') or '')[:10])
+    except ValueError:
+        as_of = dt.date.today()
+    cut = W.add_years(as_of, FOCUS_YEARS)
+    foc, non = {}, []
+    for s in secs:
+        kind, e = str(s.get('kind') or '').strip(), end_date(s.get('end'))
+        if kind in ('', 'none'):
+            non.append((s, f'kind {kind or "blank"}'))
+        elif e is None:
+            non.append((s, f'no parsable end ({s.get("end")!r})'))
+        elif e < cut:
+            non.append((s, f'end too soon ({s.get("end")} before {cut})'))
+        else:
+            foc[s['id']] = s
+    return foc, non, as_of, cut
 
 
 def blocking_reject(r):
@@ -527,9 +600,31 @@ def assign(sym, secs, other_rank, gate_sector=None):
     return 'other', other_rank, 'other', ''
 
 
-def cmd_order(a):
-    run = run_dir()
-    secs = load_map(run)
+def evidence_codes(r):
+    """triage.csv `evidence` ("E1+E3") -> {'E1', 'E3'}."""
+    return {x.strip() for x in str((r or {}).get('evidence') or '').split('+') if x.strip()}
+
+
+def released_path(run):
+    return os.path.join(run, 'reserve_released.txt')
+
+
+def read_released(run):
+    """The symbols in <run>/reserve_released.txt, in file order, without duplicates."""
+    p = released_path(run)
+    if not os.path.exists(p):
+        return []
+    with open(p, encoding='utf-8') as f:
+        return list(dict.fromkeys(x.strip() for x in f if x.strip()))
+
+
+def plan_order(run, sectors_path=None, from_gate=False, all_=False, extra_released=()):
+    """Everything `order` computes, nothing written: a dict (see cmd_order). extra_released: symbols taken as appended
+    to reserve_released.txt (a --release with --dry-run)."""
+    released = list(dict.fromkeys(read_released(run) + list(extra_released)))
+    rel_set = set(released)
+    secs, doc = load_map(run, sectors_path)
+    by_id = {s['id']: s for s in secs}
     other_rank = max([s['rank'] for s in secs] + [0]) + 1
     tp = os.path.join(run, 'triage.csv')
     if not os.path.exists(tp):
@@ -539,7 +634,7 @@ def cmd_order(a):
     held = W.holdings_syms(hp if os.path.exists(hp) else os.path.join('data', 'kite', 'holdings.csv'))
     queued = [s for s, r in tri.items() if r.get('triage') == 'gate']
     gate_sec, unknown = {}, []
-    if a.from_gate:
+    if from_gate:
         ids = {s['id'] for s in secs} | {'other'}
         for fn in glob.glob(os.path.join(run, 'gate', '*.json')):
             sym = os.path.basename(fn)[:-5]
@@ -565,6 +660,7 @@ def cmd_order(a):
         unknown = [f'{s}: {sec}' for s, sec in sorted(gate_sec.items()) if sec not in ids]
         if unknown:
             W.fail(f'gate files name sectors not in sectors.json: {unknown} (fix the gate file or add the sector)')
+    foc, non, as_of, cut = focus_sectors(secs, doc)
     # batches already run
     bp = os.path.join(run, 'gate_batches.json')
     old = W.read_json(bp) if os.path.exists(bp) else {'batches': {}}
@@ -575,6 +671,10 @@ def cmd_order(a):
             ran.add(int(m.group(1)))
     keep = {k: v for k, v in old['batches'].items() if int(k) in ran}
     done = {s for v in keep.values() for s in v}
+
+    def why_not(sym):
+        return ('held' if sym in held else 'in a batch that has run' if sym in done
+                else blocking_reject(tri[sym]) if sym in tri else None)
     # emerging names: every override or participant of an emerging entry, unless held, already gated or hard-rejected by triage
     em_add, em_absent, em_blocked = [], [], []
     for sec in secs:
@@ -583,54 +683,212 @@ def cmd_order(a):
         for sym in list(sec.get('overrides') or {}) + list(sec.get('participants') or {}):
             if sym in em_add or any(sym == b[0] for b in em_blocked):
                 continue
-            why = ('held' if sym in held else 'in a batch that has run' if sym in done
-                   else blocking_reject(tri[sym]) if sym in tri else None)
+            why = why_not(sym)
             if why:
                 em_blocked.append((sym, sec['id'], why))
                 continue
             em_add.append(sym)
             if sym not in tri:
                 em_absent.append(sym)
+    # suppliers of the focus sectors: the same entry rules as emerging names; ordered by the best-ranked entry listing them
+    sup_add, sup_absent, sup_blocked, sup_entry = [], [], [], {}
+    for sec in secs:  # by rank, so the first entry listing a supplier is its best
+        if sec['id'] not in foc:
+            continue
+        for sym in (sec.get('suppliers') or {}):
+            sup_entry.setdefault(sym, sec)
+            if sym in sup_add or any(sym == b[0] for b in sup_blocked):
+                continue
+            why = why_not(sym)
+            if why:
+                sup_blocked.append((sym, sec['id'], why))
+                continue
+            sup_add.append(sym)
+            if sym not in tri:
+                sup_absent.append(sym)
     em_new = [s for s in em_add if s not in queued]  # added beyond triage's queue
-    hard = {s for s, _, why in em_blocked if why not in ('held', 'in a batch that has run')}
+    sup_new = [s for s in sup_add if s not in queued and s not in em_add]
+    hard = {s for s, _, why in em_blocked + sup_blocked if why not in ('held', 'in a batch that has run')}
     rows = []
-    for sym in list(dict.fromkeys(held + queued + em_new)):
+    for sym in list(dict.fromkeys(held + queued + em_new + sup_new)):
         sec, rank, src, amb = assign(sym, secs, other_rank, gate_sec.get(sym))
         rows.append({'sym': sym, 'name': (tri.get(sym) or {}).get('name', ''), 'held': sym in held,
                      'industry': W.industry(sym) or '', 'sector': sec, 'rank': rank, 'source': src, 'ambiguous': amb})
+    for r in rows:
+        s = r['sym']
+        r['focus'] = ('held' if r['held'] else 'focus' if r['sector'] in foc else 'emerging' if s in em_add
+                      else 'supplier' if s in sup_add
+                      else 'out' if s not in queued or not {'E1', 'E2', 'E3', 'E4'} & evidence_codes(tri.get(s))
+                      else 'reserve_released' if s in rel_set else 'reserve')
     rows.sort(key=lambda r: (not r['held'], r['rank'], r['sym']))
-    W.write_csv(os.path.join(run, 'sector_of.tsv'), OF_FIELDS, rows, delimiter='\t')
+    info = {r['sym']: r for r in rows}
     # gate batches
     pending = [s for k, v in sorted(old['batches'].items(), key=lambda x: int(x[0])) if int(k) not in ran for s in v]
-    pending += [s for s in queued + em_new if s not in pending]
-    live = set(queued) | set(em_add)  # a name triage no longer queues leaves the batches not yet run
+    was_pending = set(pending)
+    pending += [s for s in queued + em_new + sup_new if s not in pending]
+    live = set(queued) | set(em_add) | set(sup_add)  # a name triage no longer queues leaves the batches not yet run
     pending = [s for s in dict.fromkeys(pending) if s in live and s not in done and s not in held and s not in hard]
-    info = {r['sym']: r for r in rows}
     head = lambda s: W.fnum((tri.get(s) or {}).get('headroom'))
-    pending.sort(key=lambda s: ((info[s]['rank'] if s in info else assign(s, secs, other_rank)[1]),
-                                -(head(s) if head(s) is not None else -999), s))
+    neg_head = lambda s: -(head(s) if head(s) is not None else -999)
+    rank_of = lambda s: info[s]['rank'] if s in info else assign(s, secs, other_rank)[1]
+    cut_out = []
+    # reserve companies not yet released, in release order (headroom highest first, then symbol); none already gated
+    reserve = sorted((s for s in info if info[s]['focus'] == 'reserve' and s not in done), key=lambda s: (neg_head(s), s))
+    if all_:
+        pending.sort(key=lambda s: (rank_of(s), neg_head(s), s))
+    else:
+        cut_out = [s for s in pending if info[s]['focus'] not in QUEUE_FOCUS]
+        main = [s for s in pending if info[s]['focus'] in ('focus', 'emerging', 'supplier')]
+        rel_pos = {s: i for i, s in enumerate(released)}
+        rel = [s for s in pending if info[s]['focus'] == 'reserve_released']
+
+        def entry(s):  # the sector entry a company is ordered by: a supplier's best-ranked listing entry, else its own
+            return sup_entry[s] if info[s]['focus'] == 'supplier' else by_id.get(info[s]['sector'])
+        main.sort(key=lambda s: ((entry(s) or {}).get('stage') == 'crowded',
+                                 (entry(s) or {}).get('rank', other_rank), neg_head(s), s))
+        rel.sort(key=lambda s: rel_pos[s])
+        pending = main + rel
     n = max(list(ran) + [int(k) for k in keep] + [0])
     new = {'batches': dict(sorted(keep.items(), key=lambda x: int(x[0])))}
     for i in range(0, len(pending), BATCH):
         n += 1
         new['batches'][str(n)] = pending[i:i + BATCH]
+    return {'secs': secs, 'doc': doc, 'by_id': by_id, 'other_rank': other_rank, 'tri': tri, 'held': held,
+            'queued': queued, 'gate_sec': gate_sec, 'foc': foc, 'non': non, 'as_of': as_of, 'cut': cut, 'bp': bp,
+            'old': old, 'new': new, 'keep': keep, 'done': done, 'rows': rows, 'pending': pending,
+            'cut_out': cut_out, 'reserve': reserve, 'released': released, 'info': info, 'head': head, 'was_pending': was_pending, 'em': (em_add, em_new, em_absent, em_blocked),
+            'sup': (sup_add, sup_new, sup_absent, sup_blocked)}
+
+
+def cmd_order(a):
+    run = run_dir()
+    if a.release is not None and (a.all or a.release < 1):
+        W.fail('--release takes a positive N and cannot be combined with --all')
+    P = plan_order(run, a.sectors, a.from_gate, a.all)
+    rel_now = []
+    if a.release:
+        rel_now = P['reserve'][:a.release]
+        if rel_now:
+            if not a.dry_run:
+                with open(released_path(run), 'a', encoding='utf-8') as f:
+                    f.writelines(s + '\n' for s in rel_now)
+            P = plan_order(run, a.sectors, a.from_gate, a.all, rel_now if a.dry_run else ())
+    rows, new, old, keep, bp = P['rows'], P['new'], P['old'], P['keep'], P['bp']
     changed = new != old
-    if changed:
-        if os.path.exists(bp):
-            os.replace(bp, os.path.join(run, f'gate_batches_{dt.datetime.now():%Y%m%d_%H%M%S}.json'))
-        W.write_json(bp, new)
+    if not a.dry_run:
+        W.write_csv(os.path.join(run, 'sector_of.tsv'), OF_FIELDS, rows, delimiter='\t')
+        if changed:
+            if os.path.exists(bp):
+                os.replace(bp, os.path.join(run, f'gate_batches_{dt.datetime.now():%Y%m%d_%H%M%S}.json'))
+            W.write_json(bp, new)
+    print(f'focus sectors (end on or after {P["cut"]}, {FOCUS_YEARS} years from as_of {P["as_of"]}): {len(P["foc"])}')
+    for s in P['foc'].values():
+        print(f'  {s["id"]} (rank {s["rank"]}): {s.get("kind")}, {s.get("stage")}, end {s.get("end")}')
+    print(f'not focus: {len(P["non"])}')
+    for s, why in P['non']:
+        print(f'  {s["id"]} (rank {s["rank"]}): {why}')
     amb = [r['sym'] for r in rows if r['ambiguous']]
     by = {}
     for r in rows:
         by[r['sector']] = by.get(r['sector'], 0) + 1
-    print(f'{len(rows)} companies ({len(held)} holdings) mapped: {by}; ambiguous {amb or "none"}; '
-          f'{"from gate " + str(len(gate_sec)) + "; " if a.from_gate else ""}'
-          f'gate batches: {len(keep)} run kept, {len(new["batches"]) - len(keep)} rebuilt ({len(pending)} companies)'
+    fc = Counter(r['focus'] for r in rows)
+    nb = len(new['batches']) - len(keep)
+    print(f'{len(rows)} companies ({len(P["held"])} holdings) mapped: {by}; ambiguous {amb or "none"}; '
+          f'{"from gate " + str(len(P["gate_sec"])) + "; " if a.from_gate else ""}'
+          f'gate batches: {len(keep)} run kept, {nb} rebuilt ({len(P["pending"])} companies)'
           f'{"" if changed else "; unchanged, nothing rewritten"}')
+    print('by focus value: ' + ', '.join(f'{k} {fc[k]}' for k in ('held', 'focus', 'emerging', 'supplier', 'reserve_released', 'reserve', 'out')))
+    if a.all:
+        print(f'--all: no focus cut; pending {len(P["pending"])} companies in {nb} batches')
+    else:
+        cut_res = sum(info_f == 'reserve' for info_f in (P['info'][s]['focus'] for s in P['cut_out']))
+        print(f'pending: {len(P["pending"])} companies in {nb} batches; out: {fc["out"]}, reserve: {fc["reserve"]} '
+              f'({len(P["cut_out"])} of them left out of the batches not yet run: {len(P["cut_out"]) - cut_res} out, '
+              f'{cut_res} reserve; {sum(s in P["was_pending"] for s in P["cut_out"])} of those were in them before)')
+    fmt = lambda s: f'{s} ({P["head"](s)})'
+    if a.release is not None:
+        print(f'{"would release" if a.dry_run else "released"} {len(rel_now)} of {a.release} asked to '
+              f'{released_path(run)}: {" ".join(map(fmt, rel_now)) or "none (no reserve left)"}')
+    print(f'reserve unreleased: {len(P["reserve"])}; next 5 (headroom): {" ".join(map(fmt, P["reserve"][:5])) or "none"}')
+    em_add, em_new, em_absent, em_blocked = P['em']
     print(f'emerging names: {len(em_add)} in the queue, {len(em_new)} of them added beyond the triage queue '
           f'({" ".join(em_new) or "none"}); absent from triage.csv: {" ".join(em_absent) or "none"}; blocked: {len(em_blocked)}')
     for s, sid, why in em_blocked:
         print(f'  blocked {s} ({sid}): {why}')
+    sup_add, sup_new, sup_absent, sup_blocked = P['sup']
+    print(f'suppliers: {len(sup_add)} in the queue, {len(sup_new)} of them added beyond the triage queue '
+          f'({" ".join(sup_new) or "none"}); absent from triage.csv: {" ".join(sup_absent) or "none"}; blocked: {len(sup_blocked)}')
+    for s, sid, why in sup_blocked:
+        print(f'  blocked {s} ({sid}): {why}')
+    if a.dry_run:
+        print('DRY RUN: nothing written (sector_of.tsv, gate_batches.json, reserve_released.txt)')
+    return 0
+
+
+def marker_text(m):
+    return m if isinstance(m, str) else str((m or {}).get('text') or (m or {}).get('event') or (m or {}).get('id') or '')
+
+
+def marker_met(m):
+    """A theme marker counts as met only on an explicit state held or met."""
+    return isinstance(m, dict) and str(m.get('state') or '').strip().lower() in ('held', 'met')
+
+
+def marker_due(m):
+    if not isinstance(m, dict):
+        return None
+    try:
+        return dt.date.fromisoformat(str(m.get('due') or '')[:10])
+    except ValueError:
+        return None
+
+
+def cmd_themes(a):
+    run = run_dir()
+    rq, today = run_quarter(run), dt.date.today().isoformat()
+    P = plan_order(run, a.sectors)
+    queue = {s for v in P['new']['batches'].values() for s in v}  # any batch, run or pending, after the focus cut
+    held, tri = set(P['held']), P['tri']
+    wrote, skipped, seen = [], [], {}
+    for th in P['doc'].get('upcoming') or []:
+        tid, tname = th.get('id', ''), th.get('name', '')
+        unmet = [m for m in th.get('markers') or [] if not marker_met(m)]
+        first = next((marker_text(m) for m in unmet if marker_text(m)), '') or 'theme markers'
+        dues = [d for d in (marker_due(m) for m in unmet) if d]
+        nxt = min(dues).isoformat() if dues else ''
+        for sym, c in (th.get('companies') or {}).items():
+            if not (isinstance(c, dict) and c.get('material') is True):
+                continue
+            why = ('held' if sym in held else 'in the gate queue' if sym in queue
+                   else f'already written for theme {seen[sym]}' if sym in seen else None)
+            path = os.path.join(analysis_dir(sym, rq), 'watch.json')
+            if not why and os.path.exists(path):
+                try:
+                    k = (W.read_json(path) or {}).get('kind')
+                except ValueError:
+                    k = 'unreadable'
+                if k != 'theme':
+                    why = f'{path} exists with kind {k!r}: not overwritten'
+            if why:
+                skipped.append(f'{sym} ({tid}): {why}')
+                continue
+            seen[sym] = tid
+            name = (tri.get(sym) or {}).get('name') or (W.scr(sym, 'overview') or {}).get('name') or ''
+            w = {'sym': sym, 'name': name, 'sector': assign(sym, P['secs'], P['other_rank'])[0], 'kind': 'theme',
+                 'status': 'watch', 'analysed_on': today, 'results_used': rq, 'theme': {'id': tid, 'name': tname},
+                 'watch': {'waiting_for': f'theme {tname}: {first}',
+                           'evidence_so_far': '; '.join(x for x in (str(c.get('link') or ''), str(c.get('evidence') or '')) if x),
+                           'next_check': nxt, 'due': nxt},
+                 'buy_below': None, 'note': 'analysis pending', 'source': f'sectors.json upcoming {tid}'}
+            if not a.dry_run:
+                W.write_json(path, w)
+            wrote.append((path, w))
+    for p, w in wrote:
+        print(f'{"would write" if a.dry_run else "wrote"} {p}: {w["watch"]["waiting_for"]} (next check {w["watch"]["next_check"] or "-"})')
+    for s in skipped:
+        print(f'skipped {s}')
+    print(f'{len(P["doc"].get("upcoming") or [])} upcoming themes: {len(wrote)} theme watches '
+          f'{"to write (DRY RUN, nothing written)" if a.dry_run else "written"}, {len(skipped)} skipped')
     return 0
 
 
@@ -832,13 +1090,20 @@ def main():
     p = sp.add_parser('stage', help='<run>/sector_stage.csv (S4)', description=doc_part('S4'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--sectors', help='sectors file: also rows per sector of it')
     p.add_argument('--stage-only', action='store_true', help='recheck: only the sectors (needs --sectors)')
-    p = sp.add_parser('order', help='sector of each company, gate batches reordered (S5, S6R)', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = sp.add_parser('order', help='sector and focus value of each company, gate batches reordered (S5, S6R)', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--from-gate', action='store_true', help="the gate file's sector wins (S6R)")
+    p.add_argument('--all', action='store_true', help='no focus cut: every queued company, ordered by rank (the old order)')
+    p.add_argument('--release', type=int, metavar='N', help='append the next N unreleased reserve companies (headroom highest first) to <run>/reserve_released.txt, then build the batches')
+    p.add_argument('--dry-run', action='store_true', help='compute and print, write nothing')
+    p.add_argument('--sectors', help='the sectors file (default: <run>/sectors.json)')
+    p = sp.add_parser('themes', help='watch.json for the material companies of upcoming themes', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument('--dry-run', action='store_true', help='print what would be written, write nothing')
+    p.add_argument('--sectors', help='the sectors file (default: <run>/sectors.json)')
     sp.add_parser('log', help='log changed sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p = sp.add_parser('score', help='score logged sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out', help='default: <run>/sector_calls_score.md')
     a = ap.parse_args()
-    return {'syms': cmd_syms, 'clusters': cmd_clusters, 'stage': cmd_stage, 'order': cmd_order,
+    return {'syms': cmd_syms, 'clusters': cmd_clusters, 'stage': cmd_stage, 'order': cmd_order, 'themes': cmd_themes,
             'log': cmd_log, 'score': cmd_score}[a.cmd](a)
 
 
