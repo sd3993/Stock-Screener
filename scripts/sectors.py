@@ -43,7 +43,7 @@ stage -> <run>/sector_stage.csv: per industry label with 5+ universe companies (
   It describes how priced-in a sector is (sizing, the re-rating case); tested on past March starts, it did not
   predict later winner rates, so it is not a signal for picking sectors.
 
----- order (S5 after S5R; S6R with --from-gate), themes ----
+---- order (S5 after S5R; S6R with --from-gate), themes, who ----
 order maps every queued company and holding to a sector of the map, gives each a focus value, queues the emerging
 entries' companies and the focus sectors' suppliers, and rebuilds the gate batches not yet run: the sector focus only.
 Inputs (run folder, config.py): sectors.json (S5, or --sectors FILE: as_of; per entry id, rank, kind, stage, end,
@@ -96,6 +96,10 @@ Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: overrid
   reserve names with their headroom and how many reserve remain unreleased, the emerging names and suppliers added, absent from triage.csv
   or blocked (each with the reason). Safe to re-run: nothing changes when nothing changed. sectors.json's top-level
   "upcoming" list is ignored by order.
+who SYM [SYM ...] [--sectors FILE]: one line per symbol (tab-separated: sym, name, sector (rank) as order assigns
+  it, triage verdict and reason, status): what listing it as a supplier would do to the queue, as order computes it:
+  already in the focus set (held / focus / emerging), in a batch that has run, blocked (a triage reject other than
+  return math), outside the universe (not in triage.csv), or would join the queue as a supplier. Writes nothing.
 themes: for each company with "material": true in a theme of sectors.json "upcoming" ([{id, name, problem, markers,
   companies: {SYM: {link, material, evidence}}}]) that is not held and not in any gate batch (run or pending, as order
   computes it with the focus cut, without --from-gate), writes runs/companies/<SYM>/<run quarter>/watch.json: {sym,
@@ -825,6 +829,31 @@ def cmd_order(a):
     return 0
 
 
+def cmd_who(a):
+    """One line per symbol: what listing it as a supplier (or an emerging name) would do to the queue."""
+    run = run_dir()
+    P = plan_order(run, a.sectors)
+    tri, info, held, done = P['tri'], P['info'], P['held'], P['done']
+    for sym in dict.fromkeys(x.strip().upper() for x in a.syms if x.strip()):
+        r = tri.get(sym)
+        sec, rank = (info[sym]['sector'], info[sym]['rank']) if sym in info else assign(sym, P['secs'], P['other_rank'])[:2]
+        tv = f"triage {r.get('triage')} ({r.get('reason')})" if r else 'not in triage.csv'
+        if sym in held:
+            st = 'already in the focus set: held'
+        elif sym in done:
+            st = 'in a batch that has run'
+        elif not r:
+            st = 'outside the universe (market cap at most Rs 250 cr or P/E not positive, and no screen hit)'
+        elif blocking_reject(r):
+            st = f'blocked: {blocking_reject(r)}'
+        elif sym in info and info[sym]['focus'] in ('focus', 'emerging'):
+            st = f"already in the focus set: {info[sym]['focus']}"
+        else:
+            st = 'would join the queue as a supplier'
+        print(f"{sym}\t{(r or {}).get('name') or ''}\t{sec} (rank {rank})\t{tv}\t{st}")
+    return 0
+
+
 def marker_text(m):
     return m if isinstance(m, str) else str((m or {}).get('text') or (m or {}).get('event') or (m or {}).get('id') or '')
 
@@ -1099,12 +1128,15 @@ def main():
     p = sp.add_parser('themes', help='watch.json for the material companies of upcoming themes', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--dry-run', action='store_true', help='print what would be written, write nothing')
     p.add_argument('--sectors', help='the sectors file (default: <run>/sectors.json)')
+    p = sp.add_parser('who', help='what listing each symbol as a supplier would do to the queue (S5)', description=doc_part('order'), formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument('syms', nargs='+', help='NSE symbols or BSE codes')
+    p.add_argument('--sectors', help='the sectors file (default: <run>/sectors.json)')
     sp.add_parser('log', help='log changed sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p = sp.add_parser('score', help='score logged sector calls (S5)', description=doc_part('log'), formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out', help='default: <run>/sector_calls_score.md')
     a = ap.parse_args()
     return {'syms': cmd_syms, 'clusters': cmd_clusters, 'stage': cmd_stage, 'order': cmd_order, 'themes': cmd_themes,
-            'log': cmd_log, 'score': cmd_score}[a.cmd](a)
+            'log': cmd_log, 'score': cmd_score, 'who': cmd_who}[a.cmd](a)
 
 
 if __name__ == '__main__':
