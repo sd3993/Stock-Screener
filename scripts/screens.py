@@ -134,7 +134,8 @@ async def probe(cfg, sdir, log):
 
 def build(sdir=None):
     """<run>/universe.csv from every saved page in <run>/screens/: one row per symbol with hits (the T screens it matched),
-    in_sweep (in a B band) and every field found (Q pages only add fields). Returns (warnings, summary): a query whose
+    in_sweep (in a B band) and every field found (Q pages only add fields). Saved pages of a T screen no longer in
+    screens.json still add fields but count as no hit. Returns (warnings, summary): a query whose
     saved companies don't add up to its total, and columns of screens.json never returned."""
     base = run_dir()
     sdir = sdir or os.path.join(base, 'screens')
@@ -153,7 +154,7 @@ def build(sdir=None):
             row.update({k: v for k, v in (r.get('fundamentals') or {}).items() if v is not None})
             if sid.startswith('B'):
                 swept.add(r['symbol'])
-            elif sid.startswith('T'):
+            elif sid.startswith('T') and sid in cfg['screens']:  # pages of a screen since removed are not hits
                 hits.setdefault(r['symbol'], set()).add(sid)
     for sid, (total, got) in sorted(totals.items()):
         if total is not None and len(got) != total:

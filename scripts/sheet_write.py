@@ -7,8 +7,8 @@ listing inputs: each company's agreed analysis (thesis.py's agreed(): the highes
   --only overview first), the run quarter, runs/verdict_history.csv. --hold SYM: an S9 "hold": only a verdict-history
   row ("markers held, results <run quarter>"), copied from the company's last row.
 listing writes, per company: its Data row (found by ticker in A2:A300, else the first empty row; none: "NO FREE ROW",
-  that company skipped, exit 3) in A:T, W:AC, BB, BC and BF:BI (columns in DATA in the script; never U, V, which are S14's):
-  A:J and W:AC, BC, BF the identity, figures and notes; BG the moat verdict (None/Narrow/Wide); BH reject_points, one "- " line each; BI revisit_if.trigger plus " (by <by>)"; BB "Y" when rerating_evidence is non-blank, else "N";
+  that company skipped, exit 3) in A:T, X:AC, BB, BC and BF:BI (columns in DATA in the script; never U, V, which are S14's):
+  A:J and X:AC, BC, BF the identity, figures and notes; BG the moat verdict (None/Narrow/Wide); BH reject_points, one "- " line each; BI revisit_if.trigger plus " (by <by>)"; BB "Y" when rerating_evidence is non-blank, else "N";
   K the status capitalised (List / Watch / Reject / Hold / Exit);
   L visible_until; M years; N eps_end_base; O eps_end_bear; P exit_pe; Q watch.waiting_for plus " (by <due>)" when the
   watch has a due date; R watch.evidence_so_far; S watch.next_check (Q:S blank without a watch); T "Urgent: <event>,
@@ -45,7 +45,7 @@ import wf_lib as W
 from config import run_dir, shared_path
 
 DATA_FIRST, DATA_LAST = 2, 300
-DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'W',
+DATA = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
         'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'BB', 'BC', 'BF', 'BG', 'BH', 'BI']
 TOPUP = ['U', 'V']   # Data top-up columns, written by allocation
 VH_FIELDS = ['date', 'quarter_folder', 'sym', 'results_used', 'verdict', 'reason']
@@ -114,7 +114,7 @@ def data_row(a, ov, run_q):
         'K': st[:1].upper() + st[1:], 'L': a.get('visible_until') or '', 'M': num_or_blank(a.get('years')),
         'N': num_or_blank(a.get('eps_end_base')), 'O': num_or_blank(a.get('eps_end_bear')), 'P': num_or_blank(a.get('exit_pe')),
         'Q': wait, 'R': w.get('evidence_so_far') or '', 'S': w.get('next_check') or '', 'T': exitc,
-        'W': num_or_blank(a.get('dividend_per_share_per_year')), 'X': a.get('evidence_quality') or '',
+        'X': a.get('evidence_quality') or '',
         'Y': a.get('nonneg_overall') or '', 'Z': '; '.join(map(str, a.get('bent_rules') or [])), 'AA': a.get('thesis') or '',
         'AB': kill, 'AC': a.get('_file', ''), 'BB': 'Y' if str(a.get('rerating_evidence') or '').strip() else 'N',
         'BC': ', '.join(map(str, a.get('nonneg_failed') or [])), 'BF': a.get('discovery_stage') or '',

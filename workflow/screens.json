@@ -13,17 +13,11 @@
   "T4": {
    "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Market Capitalization < 25000 AND Sales growth 3Years > 18 AND Profit growth 3Years > 20 AND Return on capital employed > 18 AND Price to Earning > 3 AND Price to Earning < 45 AND Debt to equity < 1 AND Pledged percentage < 20"
   },
-  "T5": {
-   "query": "Historical PE 5Years > 0 AND Piotroski score > 6 AND Market Capitalization > 300 AND Price to Earning > 3 AND Price to Earning < 20 AND Return on capital employed > 12 AND Profit growth > 10 AND Pledged percentage < 20"
-  },
   "T6": {
    "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Average return on capital employed 5Years > 15 AND Return on capital employed < Average return on capital employed 5Years AND YOY Quarterly profit growth > 25 AND YOY Quarterly sales growth > 10 AND Debt to equity < 1.5 AND Pledged percentage < 20"
   },
   "T7": {
    "query": "Historical PE 5Years > 0 AND Market Capitalization > 300 AND Price to Earning > 0 AND YOY Quarterly profit growth > 40 AND YOY Quarterly sales growth > 15 AND Profit growth 3Years < 10 AND Return on capital employed > 8 AND Debt to equity < 1.5 AND Pledged percentage < 20"
-  },
-  "T8": {
-   "query": "Historical PE 5Years > 0 AND Market Capitalization > 500 AND Dividend yield > 3 AND Price to Earning > 3 AND Price to Earning < 15 AND Return on capital employed > 15 AND Profit growth 3Years > 5 AND Debt to equity < 1 AND Pledged percentage < 20"
   },
   "T9": {
    "query": "Historical PE 5Years > 0 AND Market Capitalization > 250 AND Market Capitalization < 3000 AND Sales growth 5Years > 15 AND Profit growth 3Years > 20 AND Return on capital employed > 15 AND OPM > 10 AND Price to Earning > 3 AND Price to Earning < 40 AND Debt to equity < 1 AND Promoter holding > 45 AND Pledged percentage < 10"
@@ -71,7 +65,6 @@
   "Net Profit preceding year"
  ],
  "query_fields": [
-  "Dividend yield",
   "Net Profit last year",
   "Cash from operations last year",
   "Debt to equity",

@@ -9,7 +9,7 @@
   Reject, or Exit once no longer held, newest analysis first; hidden Z the ticker list); 2 header texts
   (RAW) and every formula row by row (USER_ENTERED: Data 2-300, List and Watchlist 2-200, Allocation and Holdings 2-100;
   Data, List and Watchlist always in full, Allocation and Holdings only the columns that differ from the owned ones);
-  3 clears (Data AW:AX and BE with their headers; List and Watchlist Z3:Z200; Allocation L:M; Holdings K); 4 number
+  3 clears (Data W, AW:AX and BE with their headers; List and Watchlist Z3:Z200; Allocation L:M; Holdings K); 4 number
   formats, hidden helper columns W:Z and conditional-format rules (List: the old Sell-trigger rules on J dropped;
   Watchlist: the List rule set); 5 deleting Long term (103), last. Saved as JSON to FILE (default
   runs/sheet_layout_plan.json); prints counts per tab and anything unexpected (an owned formula that differs from the
@@ -59,7 +59,7 @@ DATA_HEAD = {
     'F': 'Results used', 'G': 'Analysis date', 'H': 'Stored price (screener, last run)', 'I': 'EPS TTM (normalised)',
     'J': 'Base EPS y1', 'K': 'Status', 'L': 'Visible until', 'M': 'Years', 'N': 'Base EPS (at year)', 'O': 'Bear EPS (at year)',
     'P': 'Exit P/E', 'Q': 'Waiting for', 'R': 'Evidence so far', 'S': 'Next check', 'T': 'Exit call',
-    'U': 'Top-up: waiting for', 'V': 'Top-up: next check', 'W': 'Dividend / share / year', 'X': 'Evidence quality',
+    'U': 'Top-up: waiting for', 'V': 'Top-up: next check', 'X': 'Evidence quality',
     'AV': '[f] Exit P/E used', 'BB': 'Re-rating evidenced (Y/N)',
     'Y': 'Non-negotiables (Pass / Bent / Fail)', 'Z': 'Bent rules', 'AA': 'Thesis and key reasons',
     'AB': 'Kill condition and review date', 'AC': 'Analysis file', 'AD': '[f] Google price', 'AE': '[f] Screener price',
@@ -84,10 +84,10 @@ DATA_F = {
     'AJ': '=IFERROR($AI2/((($N2/$I2)^(1/$M2)-1)*100),"")',
     # the exit P/E used: capped at today's P/E unless Data BB says the re-rating is evidenced
     'AV': '=IF($A2="","",IF(OR($BB2="Y",NOT(ISNUMBER($AH2)),$AH2<=0),$P2,MIN($P2,$AH2)))',
-    'AK': '=IF(AND(ISNUMBER($N2),ISNUMBER($AV2),ISNUMBER($M2),ISNUMBER($AF2)),($N2*$AV2+$M2*N($W2))/$AF2,"")',
+    'AK': '=IF(AND(ISNUMBER($N2),ISNUMBER($AV2),ISNUMBER($M2),ISNUMBER($AF2)),$N2*$AV2/$AF2,"")',
     'AL': '=IF(ISNUMBER($AK2),$AK2^(1/$M2)-1,"")',
-    'AM': '=IF(AND(ISNUMBER($O2),ISNUMBER($AV2),ISNUMBER($M2),ISNUMBER($AF2)),($O2*MIN($AV2,30)+$M2*N($W2))/$AF2,"")',
-    'AN': ('=IF(AND(ISNUMBER($N2),ISNUMBER($O2),ISNUMBER($P2),ISNUMBER($M2)),LET(h,1.25^$M2,d,$M2*N($W2),pb,MIN($P2,30),'
+    'AM': '=IF(AND(ISNUMBER($O2),ISNUMBER($AV2),ISNUMBER($M2),ISNUMBER($AF2)),$O2*MIN($AV2,30)/$AF2,"")',
+    'AN': ('=IF(AND(ISNUMBER($N2),ISNUMBER($O2),ISNUMBER($P2),ISNUMBER($M2)),LET(h,1.25^$M2,d,0,pb,MIN($P2,30),'
            'ev,OR($BB2="Y",NOT(ISNUMBER($I2)),$I2<=0),pc,IF(ev,($N2*$P2+d)/h,IF(($N2*$P2+d)/h>=$P2*$I2,($N2*$P2+d)/h,'
            'IF(d>0,d/(h-$N2/$I2),0))),pbear,IF(ev,($O2*pb+d)/0.8,IF(($O2*pb+d)/0.8>=pb*$I2,($O2*pb+d)/0.8,'
            'IF(d>0,d/(0.8-$O2/$I2),0))),g,IFERROR(($N2/$I2)^(1/$M2)-1,0),ppeg,IFERROR(IF(g>0,2*g*100*$J2,10^99),10^99),'
@@ -107,7 +107,7 @@ DATA_F = {
            'TEXT($AN2,"#,##0.00"),"re-rating evidence or faster growth (no price clears the hurdle)"))))'),
     'AU': '=IF($AS2="","",IF($AS2="Top-up",$V2,IF($AS2="Entry: evidence",$S2,"")))',
 }
-DATA_CLEAR = ['AW', 'AX', 'BE']   # header and contents
+DATA_CLEAR = ['W', 'AW', 'AX', 'BE']   # header and contents
 
 TAIL_HEAD = {'W': '[h] price source', 'X': '[h] flag', 'Y': '[h] pending', 'Z': '[h] list'}
 TAIL_F = {'W': look('AG'), 'X': look('AZ'), 'Y': look('AY')}
