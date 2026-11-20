@@ -13,3 +13,5 @@ Work file: `runs/companies/<SYM>/<FYyyQn>/main.json` (the newest results-quarter
 9. **Markers:** each meets the exit rules and the thesis-marker standard (`/principles/sector_rules.md`); "script" markers use supported metrics.
 10. **Status:** it follows the entry tests (a company not held) or the one exit test (a holding): no exit rests on a weak quarter, a price move or a high valuation alone; a watch names dated evidence; an exit states its urgency and the event behind it.
 11. **History:** no forecast or judgement rests on a past pattern beyond what the use of history rule allows.
+12. **Supplier:** a supplier's focus share is on filed evidence and each supplier risk is sized in the EPS paths, not just named.
+13. **Promoter track record:** each part (delivery, group, capital allocation, minority treatment) rests on sources, and the verdict carries through: poor as an integrity flag, mixed in evidence quality and the exit P/E.

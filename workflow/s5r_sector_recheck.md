@@ -10,3 +10,6 @@ Work files: `<run>/sector_map.md` and `<run>/sectors.json` (or the previous rech
 6. **Markers:** each meets the sector standard (count, observable on its due date from a named source); "script" markers use a metric `thesis.py check` supports (its `--help`); review states match the evidence.
 7. **Rank** follows from the entries per the sector standard.
 8. **Emerging entries:** each meets every emerging test of the sector standard from its sources, proven demand included; each listed company's part rests on its own filings, not a press claim; each is rightly an emerging company or a participant, and each participant sits in its main business's sector; every filing a participant made after the award or plan its part rests on is read, since a rescission or cancellation can sit under a generic headline; contrary evidence that the problem is already priced in (stage, institutional holding, P/E against the company's own history).
+9. **Suppliers:** every focus sector's suppliers were looked for by backtracking (its inputs listed and tested); each listed supplier's focus share meets the share test on filed evidence.
+10. **Supply balance:** each rests on capacity-against-demand evidence.
+11. **Upcoming themes:** each has markers, and each company's material or immaterial call is right.

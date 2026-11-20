@@ -10,6 +10,7 @@ Copies each agreed analysis in the batch into the Google Sheet "Stock Screener" 
    - **Pending results tab** (its name in Data!BA1): the company added (A Ticker, B Name, C Latest declared quarter, D Results due by, E Notes) when its results_used is earlier than the run quarter, removed otherwise.
    - **Verdict history:** one row in `runs/verdict_history.csv`: date, run folder, sym, results used, verdict (status, visible-until date and years, stage, and non-negotiables overall), reason (the analysis's `what_changed`; "first listing" for a company's first row). A company with an earlier row whose analysis has no `what_changed` line is refused and goes back to its analysis recheck.
    - **Read-back:** every written range is read back and compared cell by cell; a difference is rewritten once, then the script fails (exit 4) naming the cells. Tell the user about any failure.
+3. **Watches:** price and theme watches (`watch.json`, no analysis yet) are listed with `python -I scripts/sheet_write.py listing --watch SYM...`, written as Watch rows marked "analysis pending".
 
 The List and Watchlist tabs are formula views of Data and are never written.
 

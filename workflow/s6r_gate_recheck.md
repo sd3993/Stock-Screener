@@ -5,11 +5,12 @@ Work file: `<run>/gate/bNN.json` (recheck 1) or `bNN_rc1.json`; your output: `bN
 A wrong REJECT is never seen again, while every NEXT gets the full analysis and two rechecks in S11. So the weight of this recheck is on rejects:
 - **Every REJECT** that isn't clearly dead on return math, **every borderline case** (best CAGR within ~5 points of the line) and **every floor call**: the full checklist below.
 - **Clear REJECTs on return math:** check only that the math and its inputs are right.
+- **Every WATCH:** check that it fails on price alone (no floor failed, growth evidence intact; otherwise REJECT) and recompute its buy-below price.
 - **Every NEXT:** check only the floors and integrity items (3 below), that nothing in the filings was missed (5), and the sector (6). A NEXT whose g fails the gate step's capacity test, with no floor failed, stays NEXT with the capacity-led figure recorded for S11 (in `contrary_search` and the entry's `why`), not in `unresolved`; a floor failure decides REJECT.
 
 1. **Inputs:** where cash flows were regrouped (often SME filers), compare the 3-year CFO across both annual reports' columns. P/E basis (one-offs normalised), growth used and exit P/E, each as the gate standard sets it: against the cached screener data, the gate file and the filing.
 2. **Math:** redo the multiple and CAGR for the projection length used, and check whether another length would clear the line.
-3. **Floors:** each floor of the gate standard, and promoter buying against the promoter selling and buying rule's tests; each REJECT's `verified_against` points to the right page.
+3. **Floors:** each floor of the gate standard, and promoter buying against the promoter selling and buying rule's tests; the light promoter track record check was done, and a poor record decided REJECT; each REJECT's `verified_against` points to the right page.
 4. **Contrary evidence** for each REJECT checked: anything in the guidance documents, filings or figures that shows the growth or exit P/E was too low, or that the failed floor actually passes (a temporary cause, an improving trend, the trajectory rule).
 5. **Missed evidence:** a newer results filing, a guidance change, or a governance item the gate didn't read.
 6. **Sector:** the confirmed sector follows from what the company does (a correction goes in the entry's `sector` field in your output, with the reason in `recheck_log`; `gate/<SYM>.json` stays as the gate wrote it); no reject leans on the company being outside a tailwind sector, and no emerging company is rejected on trailing return math, and a participant is gated on its main business's sector.
