@@ -1,7 +1,9 @@
 """S8 downloads from the company's saved screener answers (run scr_company.py first): results filings (last 8),
 investor presentations and call transcripts (last 6 quarters), governance and business filings (3 years) from the
 NSE announcements; annual reports (last 3) and exchange-hosted transcripts from the document list. PDFs with text,
-into data/companies/<SYM>/<FYyyQn>/, recorded in index.json; nothing indexed is downloaded again.
+into data/companies/<SYM>/<FYyyQn>/, recorded in index.json; nothing indexed is downloaded again. An index entry whose
+file is not on disk is dropped and the file fetched again; a failed download is listed once under missing; an annual
+report without a numeric year (screener's "Unknown") is skipped. NSE archive links (.com and .in) go to archives.nseindia.com.
   python scripts/scr_docs.py SYM
 """
 import datetime as dt, hashlib, json, os, re, subprocess, sys
@@ -43,7 +45,15 @@ def url_id(url):
 def load_index(sym):
     p = os.path.join(FILINGS_DIR, sym, 'index.json')
     if os.path.exists(p):
-        return json.load(open(p, encoding='utf-8-sig'))
+        idx = json.load(open(p, encoding='utf-8-sig'))
+        idx.setdefault('files', []); idx.setdefault('missing', []); idx.setdefault('fetched_direct', [])
+        # an entry whose file is not on disk is dropped, so the file is fetched again (and never used as a duplicate)
+        gone = [f for f in idx['files'] if not f.get('file') or
+                not os.path.exists(os.path.join(FILINGS_DIR, sym, f['file'].replace(chr(92), '/')))]
+        if gone:
+            print(f'{sym}: {len(gone)} indexed files not on disk; their entries dropped and refetched')
+            idx['files'] = [f for f in idx['files'] if f not in gone]
+        return idx
     return {'sym': sym, 'files': [], 'missing': [], 'fetched_direct': []}
 
 def save_index(sym, idx):
@@ -76,7 +86,9 @@ def get(sym, idx, url, quarter, fname, typ, period, filed, source, ident, text=F
     dest = os.path.join(FILINGS_DIR, sym, rel)
     sha = download(url, dest)
     if not sha:
-        idx['missing'].append({'what': f'{typ} {period} {filed}', 'tried': url})
+        m = {'what': f'{typ} {period} {filed}', 'tried': url}
+        if m not in idx['missing']:
+            idx['missing'].append(m)
         return None
     dup = next((f for f in idx['files'] if f.get('sha256') == sha), None)
     if dup:
@@ -101,8 +113,8 @@ GOV = re.compile(r'auditor|preferential|qip|warrant|reg(ulation)?\.? ?(7|29|31)|
                  r'fraud|forensic|default|insolvency|order|contract|acquisition|merger|demerger|amalgamation|buyback|'
                  r'rights issue|allotment|change in (director|management|kmp)|cessation|appointment', re.I)
 
-def nse(url):  # nsearchives.nseindia.com hangs for curl; archives.nseindia.com serves the same paths
-    return url.replace('://nsearchives.nseindia.com/', '://archives.nseindia.com/')
+def nse(url):  # nsearchives.nseindia.com / .in hang for curl; archives.nseindia.com serves the same paths
+    return url.replace('://nsearchives.nseindia.com/', '://archives.nseindia.com/').replace('://nsearchives.nseindia.in/', '://archives.nseindia.com/')
 
 def day(s):
     try:
@@ -135,7 +147,7 @@ for d, url, typ, head in res[:8] + calls + gov[:120]:
 docs = load('documents')
 for r in docs.get('annual_reports', [])[:3]:
     url, y = r.get('url') or '', r.get('year')
-    if not url or not y or not url.lower().endswith('.pdf'):
+    if not url or not str(y or '').isdigit() or not url.lower().endswith('.pdf'):  # screener gives "Unknown" for some years
         skipped.append(f"annual report {y}: {url or 'no link'}")
         continue
     q = f'FY{int(y) % 100:02d}Q4'

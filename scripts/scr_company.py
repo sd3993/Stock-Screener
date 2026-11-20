@@ -5,6 +5,8 @@ corporate actions and the shareholding-pattern list (about 26 quarters), plus pr
 from the last 12 filed shareholding-pattern XBRLs (scr/shp_history.json). Run it through uvx (the library isn't installed); if screener.in can't be reached: sources/screener.md:
   uvx --from screener-mcp==0.5.0 python scripts/scr_company.py SYM [SYM ...] [--syms-file list.txt] [--days 1100]
       [--only quarterly,shareholding] [--skip-saved]
+--days N sets the announcement and insider window (default 1100) and overwrites the saved files with that window, so a
+shorter N loses older rows: re-run with the default afterwards.
 Several companies in one run save the start-up time; --skip-saved skips a company whose --only items are all saved already
 (statements count as saved when profit_loss.json exists, nse when shareholding_nse.json does). A batch in one run saves about 3 s of
 start-up per company. If uvx can't reach PyPI, add --offline to uvx to use the cached package. A fetch may still be running after an

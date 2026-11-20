@@ -66,7 +66,8 @@ Emerging names: every `overrides` company (an emerging company) and every `parti
   business's (an override or label there).
 Outputs: sector_of.tsv (sym, name, held, industry, sector, rank, source: override/emerging/label/gate/other, ambiguous)
   for every holding, queued company and emerging name added; gate_batches.json rebuilt: batches already run (a
-  gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (holdings
+  gate/bNN.json exists) keep their number and content; every other queued company and emerging name added (a name
+  in a batch not yet run that triage no longer queues is dropped; holdings
   never) goes into batches of 5 ordered by sector rank, then triage headroom (highest first), numbered after the last
   run batch; the old file is kept as gate_batches_<YYYYmmdd_HHMMSS>.json when it changes.
   Safe to re-run: nothing changes when nothing changed.
@@ -602,7 +603,8 @@ def cmd_order(a):
     # gate batches
     pending = [s for k, v in sorted(old['batches'].items(), key=lambda x: int(x[0])) if int(k) not in ran for s in v]
     pending += [s for s in queued + em_new if s not in pending]
-    pending = [s for s in dict.fromkeys(pending) if s not in done and s not in held and s not in hard]
+    live = set(queued) | set(em_add)  # a name triage no longer queues leaves the batches not yet run
+    pending = [s for s in dict.fromkeys(pending) if s in live and s not in done and s not in held and s not in hard]
     info = {r['sym']: r for r in rows}
     head = lambda s: W.fnum((tri.get(s) or {}).get('headroom'))
     pending.sort(key=lambda s: ((info[s]['rank'] if s in info else assign(s, secs, other_rank)[1]),

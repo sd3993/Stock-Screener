@@ -31,6 +31,8 @@ Company data: `scr_company.py`; any single tool call (screens, peers, …): `scr
 - **Cache:** `data/companies/<SYM>/scr/<name>.json`, each `{fetched_at (IST), via, tool, args, warnings, partial, data}`. Names: `profit_loss`, `balance_sheet`, `cash_flow`, `ratios` (and `_standalone` versions), `quarterly`, `shareholding`, `insider`, `announcements`, `documents`, `overview`, `peers`, `credit_ratings`, `pledge_nse`, `sast`, `corporate_actions`, `shareholding_nse`, `history` (price and P/E history).
 - **Quirks:**
   - Figures are rounded to whole crore.
+  - Empty price fields on the company page: `scr/overview.json` still holds `price_freshness.last_close_or_trade`; use it before any older stored price.
+  - Screen field definitions: screener's own list at `https://www.screener.in/api/ratio/search/?q=<name>` (opens in the browser pane). "Sales growth" and "Profit growth" are TTM: the last 4 quarters against the preceding 4. The 3/5/7/10-year profit growths exclude exceptional items. Checked against the quarterly tables (Nov 2026, 295 quarterly filers): Sales growth matched within 0.5 points; Profit growth was within whole-crore rounding for 125, and the rest differ where profit is small or carries exceptional items.
   - Consolidated statements can skip years (e.g. 2021-24 missing) while standalone has them: check the years, not just that the table is there.
   - Results announcements include newspaper copies: take the "Outcome of Board Meeting" / "Financial Result Updates" filing.
   - A call can fail mid-run (429, dropped connection): the script exits non-zero with the reason; wait and re-run before calling screener unavailable.

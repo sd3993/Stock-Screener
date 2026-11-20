@@ -15,7 +15,7 @@ How to reach each source, and what has already been found about each, so no sess
 | BSE-only companies, documents NSE lacks | BSE | `bse_fetch.py` + `bse_fetch.js` in a browser (`/sources/exchanges.md`) |
 | Long price, P/E, EPS, market cap history (about 2005 onward, incl. merged/delisted) | screener public chart API | `mb_history.py` |
 | Stored price for the sheet (S12) | screener page | `scr_company.py --only overview` |
-| Official sector evidence (S5): policy releases, budget lines, sector statistics | PIB, ministries, CEA, indiabudget.gov.in | pib.gov.in refuses plain web fetchers (403): read it in the browser pane; CEA's 2026 transmission PDFs return 404, and the same tables are in PIB's Parliament answers; indiabudget.gov.in demand notes (`sbeNN.pdf`) download directly |
+| Official sector evidence (S5): policy releases, budget lines, sector statistics | PIB, ministries, CEA, indiabudget.gov.in | pib.gov.in refuses plain web fetchers (403): read it in the browser pane; CEA's 2026 transmission PDFs return 404, and the same tables are in PIB's Parliament answers; indiabudget.gov.in demand notes (`sbeNN.pdf`) download directly Parliament answers: the Parliament library (eparlib) refuses curl and fails in the browser; committee reports on sansad.in and ministry-hosted answer PDFs download with curl; pmindia.gov.in opens in the browser pane. |
 
 ## Source references
 
