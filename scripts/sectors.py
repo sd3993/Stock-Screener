@@ -83,7 +83,7 @@ Pending batches (the batches not yet run; batches already run keep their number 
   hard-blocked name, or a name triage no longer queues); "reserve" and "out" companies are left out. Order: focus,
   emerging and supplier companies first, by (an entry of stage "crowded" after the others, the entry's rank, triage
   headroom highest first, symbol), the entry being the company's own sector (a supplier: the best-ranked focus entry
-  listing it; an emerging participant: its main business's sector, so "other" sorts it last); then the released
+  listing it; an emerging name: the better-ranked of its own sector and the best-ranked emerging entry listing it); then the released
   reserve companies in reserve_released.txt's order. Batches of 5, numbered after the last run batch.
   --all: no focus cut (the old order): every queued company, emerging name and supplier, by sector rank, then
   headroom (highest first), then symbol.
@@ -121,7 +121,8 @@ log: for each sector in <run>/sectors.json whose call differs from its last logg
   of <old id>" when a new id has the same industries as a logged id missing from the map). An unchanged call is not
   logged again, so re-running is safe. Each marker state in sectors.json (state, state_date, state_evidence) is appended
   once to runs/sector_marker_states.csv (call_id, marker, date, state, evidence).
-score: every logged call 6+ months old: its markers held / broken / pending (due date not reached) / unchecked (due
+score: every logged call 6+ months old: its markers (a marker with "void": true, met before its call, is left out)
+  held / broken / pending (due date not reached) / unchecked (due
   passed, no state recorded), from sector_marker_states.csv across the sector's later calls; the median price return of
   its members since the call date against the median of the universe (universe.csv of the call's run, else this run's)
   over the same period, at 6, 12 and 24 months where reached (chart prices, history.json); blank with the reason when
@@ -680,7 +681,7 @@ def plan_order(run, sectors_path=None, from_gate=False, all_=False, extra_releas
         return ('held' if sym in held else 'in a batch that has run' if sym in done
                 else blocking_reject(tri[sym]) if sym in tri else None)
     # emerging names: every override or participant of an emerging entry, unless held, already gated or hard-rejected by triage
-    em_add, em_absent, em_blocked = [], [], []
+    em_add, em_absent, em_blocked, em_entry = [], [], [], {}
     for sec in secs:
         if not emerging(sec):
             continue
@@ -692,6 +693,7 @@ def plan_order(run, sectors_path=None, from_gate=False, all_=False, extra_releas
                 em_blocked.append((sym, sec['id'], why))
                 continue
             em_add.append(sym)
+            em_entry.setdefault(sym, sec)
             if sym not in tri:
                 em_absent.append(sym)
     # suppliers of the focus sectors: the same entry rules as emerging names; ordered by the best-ranked entry listing them
@@ -746,8 +748,12 @@ def plan_order(run, sectors_path=None, from_gate=False, all_=False, extra_releas
         rel_pos = {s: i for i, s in enumerate(released)}
         rel = [s for s in pending if info[s]['focus'] == 'reserve_released']
 
-        def entry(s):  # the sector entry a company is ordered by: a supplier's best-ranked listing entry, else its own
-            return sup_entry[s] if info[s]['focus'] == 'supplier' else by_id.get(info[s]['sector'])
+        def entry(s):  # the entry a company is ordered by: a supplier's or emerging name's best-ranked listing entry, else its own
+            if info[s]['focus'] == 'supplier':
+                return sup_entry[s]
+            own = by_id.get(info[s]['sector'])
+            em = em_entry.get(s) if info[s]['focus'] == 'emerging' else None
+            return min((e for e in (own, em) if e), key=lambda e: e.get('rank', other_rank), default=None)
         main.sort(key=lambda s: ((entry(s) or {}).get('stage') == 'crowded',
                                  (entry(s) or {}).get('rank', other_rank), neg_head(s), s))
         rel.sort(key=lambda s: rel_pos[s])
@@ -1050,6 +1056,8 @@ def cmd_score(a):
         later = chain[r['sector']][chain[r['sector']].index(r['call_id']):]
         mk = {'held': 0, 'broken': 0, 'pending': 0, 'unchecked': 0}
         for m in json.loads(r['markers'] or '[]'):
+            if isinstance(m, dict) and m.get('void'):  # met before the call that set it: tests nothing
+                continue
             ss = sorted((x for x in states if x['call_id'] in later and x['marker'] == str(m.get('id'))), key=lambda x: x['date'])
             due = m.get('due')
             try:
