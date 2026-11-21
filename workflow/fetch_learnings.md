@@ -1,3 +1,14 @@
 # Fetch learnings (one line per item; fetch subagents append, the orchestrator folds them into /workflow/s10_fetch.md, /principles/data_rules.md or a file in /sources/)
 - **Scanned SME results:** some SME filers (SHERA) file a legible copy of their results minutes after the scanned one; scr_docs.py skips it, so look for it before reading page images.
 - **NSE hosts in ad-hoc downloads:** rewrite nsearchives.nseindia.com to archives.nseindia.com, as scr_docs.py does (the former hung for over 2 minutes).
+- **SEBI offer documents:** when sebi.gov.in can't be reached, brokers host the abridged prospectus and the DRHP (rrfinance.com, sharekhan.com), downloadable with plain curl.
+- **RHP pages without text:** restated statements in an RHP can use a shifted-glyph font or be vector pages with no text layer, so grep misses them: render the pages with pymupdf and read them as images.
+- **ICRA rationales:** the rationale pages load by script; `icra.in/Rating/ShowRationalReportFilePdf/<Id>` serves the PDF to plain curl.
+- **CRISIL rationales:** crisil.com returns 406 to curl's default identity; read them with WebFetch.
+- **BSE transcript links:** an `AnnPdfOpen.aspx` link can return a 302 HTML page; the same id under `AttachHis/<id>.pdf` serves the PDF.
+- **RHPs when sebi.gov.in can't be reached:** the lead manager hosts the RHP.
+- **NSE Emerge SME offer documents:** no route found yet (web search missed Sunlite's 2024 document); look for the lead manager's copy.
+- **SME call transcripts:** BSE SME companies can file a call as audio first and the transcript up to five working days later; re-check the BSE list before closing a borderline company.
+- **Trade-remedy sources:** DGTR findings come attached to the petitioning company's exchange filing; customs anti-dumping notifications are mirrored on caalley.com; DGTR keeps capacity and share figures confidential.
+- **Older announcements:** NSE corporate announcements through the screener-mcp session reach back to 2019, one month a call; BSE's announcements API, called from a bseindia.com tab in the browser pane, accepts 2019-2021 windows.
+- **sebi.gov.in:** unreachable by curl, Python and the browser pane on 21 Nov 2026: retry later; brokers and lead managers host offer documents.
