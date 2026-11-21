@@ -29,7 +29,7 @@ Which sources count and how to treat them. What each source offers, how to reach
 ## Calls and caching
 - **Every answer is saved:** screener answers in `data/companies/<SYM>/scr/` (market-wide ones in the run folder or `data/market/`), written by `scr_company.py` and `scr_tool.py`.
 - Read the cache before calling. Call again only when the data may have changed since (new results, shareholding or filings since the fetch date) or when a doubt needs a fresh copy.
-- Downloads from document links (exchange PDFs) are free.
+- Downloads from document links (exchange PDFs) are free. When curl or WebFetch fails on a site, open it in the browser pane (a PDF there is saved through the base64 route in `/sources/exchanges.md`). A site that fails may only be down or unreachable for a while: retry it later before treating it as inaccessible, and date any access note.
 
 ## Storing company data (`data/companies/<SYM>/`)
 - One folder per company holds everything about it, whatever the source (layout: `/workflow/WORKFLOW.md`).

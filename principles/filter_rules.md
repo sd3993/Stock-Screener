@@ -5,6 +5,7 @@ Standards for the two filters before the deep analysis: triage (a script) and th
 ## Both filters
 - **Holdings are never filtered:** they skip triage's rejects and the gate.
 - **Sector focus:** the gate takes the focus set first, and the reserve only when the focus set doesn't fill the positions (`/principles/sector_rules.md`, the sector focus); triage itself has no sector filter.
+- **Competitive sectors:** in a sector with a surplus or a profit-capture verdict of partly or doesn't, a company needs its own evidence of beating competitors (share gains, orders at stable margins, a cost edge); rising sector demand alone isn't enough. The analysis applies the same test.
 
 ## Triage (decided by `triage.py`; its `--help` has the exact rules)
 - **Return math** at three projection lengths (2, 5 and 7 years; a stock's own visible-until date is only set in the analysis): the EPS growth needed for the CAGR hurdle at exit P/E = min(own 5-year median P/E, 30) (a script cannot judge re-rating evidence, so triage allows the re-rating; the gate and the analysis apply the rule), without dividends, against the growth visible in the trailing figures (conservative and optimistic).
