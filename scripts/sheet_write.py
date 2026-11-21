@@ -20,13 +20,13 @@ listing writes, per company: its Data row (found by ticker in A2:A300, else the 
   what_changed line ("first listing" for a company with no earlier row). A company that has an earlier verdict-history
   row but a blank what_changed is refused: written nowhere (no Data, flags, pending or history row), printed as
   "NO WHAT-CHANGED LINE: <sym>"; the others are still handled and the script exits 5 (5 wins over 3).
---watch SYM: a company on watch with no analysis yet (a gate WATCH's price watch, or an upcoming theme's watch):
+--watch SYM: a company on watch with no analysis yet (a gate WATCH's price or growth watch, or an upcoming theme's watch):
   runs/companies/<SYM>/<FYyyQn>/watch.json from the newest quarter folder holding one (written by gate_merge.py or
   sectors.py themes). An agreed analysis (recheck<N>.json) in that folder or a later one wins: the watch is skipped,
   printed. No watch.json: exit 1, nothing written. Its Data row (found or placed as above): A:D the identity, E sector,
   F results_used, G analysed_on, H the stored price, K "Watch", Q waiting_for plus " (by <due>)" when due is set, R
-  evidence_so_far, S next_check, AA "Analysis pending: price watch, buy below Rs <buy_below>" or "Analysis pending:
-  theme watch (<theme name>)", AC the watch.json path, every other written column blank (a stale analysis value is
+  evidence_so_far, S next_check, AA "Analysis pending: price watch, buy below Rs <buy_below>", "Analysis pending:
+  growth watch, <CAGR without the drag>% without the drag" or "Analysis pending: theme watch (<theme name>)", AC the watch.json path, every other written column blank (a stale analysis value is
   cleared). Its verdict-history row: verdict "watch (<kind> watch, analysis pending)", reason "first listing" when the
   company has no earlier row, else "<kind> watch from <source>". The what_changed refusal does not apply; watch
   companies get no Data Flags or pending-tab change.
@@ -143,6 +143,8 @@ def watch_row(w, ov, run_q, path):
     kind = w.get('kind') or ''
     note = (f"Analysis pending: price watch, buy below Rs {money(w.get('buy_below'))}" if kind == 'price' and money(w.get('buy_below'))
             else 'Analysis pending: price watch' if kind == 'price'
+            else (f"Analysis pending: growth watch, {W.fnum(w.get('cagr_without_drag')) * 100:.1f}% without the drag"
+                  if W.fnum(w.get('cagr_without_drag')) is not None else 'Analysis pending: growth watch') if kind == 'growth'
             else f"Analysis pending: theme watch ({(w.get('theme') or {}).get('name') or ''})")
     cells = data_row({'sym': w['sym'], 'name': w.get('name'), 'sector': w.get('sector'), 'results_used': w.get('results_used'),
                       'analysed_on': w.get('analysed_on'), 'status': 'watch', 'watch': w.get('watch') or {},
