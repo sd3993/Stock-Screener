@@ -19,3 +19,4 @@
 - **Transcripts on the company site:** several companies (PARADEEP, VAML, Vedanta) file only a cover letter on NSE; the PDF link is in the IR page source (VAML's a cloudfront path) and downloads with curl.
 - **Two shareholding patterns for one quarter:** a company can file two with different pledge figures (PARADEEP, 30 and 31 Dec 2025); settle which stands before testing for new pledges.
 - **Acceptances series:** a company can split acceptances out of trade payables only from a given year with a restated prior year (COROMANDEL from FY26, back to 1 Apr 2024); an older report's wider series doesn't mix with the restated ones.
+- **NSE feed empty for a new NSE listing:** ALUFLUOR (on NSE since Aug 2026) returns no NSE announcements; its filings come through the BSE route.
