@@ -12,3 +12,10 @@
 - **Trade-remedy sources:** DGTR findings come attached to the petitioning company's exchange filing; customs anti-dumping notifications are mirrored on caalley.com; DGTR keeps capacity and share figures confidential.
 - **Older announcements:** NSE corporate announcements through the screener-mcp session reach back to 2019, one month a call; BSE's announcements API, called from a bseindia.com tab in the browser pane, accepts 2019-2021 windows.
 - **sebi.gov.in:** unreachable by curl, Python and the browser pane on 21 Nov 2026: retry later; brokers and lead managers host offer documents.
+- **L&T transcripts:** NSE carries only a cover letter; the PDF downloads with plain curl from `investors.larsentoubro.com/upload/Analysttrans/…`, its path in the `Transcripts-Archives.aspx` page source.
+- **Text files with stray bytes:** some annual-report text files (NFL) need `grep -a`.
+- **Shareholding XBRL pledge percentages:** filed as a fraction in some filings and a percent in others; compute from the share counts (`NumberOfSharesEncumberedUnderPledged` / promoter `NumberOfShares`), as scr_company.py now does.
+- **Peer sets:** refresh the peers' statements (balance sheet, profit and loss), not only their quarterlies, before measuring them against a company; cached balance sheets can stop a half-year earlier.
+- **Transcripts on the company site:** several companies (PARADEEP, VAML, Vedanta) file only a cover letter on NSE; the PDF link is in the IR page source (VAML's a cloudfront path) and downloads with curl.
+- **Two shareholding patterns for one quarter:** a company can file two with different pledge figures (PARADEEP, 30 and 31 Dec 2025); settle which stands before testing for new pledges.
+- **Acceptances series:** a company can split acceptances out of trade payables only from a given year with a restated prior year (COROMANDEL from FY26, back to 1 Apr 2024); an older report's wider series doesn't mix with the restated ones.
