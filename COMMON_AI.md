@@ -15,7 +15,7 @@ All three are git-ignored; their layout is in `/workflow/WORKFLOW.md`.
 
 - `data/`: what does not change and can be reused across runs: facts, mostly about the past (filings, fetched source answers, market history, past-episode evidence).
 - `runs/`: what is predictive or derived from judgement: sector calls and the sector map, thesis markers, analyses, verdicts, allocation, run status.
-- `archive/`: run data set aside rather than deleted: an abandoned or superseded run's folder, or company data replaced by a fresh fetch, moved to `archive/<what>_<date>/`. Never depend on it.
+- `archive/`: run data set aside rather than deleted: an abandoned or superseded run's folder, or company data replaced by a fresh fetch, moved to `archive/<what>_<date>/`, dated by when its data started. Delete what no later step or brief needs. Never depend on it.
 
 ## Core project references
 
