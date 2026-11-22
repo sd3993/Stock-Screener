@@ -206,12 +206,19 @@ async def main():
             prom, total = val(t, 'NumberOfShares', 'ShareholdingOfPromoterAndPromoterGroup_ContextI'), val(t, 'NumberOfShares', 'ShareholdingPattern_ContextI')
             pl_pct = val(t, 'EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares', 'ShareholdingOfPromoterAndPromoterGroup_ContextI')
             enc_pct = val(t, 'EncumberedSharesHeldAsPercentageOfTotalNumberOfShares', 'ShareholdingOfPromoterAndPromoterGroup_ContextI')
+            pl_n = val(t, 'NumberOfSharesEncumberedUnderPledged', 'ShareholdingOfPromoterAndPromoterGroup_ContextI')
+            enc_n = val(t, 'NumberOfSharesEncumbered', 'ShareholdingOfPromoterAndPromoterGroup_ContextI')
+
+            def pct(n, p):  # from share counts; the filed percentage is a fraction in some filings and a percent in others
+                if n is not None and prom:
+                    return round(n / prom * 100, 2)
+                return None if p is None else round(p * 100 if p <= 1 else p, 2)
             flag = re.search(r'<in-bse-shp:WhetherAnySharesHeldByPromotersAreEncumberedUnderPledged(?=[\s/>])[^>]*>([^<]*)<', t)
             out.append({'quarter_end': r.get('date'), 'filed': r.get('submissionDate'), 'revised': r.get('revisedData'),
                         'total_shares': total, 'promoter_shares': prom,
                         'promoter_pct': round(prom / total * 100, 2) if prom is not None and total else None,
-                        'pledged_pct_of_promoter': round(pl_pct * 100, 2) if pl_pct is not None else (0.0 if flag and flag.group(1) == 'false' else None),
-                        'encumbered_pct_of_promoter': round(enc_pct * 100, 2) if enc_pct is not None else None,
+                        'pledged_pct_of_promoter': pct(pl_n, pl_pct) if (pl_n, pl_pct) != (None, None) else (0.0 if flag and flag.group(1) == 'false' else None),
+                        'encumbered_pct_of_promoter': pct(enc_n, enc_pct),
                         'pledge_flag': flag.group(1) if flag else None, 'xbrl': r['xbrl']})
         save('shp_history', 'nse:shp_xbrl', {'symbol': sym, 'quarters': n}, {'symbol': sym, 'rows': out})
 
