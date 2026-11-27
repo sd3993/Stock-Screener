@@ -20,3 +20,52 @@
 - **Two shareholding patterns for one quarter:** a company can file two with different pledge figures (PARADEEP, 30 and 31 Dec 2025); settle which stands before testing for new pledges.
 - **Acceptances series:** a company can split acceptances out of trade payables only from a given year with a restated prior year (COROMANDEL from FY26, back to 1 Apr 2024); an older report's wider series doesn't mix with the restated ones.
 - **NSE feed empty for a new NSE listing:** ALUFLUOR (on NSE since Aug 2026) returns no NSE announcements; its filings come through the BSE route.
+- **BSE SME RHPs:** download with curl and a browser User-Agent from `www.bsesme.com/download/<id>/SME_IPO%20Open/<file>.pdf`; chittorgarh's IPO page carries the link.
+- **Mixed-raster scans (SAST):** pages stored as a jpg plus a tiff mask read cleanly when rendered with pymupdf (`page.get_pixmap`) instead of extracting the layers.
+- **BSE SME DRHPs and SME IPO pages:** DRHPs download with plain curl (no User-Agent) from `www.bsesme.com/download/<id>/SME_IPO%20InPrinciple/<file>.pdf`; news items on the filing carry the path. SME companies' own IPO pages host the final Prospectus and the Reg 32 statements, also plain curl.
+- **Image-only SME decks:** pdf_text.py returns only the cover letter (~2 KB); render a contact sheet with pymupdf to find the slide, then read it at full size.
+- **Screener's early annual series:** can contradict the filed table (ATLANTAELE FY22 margin 7.9% vs 13.96% filed) and is broken for PRECWIRE, 538786 and 537669; check early years against a filed table before building a mid-cycle base on them.
+- **539984 annual reports:** the FY22 bseplus PDF serves null bytes (use the FY23 report's comparatives) and the FY16 report's text layer is garbled (render the pages).
+- **VOLTAMP PDFs:** its results and press-release PDFs extract as unreadable glyphs; read them as page images.
+- **Short-term borrowings inside operating cash flow:** some small filers (MMP) book increases in short-term borrowings as an operating item, and screener's CFO inherits it; restate before testing cash conversion.
+- **Scanned results PDFs:** LASERPOWER and FINCABLES file scanned results; read them as page images.
+- **Screener's VEDL data:** the insider feed is empty despite a 1.66% promoter sale (use NSE SAST), and the statements mix pre- and post-demerger figures.
+- **Rating rationales expose LC-backed creditors:** a rating agency's overall gearing can include LC-backed creditors or bills discounted that the annual report doesn't split out (CORDSCABLE, PRECWIRE); read the latest rationale before passing the debt floor.
+- **Offer documents when sebi.gov.in is down:** try the company's own IR site first for the RHP, Prospectus and audited statements (LASERPOWER); sebi.gov.in still refused connections on 22 Nov 2026.
+- **Older annual reports:** the permission check refuses scripted BSE downloads; take the copy attached to the NSE announcement.
+- **NSE insider and deal feeds:** the insider-trading API returned nothing for RRKABEL for 1,100 days, even live, and the bulk/block-deal APIs gave 503 once from the browser; don't read silence as no disclosure.
+- **IBBI lists:** the order and public-announcement lists work with plain curl (`-L`) at `ibbi.gov.in/orders/nclt?title=` and `/public-announcement?title=`.
+- **Pledge figure after a bonus:** screener's "Pledged percentage" (and so triage) can come from a bonus-date SHP pairing the pre-bonus pledged count with the post-bonus holding (VMARCIND 7.19% vs a real 43.15%); test the pledge on the quarter-end SHP XBRLs.
+- **Download helpers:** never delete a file already in `index.json`; a SHA match only adds an index record.
+- **BSE SME attachments:** load from `AttachHis`; same-week transcripts sit under `AttachLive`.
+- **SME RHPs at the lead manager:** Hem Securities hosts them at `offer/<n>.pdf` (544541: RHP 868, abridged prospectus 872).
+- **SEBI orders when sebi.gov.in is down:** NSE investigation circulars annex SEBI and SAT orders and download with curl.
+- **CBP EAPA and USITC documents:** CBP PDFs download with plain curl from `cbp.gov/sites/default/files/<yyyy-mm>/...` (listing pages give the paths through WebFetch); USITC publications download with curl.
+- **NSE IPO RHPs:** `nsearchives.nseindia.com/content/ipo/RHP_<SYM>.zip` (rewrite to archives.nseindia.com) downloads with curl, for main-board and NSE Emerge SME listings (EMMVEE, ANAWIL).
+- **BSE AttachHis annual reports:** downloaded with plain curl on 23 Nov 2026 (PREMIERENE, EMMVEE FY26).
+- **pdf_text.py LimitReachedError:** pypdf fails on some large annual reports and decks (EMMVEE AR FY26, ANAWIL Aug 2026 deck); pymupdf `get_text` works.
+- **ANAWIL:** H1 results are scanned (read as page images); the company site hosts its Prospectus and annual reports.
+- **Reg 32 statements in NSE's integrated filing:** they now sit inside the Integrated Filing – Financials XBRL; list via `/api/integrated-filing-results` and download through the screener library's NSE session (plain curl to the archive hung).
+- **Deck cash flows:** investor decks can classify cash items differently from the filed statement (EMMVEE Q3 FY26 deck H1 FY26 CFO Rs 245.7 cr vs Rs 120.75 cr filed); use filed half-year CFO only.
+- **Revised BSE SME shareholding patterns:** a quarter can have a revised filing (544682 qtrid 131.01 corrected an RTA mapping error, 68.59% to 69.99%); read `SHPQNewFormat` for its status before using qtrid 131.00. `shpSecSummery_New` and `AnnSubCategoryGetData` worked from a bseindia.com tab on 23 Nov 2026.
+- **Unaudited foreign subsidiaries:** SME consolidated accounts can include them (544682's DK USA); read the accounting-policy note.
+- **Unencumbered cash in rating rationales:** a pointer, not a measurement: the figure can be a repeated round number on a narrower scope (SWELECTES' Rs 150 cr in CRISIL's April and October rationales); test it against the annual report's collateral notes. CRISIL rationales are HTML pages, readable in the browser pane.
+- **BSE SME offer documents:** the final Prospectus can sit on the company's own site when BSE hosts only the DRHP; BSE SME DRHP zips download with plain curl.
+- **NSE SHP XBRLs by curl:** `archives.nseindia.com/corporate/xbrl/SHP_*.xml` downloaded with plain curl and a browser User-Agent on 23 Nov 2026; per-holder pledges sit in `OthersIndianShareholders_ContextNN` with names under the `D_` prefix.
+- **BSE-SME Reg 31 PDFs:** `AnnSubCategoryGetData` from a bseindia.com tab returns them (544501).
+- **INOXGREEN results PDFs:** scans with a garbled OCR layer; render the pages.
+- **Screener's consolidated CFO:** for VIKRAMSOLR FY25-26 it matches the standalone statement, not the consolidated one; check against the filing.
+- **NSE investigation circulars:** read the circulars feed a month at a time, keep INVG ones, curl each PDF from archives.nseindia.com, search the full text (in Git Bash set `MSYS_NO_PATHCONV=1`); the route misses SEBI orders that only impose a penalty. sebi.gov.in was unreachable again on 23 Nov 2026.
+- **NSE investigation circulars, scripted:** `scripts/nse_invg.py` keeps the circulars and their text under `data/market/nse_invg/` and searches them by name; its `--help` has the modes.
+- **Older NSE announcements:** through the screener library's NSE session they reach back to 2018-19, one month per call.
+- **IBBI public-announcement pages:** an empty result shows no "No Records Found" text; check the table is empty.
+- **BSE-only promoter groups:** BSE's shpPromoterNGroup page (from a bseindia.com tab) gives a BSE-only company's promoter-group names for `nse_invg.py search`.
+- **NSE RHP zip route:** also covers older SME issues.
+- **NSE half-yearly RPT filings:** not in the announcement feed; curl and fetch() to the API were refused by the permission check. Use the page's own search form in the browser pane, or BSE.
+- **SEBI orders before Nov 2023:** not in NSE's investigation circulars; the Wayback route `web.archive.org/web/<ts>id_/<url>` works for some SEBI attachments. BSE's shpPromoterNGroup page needs ~4 s to load before its text can be read.
+- **Screener's credit-ratings list:** misses agency actions and shows items that are not rating actions; check the agency's own history. Ind-Ra press releases load by script, but the company's exchange filing usually attaches the full rationale; Ind-Ra's history tables can carry a wrong year.
+- **Old SEBI attachments and US court records:** the Wayback Machine holds few Sep 2014 SEBI attachments and its index can go offline mid-search; Business Standard pages open through Wayback `id_` copies; CourtListener, Justia and PACER refuse anonymous fetchers.
+- **BSE announcements window:** the endpoint answers "Bad Request" for any window even a few days over 12 months. Brickwork INC pages download with plain curl. ICRA's ShowRationaleReport pages are empty shells: use `ShowRationalReportFilePdf/<Id>`. A CRISIL "Update on <company>" bulletin is a facility update, not a rating action.
+- **sebi.gov.in:** answered curl with a browser User-Agent on 27 Nov 2026. Also: BSE bseplus and MSEI annual-report paths for older reports; IBBI's `/orders/nclat?title=` search.
+- **SEBI orders listing search:** matches substrings of order titles only; search full names plus distinctive tokens and check every hit at person level. "Appeal No. N filed by X" rows are RTI appeals, not orders against X; appealed orders carry a "[SAT Appeal No.:" annotation. SEBI order PDFs and BSE AttachHis annual reports download with plain curl; the NSE annual-reports API with cookies and the CourtListener API are refused by the permission check.
+- **SEBI enforcement listing:** also returns recovery and unserved-notice rows, whose PAN and address settle person-level checks; paging past 25 rows is an AJAX call. NSE archive and BSE bseplus annual reports download with plain curl and a browser User-Agent.
