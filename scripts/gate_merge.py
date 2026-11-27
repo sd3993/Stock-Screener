@@ -14,11 +14,17 @@ merge (no mode): writes <run>/gate/decisions.csv from each batch's latest file (
   eps_basis; a growth watch adds cagr_without_drag and quarter_at_gate (the latest quarter in scr/quarterly.json). It
   replaces a theme watch.json there (printed). A company whose latest decision is no longer WATCH loses its price or
   growth watch.json in the run quarter folder (deleted, printed). Each file written or deleted is printed.
+  A price watch's eps_basis_kind is the entry's eps_basis_kind ("trailing", "adjusted_trailing" or "mid_cycle"); when
+  absent it is "mid_cycle" if eps_basis equals (within 0.5%) a mid_cycle_eps / mid_cycle_eps_diluted figure in the
+  entry's mid_cycle_r4h block or its r4hd sub-block, else null (unstated).
 watch-check: for every price watch.json in runs/companies/*/<run quarter>/: the current price and P/E (key_ratios
   "Stock P/E") from data/companies/<SYM>/scr/overview.json; EPS now = price / P/E when P/E > 0; buy-below now =
-  buy_below x EPS now / eps_basis (when both are known, else buy_below). Prints "REGATE <sym>: price X <= buy-below Y
-  (EPS now Z vs W at gate)" for each company at or below its buy-below now, a count line for the rest, and flags an
-  overview.json older than 14 days or missing (run scr_company.py --only overview). For every growth watch.json
+  buy_below x EPS now / eps_basis only when eps_basis_kind is "trailing" and both are known; for any other or unstated
+  kind buy-below now = buy_below (screener's EPS is reported trailing, not like the mid-cycle or adjusted basis) and
+  "NOTE <sym>: ..." says the earnings trigger was not checked and needs a re-gate on new results; no eps_basis: also
+  buy_below. Prints "REGATE <sym>: price X <= buy-below Y (EPS now Z vs W at gate)" (or "(eps_basis W <kind>, not
+  scaled)") for each company at or below its buy-below now, a count line for the rest, and flags an overview.json
+  older than 14 days or missing (run scr_company.py --only overview). For every growth watch.json
   there: "REGATE <sym>: marker due <date> reached (<waiting_for>)" when its due date is today or earlier, and
   "REGATE <sym>: new results <quarter> (gate used <quarter>)" when scr/quarterly.json's latest quarter differs from
   quarter_at_gate (run scr_company.py first so the quarter is current); a growth watch with no valid due date is
@@ -35,6 +41,7 @@ from config import analysis_dir, company_runs_dir, run_dir
 FIELDS = ['sym', 'decision', 'batch', 'stage', 'est_cagr', 'years', 'floor_failed', 'why', 'buy_below', 'eps_basis',
           'waiting_for', 'watch_kind', 'marker_due', 'cagr_without_drag']
 WATCH_KINDS = ('price', 'growth')
+BASIS_KINDS = ('trailing', 'adjusted_trailing', 'mid_cycle')
 
 
 def run_quarter(run):
@@ -60,6 +67,26 @@ def latest_quarter(sym):
     return q[-1] if q else ''
 
 
+def basis_kind(e):
+    """The kind of a price watch's eps_basis: the entry's eps_basis_kind, else "mid_cycle" when eps_basis equals a
+    mid-cycle EPS in its mid_cycle_r4h block (or the r4hd sub-block), else None (unstated)."""
+    if e.get('eps_basis_kind') in BASIS_KINDS:
+        return e['eps_basis_kind']
+    basis, m = W.fnum(e.get('eps_basis')), e.get('mid_cycle_r4h')
+    if not basis or not isinstance(m, dict):
+        return None
+    blocks = [b for b in (m.get('r4hd'), m) if isinstance(b, dict)]
+    vals = [W.fnum(b.get(k)) for b in blocks for k in ('mid_cycle_eps', 'mid_cycle_eps_diluted')]
+    return 'mid_cycle' if any(v and abs(v - basis) <= 0.005 * abs(basis) for v in vals) else None
+
+
+def buy_below_now(bb, basis, kind, eps_now):
+    """(buy-below now, scaled?): scaled by EPS now / eps_basis only on a trailing basis."""
+    if kind == 'trailing' and bb is not None and eps_now is not None and basis:
+        return bb * eps_now / basis, True
+    return bb, False
+
+
 def watch_doc(e, src, rq, gate_dir, tri, today):
     """The watch.json of one WATCH entry (src: its file's name, e.g. b09_rc1)."""
     sym = e['sym']
@@ -73,7 +100,8 @@ def watch_doc(e, src, rq, gate_dir, tri, today):
          'sector': e.get('sector') or g.get('sector') or '', 'kind': kind, 'status': 'watch',
          'analysed_on': today, 'results_used': rq}
     if kind == 'price':
-        d.update({'buy_below': W.fnum(e.get('buy_below')), 'eps_basis': W.fnum(e.get('eps_basis'))})
+        d.update({'buy_below': W.fnum(e.get('buy_below')), 'eps_basis': W.fnum(e.get('eps_basis')),
+                  'eps_basis_kind': basis_kind(e)})
     else:
         d.update({'cagr_without_drag': W.fnum(e.get('cagr_without_drag')), 'quarter_at_gate': latest_quarter(sym)})
     d.update({'price_at_gate': W.fnum((tri.get(sym) or {}).get('price')),
@@ -183,10 +211,17 @@ def watch_check():
         price, pe = W.fnum(o.get('current_price')), W.fnum((o.get('key_ratios') or {}).get('Stock P/E'))
         eps_now = price / pe if price is not None and pe and pe > 0 else None
         bb, basis = W.fnum(w.get('buy_below')), W.fnum(w.get('eps_basis'))
-        bb_now = bb * eps_now / basis if bb is not None and eps_now is not None and basis else bb
+        kind = w.get('eps_basis_kind')
+        bb_now, scaled = buy_below_now(bb, basis, kind, eps_now)
         f = lambda x: '-' if x is None else f'{x:,.2f}'
+        if basis and kind != 'trailing':
+            what = f'{kind}, not the trailing EPS screener gives' if kind else 'of unstated kind (no eps_basis_kind)'
+            print(f'NOTE {sym}: eps_basis {f(basis)} is {what} (EPS now {f(eps_now)}): buy-below {f(bb)} not scaled; '
+                  'its earnings trigger needs a re-gate on new results')
         if price is not None and bb_now is not None and price <= bb_now:
-            hits.append(f'REGATE {sym}: price {f(price)} <= buy-below {f(bb_now)} (EPS now {f(eps_now)} vs {f(basis)} at gate)')
+            how = f'EPS now {f(eps_now)} vs {f(basis)} at gate' if scaled else (
+                f'eps_basis {f(basis)} {kind or "unstated"}, not scaled' if basis else 'no eps_basis, not scaled')
+            hits.append(f'REGATE {sym}: price {f(price)} <= buy-below {f(bb_now)} ({how})')
         else:
             rest.append(sym)
     for h in hits:

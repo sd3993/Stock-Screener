@@ -54,6 +54,15 @@ Inputs (run folder, config.py): sectors.json (S5, or --sectors FILE: as_of; per 
   data/companies/<SYM>/scr/overview.json.
 Focus sectors: entries whose kind is neither "none" nor blank and whose `end` ("YYYY-MM": the month's last day, or
   "YYYY-MM-DD") is on or after as_of (sectors.json; else today) + 3 years. An entry with no parsable end is not focus.
+Supply check (order, themes, who: whenever sectors.json is loaded): an entry's `supply`, when present (older map files
+  without it pass), needs balance one of tight / balanced / surplus / "surplus, no clearing path" / n/a; a surplus
+  needs clears_by "YYYY-MM" (or "YYYY-MM-DD"); no other balance has a clears_by; "surplus, no clearing path" needs
+  clears_by_note. Optional supply.by_stage, a balance per value-chain stage (not the discovery stage): a non-empty list
+  of {stage (unique name), balance, clears_by, clears_by_note (same rules), capture (captures / partly / doesn't / n/a,
+  n/a when no listed company sells in the stage), companies [SYM, ...], evidence [...]}, plus supply.rank_stage, the
+  stage whose balance the entry's own balance (the one the rank rule scores) must equal. Any problem stops the script,
+  listed, writing nothing. order prints each focus entry's supply balance and its stages (balance, clears_by, capture,
+  companies; a listed company the entry neither overrides nor lists as a supplier or participant is flagged).
 Sector of a company: an `overrides` entry first, an emerging entry before the others (source emerging, else override;
   several entries overriding the same company: the lower rank number among those, listed as ambiguous), else the
   sector whose `industries` holds its label (two sectors: the lower rank number wins, ambiguous), else "other" (rank =
@@ -539,7 +548,87 @@ def load_map(run, path=None):
     bad = [s.get('id') for s in secs if not s.get('id') or not isinstance(s.get('rank'), (int, float))]
     if bad:
         W.fail(f'{p}: sectors without an id or a numeric rank: {bad}')
+    probs = [f'{s["id"]}: {x}' for s in secs for x in supply_problems(s)]
+    if probs:
+        W.fail(f'{p}: supply balance not valid ({len(probs)}):\n  ' + '\n  '.join(probs))
     return sorted(secs, key=lambda s: s['rank']), doc
+
+
+BALANCES = ('tight', 'balanced', 'surplus', 'surplus, no clearing path', 'n/a')
+CAPTURES = ('captures', 'partly', "doesn't", 'n/a')  # per value-chain stage; "n/a": no listed company sells in it
+YM_RE = re.compile(r'^\d{4}-\d{2}(-\d{2})?$')
+
+
+def balance_problems(b, where):
+    """What is wrong with one {balance, clears_by, clears_by_note} (an entry's supply or one value-chain stage)."""
+    out, bal, cb = [], b.get('balance'), b.get('clears_by')
+    if bal not in BALANCES:
+        return [f'{where}balance {bal!r} not one of {", ".join(BALANCES)}']
+    if bal == 'surplus' and not (isinstance(cb, str) and YM_RE.match(cb) and end_date(cb)):
+        out.append(f'{where}surplus needs clears_by "YYYY-MM" (got {cb!r})')
+    if bal != 'surplus' and cb not in (None, ''):
+        out.append(f'{where}clears_by {cb!r} given for balance {bal!r} (only a dated surplus has one)')
+    if bal == 'surplus, no clearing path' and not str(b.get('clears_by_note') or '').strip():
+        out.append(f'{where}surplus, no clearing path needs clears_by_note (why no path)')
+    return out
+
+
+def supply_problems(s):
+    """Problems with an entry's `supply` (none when it has no `supply`: older map files). With `by_stage` (a list of
+    value-chain stages, each {stage, balance, clears_by, clears_by_note, capture, companies, evidence}) the entry's own
+    balance must equal the balance of the stage named in `rank_stage`."""
+    sp = s.get('supply')
+    if sp is None:
+        return []
+    if not isinstance(sp, dict):
+        return ['supply is not an object']
+    out = balance_problems(sp, '')
+    stages = sp.get('by_stage')
+    if stages is None:
+        return out + (['rank_stage given without by_stage'] if sp.get('rank_stage') else [])
+    if not isinstance(stages, list) or not stages:
+        return out + ['by_stage must be a non-empty list']
+    names = []
+    for i, st_ in enumerate(stages):
+        if not isinstance(st_, dict) or not str(st_.get('stage') or '').strip():
+            out.append(f'by_stage[{i}] needs a "stage" name')
+            continue
+        nm = st_['stage']
+        if nm in names:
+            out.append(f'by_stage: stage {nm!r} twice')
+        names.append(nm)
+        out += balance_problems(st_, f'stage {nm!r}: ')
+        if st_.get('capture') not in CAPTURES:
+            out.append(f'stage {nm!r}: capture {st_.get("capture")!r} not one of {", ".join(CAPTURES)}')
+        co = st_.get('companies', [])
+        if not isinstance(co, list) or not all(isinstance(c, str) and c for c in co):
+            out.append(f'stage {nm!r}: companies must be a list of symbols')
+        if not isinstance(st_.get('evidence', []), list):
+            out.append(f'stage {nm!r}: evidence must be a list')
+    rs = sp.get('rank_stage')
+    if rs not in names:
+        out.append(f'rank_stage {rs!r} is not one of the stages {names}')
+    else:
+        rb = next(x.get('balance') for x in stages if isinstance(x, dict) and x.get('stage') == rs)
+        if rb != sp.get('balance'):
+            out.append(f'entry balance {sp.get("balance")!r} differs from its rank_stage {rs!r} balance {rb!r}')
+    return out
+
+
+def stage_lines(s):
+    """Printable lines for an entry's value-chain stages (empty without by_stage); companies listed that the entry
+    neither overrides, lists as suppliers or participants are flagged (they may still map by label)."""
+    sp = s.get('supply') or {}
+    known = set(s.get('overrides') or {}) | set(s.get('suppliers') or {}) | set(s.get('participants') or {})
+    out = []
+    for st_ in sp.get('by_stage') or []:
+        co = st_.get('companies') or []
+        odd = [c for c in co if c not in known]
+        cb = f' to {st_["clears_by"]}' if st_.get('clears_by') else ''
+        out.append(f'    stage {st_["stage"]}{" (rank)" if st_["stage"] == sp.get("rank_stage") else ""}: '
+                   f'{st_["balance"]}{cb}, capture {st_["capture"]}; {" ".join(co) or "no listed company"}'
+                   f'{"; not in overrides/suppliers/participants: " + " ".join(odd) if odd else ""}')
+    return out
 
 
 def emerging(s):
@@ -793,7 +882,10 @@ def cmd_order(a):
             W.write_json(bp, new)
     print(f'focus sectors (end on or after {P["cut"]}, {FOCUS_YEARS} years from as_of {P["as_of"]}): {len(P["foc"])}')
     for s in P['foc'].values():
-        print(f'  {s["id"]} (rank {s["rank"]}): {s.get("kind")}, {s.get("stage")}, end {s.get("end")}')
+        print(f'  {s["id"]} (rank {s["rank"]}): {s.get("kind")}, {s.get("stage")}, end {s.get("end")}, '
+              f'supply {(s.get("supply") or {}).get("balance", "not given")}')
+        for ln in stage_lines(s):
+            print(ln)
     print(f'not focus: {len(P["non"])}')
     for s, why in P['non']:
         print(f'  {s["id"]} (rank {s["rank"]}): {why}')

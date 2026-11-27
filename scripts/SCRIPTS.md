@@ -29,6 +29,7 @@ Single entry point for the deterministic scripts under `scripts/`: which script 
 | [`wf_lib.py`](wf_lib.py) | Shared helpers for the workflow scripts (not run) | imported |
 | [`config.py`](config.py) | Every path the scripts use (not run) | imported |
 | [`mb_history.py`](mb_history.py) | Fetching long price and valuation history from the chart API | S4 |
+| [`nse_invg.py`](nse_invg.py) | Keeping NSE's investigation circulars (SEBI and SAT orders) locally and searching them by company or promoter name | S6 (news check) |
 | [`bse_fetch.py`](bse_fetch.py) | BSE API items for companies NSE does not cover, through a browser | S10 (BSE-only companies) |
 | [`bse_fetch.js`](bse_fetch.js) | The browser half of `bse_fetch.py` | S10 (BSE-only companies) |
 | [`bse_pdf.py`](bse_pdf.py) | Fetching BSE announcement PDFs with a keyword search, when NSE has none | S10 (fallback) |
