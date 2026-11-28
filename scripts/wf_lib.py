@@ -1,8 +1,7 @@
 # Shared helpers for the workflow scripts (run.py, screens.py, sectors.py, thesis.py, sheet_write.py); not run by itself.
 # Atomic writes (temp file, then rename), the screener cache (data/companies/<SYM>/scr/<name>.json), industry labels,
 # quarter names (FYyyQn: Indian fiscal year, Q1 = Apr-Jun ... Q4 = Jan-Mar, FY27 ends Mar 2027), and the sheet through
-# the gws CLI (kite_holdings.py's gws(), sheet_get() and SHEET; its GWS_EXE override serves tests too).
-# Standard library only, so every script that imports it can run with python -I.
+# google_sheets.py (imported only when the sheet is used, so the rest stays standard library only).
 import calendar, csv, datetime as dt, io, json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -190,25 +189,23 @@ def holdings_syms(path):
     return [r['sym'] for r in read_csv(path)] if os.path.exists(path) else []
 
 
-# ---------- the sheet (gws) ----------
-def gws_mod():
-    import kite_holdings  # reused: gws(), sheet_get(), SheetError, SHEET
-    return kite_holdings
+# ---------- the sheet (google_sheets.py) ----------
+def sheets_mod():
+    import google_sheets  # sheets_call(), sheet_get(), SheetError, SHEET
+    return google_sheets
 
 
 def sheet_meta():
     """{title: sheetId} of every tab."""
-    k = gws_mod()
-    d = k.gws('sheets', 'spreadsheets', 'get', '--params',
-              json.dumps({'spreadsheetId': k.SHEET, 'fields': 'sheets.properties(sheetId,title)'}))
+    d = sheets_mod().sheets_call('get', fields='sheets.properties(sheetId,title)')
     return {s['properties']['title']: s['properties']['sheetId'] for s in d.get('sheets', [])}
 
 
 def sheet_get(ranges, render='UNFORMATTED_VALUE'):
-    return gws_mod().sheet_get(ranges, render)
+    return sheets_mod().sheet_get(ranges, render)
 
 
-PUT_LIMIT = 20000  # characters of JSON body per gws call (the Windows command line holds 32767)
+PUT_LIMIT = 1000000  # characters of JSON body per values.batchUpdate call (Google advises requests under 2 MB)
 
 
 def put_chunks(data, limit=PUT_LIMIT):
@@ -247,22 +244,17 @@ def put_chunks(data, limit=PUT_LIMIT):
 def sheet_put(data, option='RAW'):
     """data: [(range with tab, [[...]])], RAW (default) so tickers, codes and dates stay as sent; USER_ENTERED for
     formulas. Sent in as many values.batchUpdate calls as put_chunks() needs."""
-    k = gws_mod()
     for part in put_chunks(data):
         body = {'valueInputOption': option, 'data': [{'range': a, 'values': v} for a, v in part]}
-        k.gws('sheets', 'spreadsheets', 'values', 'batchUpdate', '--params', json.dumps({'spreadsheetId': k.SHEET}), body=body)
+        sheets_mod().sheets_call('values.batchUpdate', body=body)
 
 
 def sheet_clear(ranges):
-    k = gws_mod()
-    return k.gws('sheets', 'spreadsheets', 'values', 'batchClear', '--params', json.dumps({'spreadsheetId': k.SHEET}),
-                 body={'ranges': ranges})
+    return sheets_mod().sheets_call('values.batchClear', body={'ranges': ranges})
 
 
 def sheet_batch(requests):
-    k = gws_mod()
-    return k.gws('sheets', 'spreadsheets', 'batchUpdate', '--params', json.dumps({'spreadsheetId': k.SHEET}),
-                 body={'requests': requests})
+    return sheets_mod().sheets_call('batchUpdate', body={'requests': requests})
 
 
 def quote_tab(title):

@@ -1,27 +1,26 @@
 """Pulls holdings through the official Kite CLI (read-only: sources/kite.md) and writes the same data to two copies:
   - data/kite/: holdings_<YYYY-MM-DD_HHMM>.json (the CLI's answer as is) and holdings.csv (the latest, one row per stock);
-  - the sheet's Holdings tab (sheetId 104) through the gws CLI: only the data columns (layout: sources/kite.md).
+  - the sheet's Holdings tab (sheetId 104) through google_sheets.py (the Google API Python client): only the data columns (layout: sources/kite.md).
     Status (F) and the Notes cells (M2 down) are S13's decisions and are never written; only the header M1 gets the fetch time.
     Rows are never deleted (sold => Qty 0).
 Kite unavailable: changes nothing except the sheet's Kite-stale column (Q = TRUE on every holding row), prints when each
   copy was last fetched and which is newer, exits 3.
-gws unavailable or a sheet write fails: the local copy is still saved; prints a line starting "SHEET NOT UPDATED", exits 0.
+The sheet unreachable (login, API) or a sheet write fails: the local copy is still saved; prints a line starting "SHEET NOT UPDATED", exits 0.
 Also printed: "sold: ...", "new holding ...", "NO FREE ROW ..." (rows 2-100 full).
 Usage (from the project root):
   python scripts/kite_holdings.py                 fetch from Kite, write local and sheet
   python scripts/kite_holdings.py --latest PATH   no Kite: print both fetch times and write the newer of local holdings.csv /
                                                   sheet (rows with Qty > 0, exchange from the Google code) to PATH, in holdings.csv's format
-Overrides (tests): env KITE_EXE, GWS_EXE (a .py path runs as a Python stand-in for gws); KITE_CONFIG=<missing file> simulates
-  a lapsed Kite login.
-Other scripts reuse gws(), sheet_get(), SheetError and SHEET from here (wf_lib.py).
-Google's per-minute quota: a gws call answered with HTTP 429 is retried after 65 seconds, up to 3 times, before it counts
-  as failed; this holds for every script that reaches the sheet through gws() (sheet_write.py, sheet_layout.py, run.py).
+Overrides (tests): env KITE_EXE, SHEETS_STUB (google_sheets.py's stand-in for Google); KITE_CONFIG=<missing file>
+  simulates a lapsed Kite login.
+Sheet login, errors and Google's quota retries: google_sheets.py.
 """
 import argparse, csv, datetime as dt, json, os, re, subprocess, sys, time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from google_sheets import SHEET, SheetError, sheet_get, sheets_call  # noqa: E402
+
 KITE = os.environ.get('KITE_EXE') or os.path.expandvars(r'%LOCALAPPDATA%\Programs\kite\kite.exe')
-GWS = os.environ.get('GWS_EXE') or os.path.expandvars(r'%LOCALAPPDATA%\Programs\gws\gws.exe')
-SHEET = '1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU'
 TAB = 'Holdings'
 FIRST, LAST = 2, 100            # rows with pre-filled formulas
 HDR, HDR_TEXT = 'M1', 'Notes · Kite fetched '      # Notes header cell carries the fetch time: "Notes · Kite fetched YYYY-MM-DD HH:MM"
@@ -33,40 +32,9 @@ FIELDS = ['sym', 'exchange', 'isin', 'name', 'qty', 'avg_cost', 'last_price', 'g
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 
 
-class SheetError(Exception):
-    pass
-
-
-def gws(*args, body=None):
-    cmd = ([sys.executable, GWS] if GWS.endswith('.py') else [GWS]) + list(args)  # a .py GWS_EXE: a test stand-in
-    if body is not None:
-        cmd += ['--json', json.dumps(body)]
-    for wait in (65, 65, 65, 0):  # Google's per-minute quota (HTTP 429): wait a minute and retry, up to 3 times
-        try:
-            r = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
-        except OSError as e:
-            raise SheetError(f'gws not found at {GWS}: {e}')
-        if r.returncode == 0 or not wait or '"code": 429' not in (r.stdout or r.stderr):
-            break
-        time.sleep(wait)
-    if r.returncode != 0:
-        raise SheetError(f'gws exit {r.returncode}: {(r.stdout or r.stderr).strip()[:300]}')
-    try:
-        return json.loads(r.stdout)
-    except ValueError:
-        raise SheetError(f'gws gave no JSON: {r.stdout.strip()[:200]}')
-
-
-def sheet_get(ranges, render='UNFORMATTED_VALUE'):
-    p = {'spreadsheetId': SHEET, 'ranges': ranges, 'valueRenderOption': render}
-    d = gws('sheets', 'spreadsheets', 'values', 'batchGet', '--params', json.dumps(p))
-    return [vr.get('values', []) for vr in d.get('valueRanges', [])]
-
-
 def sheet_put(data):  # data: [(range, [[...]])], RAW so tickers, codes and dates stay as sent
-    p = {'spreadsheetId': SHEET}
     body = {'valueInputOption': 'RAW', 'data': [{'range': f'{TAB}!{a}', 'values': v} for a, v in data]}
-    gws('sheets', 'spreadsheets', 'values', 'batchUpdate', '--params', json.dumps(p), body=body)
+    sheets_call('values.batchUpdate', body=body)
 
 
 def col(vals, i):  # column i of a 2-D answer, padded to rows FIRST..LAST

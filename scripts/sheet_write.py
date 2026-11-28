@@ -1,5 +1,5 @@
-"""S12 and S14 by script: writes agreed analyses and allocation decisions into the Google Sheet through the gws
-CLI (RAW values), reads every written cell back and compares it. Layout: sources/sheet.md.
+"""S12 and S14 by script: writes agreed analyses and allocation decisions into the Google Sheet through
+google_sheets.py (RAW values), reads every written cell back and compares it. Layout: sources/sheet.md.
   python -I scripts/sheet_write.py listing SYM... [--hold SYM...] [--watch SYM...] [--dry-run]   (S12, workflow/s12_listing.md)
   python -I scripts/sheet_write.py allocation [--dry-run]                         (S14, workflow/s13_allocation.md)
 listing inputs: each company's agreed analysis (thesis.py's agreed(): the highest recheck<N>.json in its newest
@@ -43,8 +43,8 @@ Safety: every written column is checked against the formula columns listed in so
   wf_lib.sheet_put, which splits a write into values.batchUpdate calls of at most ~20 KB of command line at range or
   row boundaries (a row is never split). After writing, every written range is read back and compared cell
   by cell (numbers as numbers, text exactly); a difference is rewritten once, then the script fails (exit 4) naming
-  the cells. gws missing or an auth error: exit 2, nothing written after the failing call.
---dry-run: reads the sheet (no writes) and saves the exact write plan (every range and its values, the gws calls they
+  the cells. Google login missing or an auth error: exit 2, nothing written after the failing call.
+--dry-run: reads the sheet (no writes) and saves the exact write plan (every range and its values, the Sheets API calls they
   split into with each call's body size, plus the read-back
   expectations) to <run>/sheet_plan_<listing|allocation>_<time>.json, and prints a summary. The plan is what a light-tier
   subagent would apply if the script can't run.
@@ -226,7 +226,7 @@ def apply(plan, dry, kind, run, extra=None):
         calls = [{'ranges': [r for r, _ in c], 'body_chars': len(json.dumps(
             {'valueInputOption': 'RAW', 'data': [{'range': r, 'values': v} for r, v in c]}))} for c in W.put_chunks(plan)]
         W.write_json(p, {'kind': kind, 'value_input_option': 'RAW', 'writes': [{'range': r, 'values': v} for r, v in plan],
-                         'gws_calls': calls,
+                         'api_calls': calls,
                          'read_back': 'read every range with valueRenderOption UNFORMATTED_VALUE and compare cell by cell',
                          **(extra or {})})
         return p
@@ -483,7 +483,7 @@ def main():
     except Fail as e:
         print(str(e), file=sys.stderr)
         return e.code
-    except W.gws_mod().SheetError as e:
+    except W.sheets_mod().SheetError as e:
         print(f'SHEET ERROR (nothing written after this call): {e}', file=sys.stderr)
         return 2
 

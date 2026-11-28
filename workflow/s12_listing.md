@@ -1,6 +1,6 @@
 # S12.0: listing, a batch of agreed analyses (scripts; both modes)
 
-Copies each agreed analysis in the batch into the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`) and the verdict history, by script through the `gws` CLI (access and layout: `/sources/sheet.md`). No analysis; values are copied exactly; formula columns are never written. The agreed analysis of a company is the highest `recheck<N>.json` in its newest results-quarter folder `runs/companies/<SYM>/<FYyyQn>/`. The orchestrator runs, from the project root:
+Copies each agreed analysis in the batch into the Google Sheet "Stock Screener" (`1yBV2fZiIR9xgZ3r-5feDKF_urqXspkPLLG9wPDoPtDU`) and the verdict history, by script through `scripts/google_sheets.py` (access and layout: `/sources/sheet.md`). No analysis; values are copied exactly; formula columns are never written. The agreed analysis of a company is the highest `recheck<N>.json` in its newest results-quarter folder `runs/companies/<SYM>/<FYyyQn>/`. The orchestrator runs, from the project root:
 
 0. **Thesis register:** `python -I scripts/thesis.py register <SYM>...` copies each agreed analysis's status, visible-until date, years, stage, results used, basis and markers into `runs/companies/<SYM>/thesis.json` (the previous version kept in its `history`). A company it refuses (rules in `thesis.py register --help`) goes back to its analysis recheck and is not listed.
 1. **Prices:** `uvx --from screener-mcp==0.5.0 python scripts/scr_company.py <SYM>... --only overview` (screener's current price, the sheet's stored fallback price, and the NSE/BSE codes; if screener.in can't be reached: `/sources/screener.md`).
@@ -14,6 +14,6 @@ Copies each agreed analysis in the batch into the Google Sheet "Stock Screener" 
 
 The List and Watchlist tabs are formula views of Data and are never written.
 
-If the script can't write (gws auth lapsed, the sheet layout not yet changed): `sheet_write.py listing ... --dry-run` saves the exact write plan (`<run>/sheet_plan_listing_*.json`: every range and its values); a light-tier subagent applies it with `gws` (RAW), reads every range back and compares it cell by cell, and appends the plan's verdict-history rows; on a miss, the batch is redone at the standard tier.
+If the script can't write (Google login lapsed, the sheet layout not yet changed): `sheet_write.py listing ... --dry-run` saves the exact write plan (`<run>/sheet_plan_listing_*.json`: every range and its values); once the cause is fixed, a light-tier subagent applies it through `google_sheets.sheets_call` (RAW), reads every range back and compares it cell by cell, and appends the plan's verdict-history rows; on a miss, the batch is redone at the standard tier.
 
 Record per company in `status.csv` (S12 done) and `progress.md`: the Data row written (or "hold, history only"), data flags written, pending yes/no.

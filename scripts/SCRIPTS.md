@@ -6,7 +6,7 @@ Single entry point for the deterministic scripts under `scripts/`: which script 
 
 - Run from the project root (PowerShell) as `python -I scripts/<name>.py`, unless the script's `--help` says otherwise (some run through `uvx`); `--help` itself always works with plain `python -I`.
 - The run folder comes from `config.py` (`RUN`, or the `RUN` environment variable, else the newest `runs/FY*`).
-- Python 3.13 with `pypdf`, `openpyxl`, `Pillow` (so `page.images` works on scanned PDFs) and `pymupdf` (renders a page to an image, for tables drawn as graphics); `curl.exe` for downloads.
+- Python 3.13 with `google-api-python-client`, `google-auth` and `google-auth-oauthlib` (the sheet), `pypdf`, `openpyxl`, `Pillow` (so `page.images` works on scanned PDFs) and `pymupdf` (renders a page to an image, for tables drawn as graphics); `curl.exe` for downloads.
 
 ## Scripts reference
 
@@ -26,6 +26,8 @@ Single entry point for the deterministic scripts under `scripts/`: which script 
 | [`sheet_write.py`](sheet_write.py) | Writing the listing or allocation to the sheet with read-back | S12, S14 |
 | [`sheet_layout.py`](sheet_layout.py) | Changing the sheet to the List + Watchlist layout, or repairing its headers, formulas and formats | manual (with the user's go-ahead) |
 | [`kite_holdings.py`](kite_holdings.py) | Pulling holdings from Kite to the local copy and the sheet | S1, S13 |
+| [`google_sheets.py`](google_sheets.py) | Every read and write of the Google Sheet (not run) | imported |
+| [`web_get_google_token.py`](web_get_google_token.py) | Signing in to Google for the sheet, or checking the login | S1 setup, when a script says "Google login needed" |
 | [`wf_lib.py`](wf_lib.py) | Shared helpers for the workflow scripts (not run) | imported |
 | [`config.py`](config.py) | Every path the scripts use (not run) | imported |
 | [`mb_history.py`](mb_history.py) | Fetching long price and valuation history from the chart API | S4 |

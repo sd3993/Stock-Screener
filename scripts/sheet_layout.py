@@ -1,6 +1,6 @@
 """Owns the Google Sheet's layout: every header and formula of the Data, List, Watchlist, Rejected, Allocation and Holdings tabs
 (the single List + Watchlist layout, sources/sheet.md), and changes the sheet from the old horizon layout (tabs Short term
-101, Medium term 102, Long term 103) to it, or repairs headers, formulas and formats once it is applied. Through the gws CLI.
+101, Medium term 102, Long term 103) to it, or repairs headers, formulas and formats once it is applied. Through google_sheets.py.
   python -I scripts/sheet_layout.py [--dry-run] [--out FILE]      the default: read the sheet, save the plan, write nothing
   python -I scripts/sheet_layout.py --apply [--out FILE]          run the plan, read it back, log it
 --dry-run reads the tab list, the conditional-format rules and (FORMULA render) Data A1:BG300, List/Watchlist A1:Z200,
@@ -24,7 +24,7 @@ Refusals (both modes print them, exit 1; --apply writes nothing): Data A2:A300 h
   (tab 103) is still there (they would need migrating); a tab id (101, 102, 7, 104, 106) is missing; the "Formula columns
   (never written)" line of sources/sheet.md does not cover a Data, Allocation or Holdings column the plan fills with
   formulas (List and Watchlist are formula views no script writes; that line does not name them).
-Exit codes: 0 done (or plan saved), 1 refused, 2 gws missing or an auth/API error (nothing written after the failing
+Exit codes: 0 done (or plan saved), 1 refused, 2 Google login missing or an auth/API error (nothing written after the failing
   call), 4 read-back mismatch after one rewrite. Run from the project root.
 """
 import argparse, datetime as dt, json, os, re, sys
@@ -273,9 +273,7 @@ def cell(vals, col, r):
 
 # ---------- reading and planning ----------
 def read_sheet():
-    k = W.gws_mod()
-    meta = k.gws('sheets', 'spreadsheets', 'get', '--params', json.dumps(
-        {'spreadsheetId': k.SHEET, 'fields': 'sheets(properties(sheetId,title,gridProperties),conditionalFormats)'}))
+    meta = W.sheets_mod().sheets_call('get', fields='sheets(properties(sheetId,title,gridProperties),conditionalFormats)')
     tabs = {s['properties']['sheetId']: s for s in meta.get('sheets', [])}
     titles = {sid: s['properties']['title'] for sid, s in tabs.items()}
     want = [(sid, 'Z' if sid in (101, 102, 7, 104, 108) else 'BI') for sid in (106, 101, 102, 7, 104, 103, 108) if sid in titles]
@@ -438,7 +436,7 @@ def build_plan(tabs, titles, vals):
     steps.append({'step': 'formats and conditional formats', 'method': 'spreadsheets.batchUpdate', 'requests': fmt})
     if old:
         steps.append({'step': 'delete Long term', 'method': 'spreadsheets.batchUpdate', 'requests': [{'deleteSheet': {'sheetId': 103}}]})
-    return {'spreadsheetId': W.gws_mod().SHEET, 'state': 'old layout' if old else 'applied layout (repair only)',
+    return {'spreadsheetId': W.sheets_mod().SHEET, 'state': 'old layout' if old else 'applied layout (repair only)',
             'tabs_found': {str(k): v for k, v in titles.items()}, 'company_rows_in_data': len(company),
             'refusals': refusals, 'unexpected': unexpected, 'counts': counts, 'conditional_formats': cf_report,
             'steps': steps,
@@ -447,10 +445,8 @@ def build_plan(tabs, titles, vals):
 
 
 # ---------- applying ----------
-def gws_call(method, body):
-    k = W.gws_mod()
-    parts = method.split('.')
-    return k.gws('sheets', 'spreadsheets', *parts, '--params', json.dumps({'spreadsheetId': k.SHEET}), body=body)
+def api_call(method, body):
+    return W.sheets_mod().sheets_call(method, body=body)
 
 
 def put(data, option):
@@ -459,7 +455,7 @@ def put(data, option):
 
 def clear(ranges):
     for i in range(0, len(ranges), 50):
-        gws_call('values.batchClear', {'ranges': ranges[i:i + 50]})
+        api_call('values.batchClear', {'ranges': ranges[i:i + 50]})
 
 
 def expand(rg):
@@ -509,7 +505,7 @@ def apply(plan):
         if s['step'] == 'delete Long term':
             continue
         if s['method'] == 'spreadsheets.batchUpdate' and s['requests']:
-            gws_call('batchUpdate', {'requests': s['requests']})
+            api_call('batchUpdate', {'requests': s['requests']})
         elif s['method'] == 'values.batchUpdate':
             put(s['data'], s['valueInputOption'])
         elif s['method'] == 'values.batchClear':
@@ -537,7 +533,7 @@ def apply(plan):
         left = horizon_refs()
         if left:
             return log, f'Long term NOT deleted: formulas still name a horizon tab: {left[:10]}'
-        gws_call('batchUpdate', {'requests': dele[0]['requests']})
+        api_call('batchUpdate', {'requests': dele[0]['requests']})
         log.append('- Long term (103) deleted')
         bad = check(plan)
         log.append(f'- read-back after the deletion: {len(bad)} cells differ')
@@ -562,7 +558,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     g = ap.add_mutually_exclusive_group()
     g.add_argument('--dry-run', action='store_true', help='read the sheet, save the plan, write nothing (the default)')
-    g.add_argument('--apply', action='store_true', help='run the plan through gws, read it back, write the log')
+    g.add_argument('--apply', action='store_true', help='run the plan through the Sheets API, read it back, write the log')
     ap.add_argument('--out', default=os.path.join('runs', 'sheet_layout_plan.json'), help='where the plan JSON goes')
     a = ap.parse_args()
     try:
@@ -592,7 +588,7 @@ def main():
     except Fail as e:
         print(str(e), file=sys.stderr)
         return e.code
-    except W.gws_mod().SheetError as e:
+    except W.sheets_mod().SheetError as e:
         print(f'SHEET ERROR (nothing written after this call): {e}', file=sys.stderr)
         return 2
 

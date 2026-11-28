@@ -8,19 +8,19 @@ Creates the run folder, sets RUN in config.py, copies the last full run's sector
 Inputs: the quarter (the latest ended one), the mode; recheck: the newest runs/FY*/ whose progress.md starts "Mode: full".
 Outputs: runs/<FYyyQn><suffix>/ with progress.md (mode line, claim line, empty checklist; recheck: where the sector map
   came from) and status.csv (header only); recheck: sector_map.md, sectors.json, sector_of.tsv copied in; RUN = '<name>'
-  in scripts/config.py (only that line; checked by importing it again); the sheet (gws): the pending tab
+  in scripts/config.py (only that line; checked by importing it again); the sheet (google_sheets.py): the pending tab
   (sheetId 105, "Pending <FYyyQn> results") renamed to the run quarter and its rows 2+ cleared (kept as is when it
   already has that name), and its name in Data!BA1, both read back.
 Refuses: a quarter name that isn't FYyyQn (n 1-4) or hasn't ended; a run folder that already has a progress.md (resume
   it instead); recheck mode with no full run ("no full run yet: run full first"). A folder without progress.md (a run
-  stopped half-way) is completed. gws unavailable or failing: the local part stands, a line starting "SHEET NOT UPDATED"
+  stopped half-way) is completed. The sheet unreachable or failing: the local part stands, a line starting "SHEET NOT UPDATED"
   is printed, exit 0; --sheet-only redoes just the sheet step for an existing run.
 
 ---- list (workflow/s7_company_list.md) ----
 Inputs (run folder, config.py): holdings.csv (S1); sector_of.tsv (S5 sectors.py order; recheck: copied from the last
   full run); full: gate/decisions.csv (gate_merge.py; NEXT rows, their est_cagr and years); the theses
   (config.thesis_path: years, status, sector); recheck: every company with a thesis, the sheet's Data tab tickers
-  (Data!A2:A300 through gws) as a cross-check when the sheet can be read, sectors.json marker states.
+  (Data!A2:A300) as a cross-check when the sheet can be read, sectors.json marker states.
 Full: every holding plus every gate NEXT; order: holdings, then gate NEXT rows by the gate's est_cagr (highest first; a
   missing est_cagr sorts last), ties by sector rank (lowest first), then sym; why "holding" / "gate NEXT, sector <id>
   rank <n>"; years: the thesis's (holdings) or decisions.csv's (gate NEXT rows).
@@ -112,7 +112,7 @@ def sheet_step(q):
         W.sheet_put([('Data!BA1', [[name]])])
         after = W.sheet_meta()
         ba1, = W.sheet_get(['Data!BA1'])
-    except W.gws_mod().SheetError as e:
+    except W.sheets_mod().SheetError as e:
         return f'SHEET NOT UPDATED ({e})'
     got = ba1[0][0] if ba1 and ba1[0] else ''
     if name not in after or got != name:
@@ -245,7 +245,7 @@ def cmd_list(a):
         try:
             v, = W.sheet_get(['Data!A2:A300'])
             sheet = [str(r[0]).strip() for r in v if r and str(r[0]).strip()]
-        except W.gws_mod().SheetError as e:
+        except W.sheets_mod().SheetError as e:
             sheet = []
             print(f'SHEET NOT READ ({e}): listed from {root} and the holdings only')
         extra = [x for x in sheet if x not in theses and x not in hold]
